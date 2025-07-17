@@ -190,17 +190,67 @@ SENTRY_DSN_WEB: The DSN for the codecave-web project.
 
 SENTRY_DSN_API: The DSN for the codecave-api project.
 
-Step 5.4: Additional Tools Setup
-Goal: Integrate the remaining security, code quality, and feature flag tools.
+Section 6: Additional Tool Integration
+This section covers the setup for remaining security, code quality, and feature flag tools.
+
+Step 6.1: ConfigCat (Feature Flags)
+Goal: Set up a feature flag service to safely roll out new features to a subset of users before a full release.
 
 Checklist:
 
-[ ] Astra Security: Create an account and get an API key for vulnerability scanning. Add ASTRA_API_KEY to Doppler.
+[ ] Create a ConfigCat account.
 
-[ ] ConfigCat: Create an account and a new project. Get the SDK Key. Add CONFIGCAT_SDK_KEY to Doppler.
+[ ] Create a new "Product" named CodeCave.
 
-[ ] CodeScene: Connect your GitHub account to set up code analysis.
+[ ] Inside the CodeCave product, create a "Config" for your environments.
 
-[ ] Blackfire.io: Create an account and get your Client ID and Client Token for profiling. Add BLACKFIRE_CLIENT_ID and BLACKFIRE_CLIENT_TOKEN to Doppler.
+[ ] In your dashboard, find and copy the SDK Key.
 
-[ ] ImgBot: Install the ImgBot application on your GitHub repository.
+[ ] Add the key to Doppler as CONFIGCAT_SDK_KEY.
+
+Step 6.2: CodeScene (Code Health Analysis)
+Goal: Integrate a deep code analysis tool to identify technical debt, complex code hotspots, and potential future risks.
+
+Checklist:
+
+[ ] Sign up for CodeScene's cloud service, using your GitHub account for authentication.
+
+[ ] Authorize CodeScene to access your GitHub repositories.
+
+[ ] Within the CodeScene dashboard, create a new analysis project.
+
+[ ] Select and link the codecave GitHub repository to this project.
+
+[ ] Run the initial analysis to confirm the connection and begin processing your code's history. (No API keys needed for this integration).
+
+Step 6.3: Blackfire.io (Performance Profiling)
+Goal: Set up a performance profiling tool to find and fix code bottlenecks in the NestJS backend.
+
+Checklist:
+
+[ ] Create a Blackfire.io account.
+
+[ ] In the dashboard, create a new "Environment" for your project (e.g., codecave-production).
+
+[ ] Navigate to the Settings > Credentials section for your environment.
+
+[ ] Gather the following credentials and add them to Doppler:
+
+BLACKFIRE_SERVER_ID: Copy the Server ID.
+
+BLACKFIRE_SERVER_TOKEN: Copy the Server Token.
+
+These will be used to configure the Blackfire agent within your backend's Docker container.
+
+Step 6.4: ImgBot (Automated Image Optimization)
+Goal: Install a "set it and forget it" GitHub App that will automatically optimize images in your repository to ensure fast load times and reduce bandwidth.
+
+Checklist:
+
+[ ] Navigate to the ImgBot page on the GitHub Marketplace.
+
+[ ] Click "Set up a plan" and choose the free plan for open-source or public repositories.
+
+[ ] During the installation process, authorize ImgBot and grant it access only to the codecave repository.
+
+[ ] Once installed, ImgBot will automatically create pull requests whenever it finds images it can optimize.
