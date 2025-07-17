@@ -15,7 +15,7 @@ YELLOW='\033[1;33m'
 NC='\033[0m' # No Color
 
 # Configuration
-PRODUCTION_SERVER="root@codecave.tech"  # Adjust this to your server
+PRODUCTION_SERVER="root@64.23.239.85"  # Your actual server IP
 PROJECT_PATH="/opt/codecave"
 
 echo -e "${YELLOW}Step 1: Building locally and pushing to Git...${NC}"
@@ -74,16 +74,16 @@ echo "📊 Checking container logs..."
 docker compose -f docker-compose.prod.yml logs --tail=20 api
 
 echo "✅ Deployment completed!"
-echo "🌐 Your API should be available at: http://codecave.tech/health"
+echo "🌐 Your API should be available at: http://64.23.239.85/health"
 echo "🔍 Check Sentry dashboard for monitoring data"
 
 ENDSSH
 
 echo -e "${GREEN}🎉 Production deployment completed!${NC}"
 echo -e "${YELLOW}Next steps:${NC}"
-echo "1. Visit http://codecave.tech/health to verify the API is running"
+echo "1. Visit http://64.23.239.85/health to verify the API is running"
 echo "2. Test Sentry endpoints:"
-echo "   - http://codecave.tech/api/sentry-test"
-echo "   - http://codecave.tech/api/sentry-examples/logger-examples"
+echo "   - http://64.23.239.85/api/sentry-test"
+echo "   - http://64.23.239.85/api/sentry-examples/logger-examples"
 echo "3. Check your Sentry dashboard for incoming data"
 echo "4. Monitor logs with: ssh $PRODUCTION_SERVER 'cd $PROJECT_PATH && docker compose logs -f api'" 
