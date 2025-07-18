@@ -1,6 +1,10 @@
 # Configure the DigitalOcean Provider
 provider "digitalocean" {
   # Uses DIGITALOCEAN_ACCESS_TOKEN environment variable automatically
+  
+  # DigitalOcean Spaces credentials (for S3-compatible storage)
+  spaces_access_id  = var.spaces_access_key
+  spaces_secret_key = var.spaces_secret_key
 }
 
 # Data source to get account information

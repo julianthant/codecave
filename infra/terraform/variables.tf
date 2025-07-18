@@ -1,6 +1,19 @@
 # DigitalOcean Configuration
 # Note: Uses DIGITALOCEAN_ACCESS_TOKEN environment variable
 
+# DigitalOcean Spaces Configuration
+variable "spaces_access_key" {
+  description = "DigitalOcean Spaces Access Key"
+  type        = string
+  sensitive   = true
+}
+
+variable "spaces_secret_key" {
+  description = "DigitalOcean Spaces Secret Key"
+  type        = string
+  sensitive   = true
+}
+
 variable "project_name" {
   description = "Name of the project"
   type        = string
@@ -17,7 +30,7 @@ variable "environment" {
 variable "droplet_size" {
   description = "Size of the droplet"
   type        = string
-  default     = "s-1vcpu-1gb" # 1 vCPUs, 1GB RAM, 50GB SSD
+  default     = "s-1vcpu-2gb" # 1 vCPUs, 2GB RAM, 50GB SSD
 }
 
 variable "droplet_region" {

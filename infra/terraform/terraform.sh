@@ -32,9 +32,9 @@ echo -e "${YELLOW}🔑 Setting up credentials from Doppler...${NC}"
 # DigitalOcean API token
 export DIGITALOCEAN_ACCESS_TOKEN="$(doppler secrets get DO_TOKEN --config=prd_all --project=codecave --plain)"
 
-# DigitalOcean Spaces credentials (for AWS S3 compatibility)
-export AWS_ACCESS_KEY_ID="$(doppler secrets get DO_SPACES_KEY --config=prd_all --project=codecave --plain)"
-export AWS_SECRET_ACCESS_KEY="$(doppler secrets get DO_SPACES_SECRET --config=prd_all --project=codecave --plain)"
+# DigitalOcean Spaces credentials (for Terraform variables)
+export TF_VAR_spaces_access_key="$(doppler secrets get DO_SPACES_KEY --config=prd_all --project=codecave --plain)"
+export TF_VAR_spaces_secret_key="$(doppler secrets get DO_SPACES_SECRET --config=prd_all --project=codecave --plain)"
 
 # Verify credentials are set
 if [ -z "$DIGITALOCEAN_ACCESS_TOKEN" ]; then
@@ -44,7 +44,7 @@ fi
 
 echo -e "${GREEN}✅ Credentials loaded successfully${NC}"
 echo "   - DigitalOcean API token: ${DIGITALOCEAN_ACCESS_TOKEN:0:20}..."
-echo "   - Spaces Access Key: ${AWS_ACCESS_KEY_ID:0:10}..."
+echo "   - Spaces Access Key: ${TF_VAR_spaces_access_key:0:10}..."
 
 # Run terraform command
 echo -e "${YELLOW}🚀 Running: terraform $@${NC}"
