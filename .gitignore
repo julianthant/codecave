@@ -42,3 +42,9 @@ next-env.d.ts
 
 #sentry
 .env.sentry-build-plugin
+# Terraform state files (contain sensitive data)
+*.tfstate
+*.tfstate.*
+*.tfvars
+.terraform/
+.terraform.lock.hcl
