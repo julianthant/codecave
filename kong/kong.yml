@@ -53,20 +53,6 @@ routes:
 
 # Plugins provide additional functionality like authentication, rate limiting, etc.
 plugins:
-  # ACME Plugin for automatic Let's Encrypt SSL certificates
-  - name: acme
-    config:
-      account_email: julianthant@gmail.com  # Your email for Let's Encrypt
-      api_uri: https://acme-v02.api.letsencrypt.org/directory  # Let's Encrypt production
-      storage: file  # Store certificates in files (works with dbless mode)
-      storage_config:
-        file:
-          path: /etc/letsencrypt
-      domains:
-        - api.codecave.tech
-      renew_threshold_days: 14  # Renew 14 days before expiry
-      cert_type: rsa  # RSA certificates (widely supported)
-
   # HTTP to HTTPS redirect plugin
   - name: redirect
     route: api-route-http-redirect
