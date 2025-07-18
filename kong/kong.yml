@@ -16,16 +16,25 @@ services:
 
 # Routes define how incoming requests are matched and forwarded to services
 routes:
-  # Main API routes - all requests go to the NestJS service
-  - name: api-route
+  # Main API routes - all requests go to the NestJS service (HTTPS)
+  - name: api-route-https
     service: codecave-api
-    protocols: ["http", "https"]
+    protocols: ["https"]
     hosts: ["api.codecave.tech"]
     paths: ["/"]
     strip_path: false
     preserve_host: true
     
-  # Health check route (public, no authentication)
+  # Main API routes - HTTP redirect to HTTPS
+  - name: api-route-http-redirect
+    service: codecave-api
+    protocols: ["http"]
+    hosts: ["api.codecave.tech"]
+    paths: ["/"]
+    strip_path: false
+    preserve_host: true
+    
+  # Health check route (allow both HTTP and HTTPS for monitoring)
   - name: health-route
     service: codecave-api
     protocols: ["http", "https"]
@@ -34,16 +43,36 @@ routes:
     strip_path: false
     methods: ["GET"]
 
-  # Sentry test routes (for monitoring setup)
+  # Sentry test routes (HTTPS only)
   - name: sentry-route
     service: codecave-api
-    protocols: ["http", "https"]  
+    protocols: ["https"]  
     hosts: ["api.codecave.tech"]
     paths: ["/sentry-test", "/sentry-error", "/sentry-examples"]
     strip_path: false
 
 # Plugins provide additional functionality like authentication, rate limiting, etc.
 plugins:
+  # ACME Plugin for automatic Let's Encrypt SSL certificates
+  - name: acme
+    config:
+      account_email: julianthant@gmail.com  # Your email for Let's Encrypt
+      api_uri: https://acme-v02.api.letsencrypt.org/directory  # Let's Encrypt production
+      storage: kong  # Store certificates in Kong's database
+      storage_config:
+        kong: {}
+      domains:
+        - api.codecave.tech
+      renew_threshold_days: 14  # Renew 14 days before expiry
+      cert_type: rsa  # RSA certificates (widely supported)
+
+  # HTTP to HTTPS redirect plugin
+  - name: redirect
+    route: api-route-http-redirect
+    config:
+      status_code: 301
+      location: "https://api.codecave.tech$request_uri"
+
   # CORS plugin for cross-origin requests from Vercel frontend
   - name: cors
     config:
@@ -96,6 +125,7 @@ plugins:
           - "X-Frame-Options: DENY"
           - "X-XSS-Protection: 1; mode=block"
           - "Referrer-Policy: strict-origin-when-cross-origin"
+          - "Strict-Transport-Security: max-age=31536000; includeSubDomains"
 
   # Add request headers for forwarding
   - name: request-transformer
