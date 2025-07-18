@@ -103,4 +103,30 @@ output "deployment_info" {
     environment  = var.environment
     region       = var.droplet_region
   }
-} 
+}
+
+# Spaces Storage Information
+output "spaces_bucket_name" {
+  description = "Name of the Spaces storage bucket"
+  value       = digitalocean_spaces_bucket.codecave_storage.name
+}
+
+output "spaces_bucket_region" {
+  description = "Region of the Spaces storage bucket"
+  value       = digitalocean_spaces_bucket.codecave_storage.region
+}
+
+output "spaces_bucket_domain" {
+  description = "Domain name of the Spaces bucket"
+  value       = digitalocean_spaces_bucket.codecave_storage.bucket_domain_name
+}
+
+output "spaces_endpoint" {
+  description = "S3-compatible endpoint for Spaces"
+  value       = "https://${digitalocean_spaces_bucket.codecave_storage.region}.digitaloceanspaces.com"
+}
+
+# output "spaces_cdn_endpoint" {
+#   description = "CDN endpoint for faster file delivery"
+#   value       = digitalocean_cdn.codecave_storage_cdn.endpoint
+# } 

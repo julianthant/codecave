@@ -1,0 +1,46 @@
+name: Deploy to Production
+
+on:
+  push:
+    branches: [main]
+
+jobs:
+  deploy:
+    name: Deploy to Server
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Deploy to server
+      uses: appleboy/ssh-action@v1.0.3
+      with:
+        host: ${{ secrets.PRODUCTION_HOST }}
+        username: ${{ secrets.PRODUCTION_USER }}
+        key: ${{ secrets.PRODUCTION_SSH_KEY }}
+        script: |
+          # Navigate to project directory
+          cd ~/codecave
+          
+          # Pull latest changes
+          echo "🔄 Pulling latest changes from main..."
+          git pull origin main
+          
+          # Stop existing services
+          echo "🛑 Stopping existing services..."
+          doppler run --config=prd --project=codecave -- docker-compose -f docker-compose.prod.yml down
+          
+          # Remove old images to ensure fresh build
+          echo "🧹 Cleaning up old images..."
+          docker image prune -f
+          
+          # Build and start services
+          echo "🚀 Building and starting services..."
+          doppler run --config=prd --project=codecave -- docker-compose -f docker-compose.prod.yml up -d --build
+          
+          # Show running containers
+          echo "✅ Deployment complete! Running containers:"
+          docker ps --format "table {{.Names}}\t{{.Status}}\t{{.Ports}}"
+          
+          # Show service health
+          echo "🏥 Service health check:"
+          sleep 5
+          curl -f http://localhost:3001/health || echo "⚠️  API health check failed" 
