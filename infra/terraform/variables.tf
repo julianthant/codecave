@@ -20,6 +20,12 @@ variable "project_name" {
   default     = "codecave"
 }
 
+variable "domain_name" {
+  description = "Primary domain name for the project"
+  type        = string
+  default     = "codecave.tech"
+}
+
 variable "environment" {
   description = "Environment (staging, production)"
   type        = string
@@ -59,12 +65,6 @@ variable "ssh_private_key_path" {
 }
 
 # Application Configuration
-variable "domain_name" {
-  description = "Domain name for the application"
-  type        = string
-  default     = "codecave.tech"
-}
-
 variable "subdomain" {
   description = "Subdomain for the environment"
   type        = string

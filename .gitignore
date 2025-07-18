@@ -9,16 +9,29 @@
 !.yarn/plugins
 !.yarn/releases
 !.yarn/versions
+**/node_modules
+pnpm-debug.log*
 
 # testing
 /coverage
+coverage/
+.nyc_output
+*.lcov
 
 # next.js
 /.next/
 /out/
+apps/web/.next/
+apps/web/out/
 
 # production
 /build
+/dist
+apps/*/build/
+apps/*/dist/
+
+# turbo
+.turbo/
 
 # misc
 .DS_Store
@@ -32,6 +45,8 @@ yarn-error.log*
 
 # env files (can opt-in for committing if needed)
 .env*
+!.env.example
+!.env.local.example
 
 # vercel
 .vercel
@@ -40,7 +55,7 @@ yarn-error.log*
 *.tsbuildinfo
 next-env.d.ts
 
-#sentry
+# sentry
 .env.sentry-build-plugin
 
 # Terraform state files (contain sensitive data)
@@ -49,3 +64,127 @@ next-env.d.ts
 *.tfvars
 .terraform/
 .terraform.lock.hcl
+terraform.tfstate*
+**/terraform.tfstate*
+
+# Docker
+*.log
+docker-compose.override.yml
+.docker/
+
+# IDE files
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# OS files
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+
+# Logs
+logs/
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+lerna-debug.log*
+
+# Runtime data
+pids
+*.pid
+*.seed
+*.pid.lock
+
+# Coverage directory used by tools like istanbul
+coverage/
+*.lcov
+
+# Dependency directories
+node_modules/
+jspm_packages/
+
+# Optional npm cache directory
+.npm
+
+# Optional eslint cache
+.eslintcache
+
+# Optional REPL history
+.node_repl_history
+
+# Output of 'npm pack'
+*.tgz
+
+# Yarn Integrity file
+.yarn-integrity
+
+# dotenv environment variables file
+.env
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
+
+# parcel-bundler cache (https://parceljs.org/)
+.cache
+.parcel-cache
+
+# NestJS build
+dist/
+
+# Playwright
+test-results/
+playwright-report/
+playwright/.cache/
+apps/web/test-results/
+apps/web/playwright-report/
+
+# Temporary files
+tmp/
+temp/
+.tmp/
+.temp/
+
+# Editor directories and files
+.vscode/
+.idea/
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.sw?
+
+# Local database files
+*.db
+*.sqlite
+
+# Documentation build
+docs/build/
+
+# Storybook build outputs
+storybook-static/
+
+# Build outputs
+*.tsbuildinfo
+
+# Sentry
+.sentryclirc
+
+# Doppler
+.doppler
+
+# Local development overrides
+docker-compose.override.yml
+docker-compose.local.yml
+
+# Backup files
+*.backup
+*.bak
+*.old

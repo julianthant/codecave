@@ -24,8 +24,13 @@ resource "digitalocean_spaces_bucket" "codecave_storage" {
     
     abort_incomplete_multipart_upload_days = 7
   }
+}
+
+# Separate CORS configuration to fix deprecation warnings
+resource "digitalocean_spaces_bucket_cors_configuration" "codecave_storage_cors" {
+  region = digitalocean_spaces_bucket.codecave_storage.region
+  bucket = digitalocean_spaces_bucket.codecave_storage.name
   
-  # CORS configuration for web uploads
   cors_rule {
     allowed_headers = ["*"]
     allowed_methods = ["GET", "POST", "PUT", "DELETE"]
