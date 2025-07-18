@@ -23,9 +23,9 @@ fi
 echo "🔄 Pulling latest changes from main..."
 git pull origin main
 
-# Stop existing services
+# Stop existing services and remove orphaned containers
 echo "🛑 Stopping existing services..."
-doppler run --config=prd_all --project=codecave -- docker-compose -f docker-compose.prod.yml down || true
+doppler run --config=prd_all --project=codecave -- docker-compose -f docker-compose.prod.yml down --remove-orphans || true
 
 # Clean up old images and containers
 echo "🧹 Cleaning up old images..."

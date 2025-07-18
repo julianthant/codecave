@@ -13,35 +13,10 @@ services:
     host: api
     port: 3001
     path: /
-    
-    # Health check configuration
-    health_checks:
-      passive:
-        healthy:
-          http_statuses: [200, 201, 202, 204, 301, 302, 307, 308]
-          successes: 3
-        unhealthy:
-          http_statuses: [429, 500, 502, 503, 504]
-          tcp_failures: 3
-          timeouts: 3
-          http_failures: 3
-          interval: 30s
-      active:
-        http_path: "/health"
-        healthy:
-          interval: 30s
-          http_statuses: [200]
-          successes: 3
-        unhealthy:
-          interval: 30s
-          http_statuses: [404, 500, 502, 503, 504]
-          tcp_failures: 3
-          timeouts: 3
-          http_failures: 3
 
 # Routes define how incoming requests are matched and forwarded to services
 routes:
-  # Main API routes - all /api/* requests go to the NestJS service
+  # Main API routes - all requests go to the NestJS service
   - name: api-route
     service: codecave-api
     protocols: ["http", "https"]
@@ -49,11 +24,6 @@ routes:
     paths: ["/"]
     strip_path: false
     preserve_host: true
-    
-    # Request/Response transformation
-    headers:
-      - "X-Forwarded-Proto: https"
-      - "X-Real-IP: $remote_addr"
     
   # Health check route (public, no authentication)
   - name: health-route
@@ -80,8 +50,8 @@ plugins:
       origins: 
         - "https://codecave.tech"
         - "https://www.codecave.tech"
-        - "https://*.vercel.app"  # For preview deployments
-        - "http://localhost:3000"  # For local development
+        - "https://*.vercel.app"
+        - "http://localhost:3000"
       methods: 
         - "GET"
         - "POST" 
@@ -106,27 +76,18 @@ plugins:
   # Rate limiting to prevent abuse
   - name: rate-limiting
     config:
-      minute: 100        # 100 requests per minute per IP
-      hour: 1000         # 1000 requests per hour per IP
+      minute: 100
+      hour: 1000
       policy: "local"
       fault_tolerant: true
       hide_client_headers: false
 
-  # Request/Response logging
-  - name: http-log
-    config:
-      http_endpoint: "http://api:3001/logs/kong"  # Optional: send logs to your API
-      method: "POST"
-      timeout: 10000
-      keepalive: 60000
-      flush_timeout: 2
-
   # Request size limiting
   - name: request-size-limiting
     config:
-      allowed_payload_size: 50  # 50MB max request size
+      allowed_payload_size: 50
 
-  # Security headers
+  # Add security headers
   - name: response-transformer
     config:
       add:
@@ -136,7 +97,10 @@ plugins:
           - "X-XSS-Protection: 1; mode=block"
           - "Referrer-Policy: strict-origin-when-cross-origin"
 
-# Global configuration
-_kong:
-  # Enable Kong's built-in health checks
-  health_checks_threshold: 60 
+  # Add request headers for forwarding
+  - name: request-transformer
+    config:
+      add:
+        headers:
+          - "X-Forwarded-Proto: $scheme"
+          - "X-Real-IP: $remote_addr" 
