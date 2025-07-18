@@ -58,9 +58,10 @@ plugins:
     config:
       account_email: julianthant@gmail.com  # Your email for Let's Encrypt
       api_uri: https://acme-v02.api.letsencrypt.org/directory  # Let's Encrypt production
-      storage: kong  # Store certificates in Kong's database
+      storage: file  # Store certificates in files (works with dbless mode)
       storage_config:
-        kong: {}
+        file:
+          path: /etc/letsencrypt
       domains:
         - api.codecave.tech
       renew_threshold_days: 14  # Renew 14 days before expiry

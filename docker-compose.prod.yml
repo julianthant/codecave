@@ -88,7 +88,8 @@ services:
       - "8001:8001"  # Keep admin on 8001
     volumes:
       - ./kong/kong.yml:/opt/kong/kong.yml:ro
-      - /etc/letsencrypt:/etc/letsencrypt:ro  # SSL certificates
+      - /etc/letsencrypt:/etc/letsencrypt  # SSL certificates (read/write for ACME)
+      - /mnt/volume_nyc3_01/kong-ssl:/etc/kong/ssl  # Kong SSL storage
     depends_on:
       - kong-migrations
     restart: unless-stopped
