@@ -1,9 +1,5 @@
 # DigitalOcean Configuration
-variable "do_token" {
-  description = "DigitalOcean API token"
-  type        = string
-  sensitive   = true
-}
+# Note: Uses DIGITALOCEAN_ACCESS_TOKEN environment variable
 
 variable "project_name" {
   description = "Name of the project"
@@ -21,13 +17,13 @@ variable "environment" {
 variable "droplet_size" {
   description = "Size of the droplet"
   type        = string
-  default     = "s-2vcpu-4gb" # 2 vCPUs, 4GB RAM, 80GB SSD
+  default     = "s-1vcpu-1gb" # 1 vCPUs, 1GB RAM, 50GB SSD
 }
 
 variable "droplet_region" {
   description = "DigitalOcean region"
   type        = string
-  default     = "nyc3"
+  default     = "sfo3"
 }
 
 variable "droplet_image" {
@@ -66,7 +62,7 @@ variable "subdomain" {
 variable "backup_enabled" {
   description = "Enable automated backups"
   type        = bool
-  default     = true
+  default     = false
 }
 
 variable "monitoring_enabled" {
@@ -91,7 +87,7 @@ variable "database_engine" {
 variable "database_version" {
   description = "Database version"
   type        = string
-  default     = "15"
+  default     = "17"
 }
 
 # Tags

@@ -1,6 +1,6 @@
 # Configure the DigitalOcean Provider
 provider "digitalocean" {
-  token = var.do_token
+  # Uses DIGITALOCEAN_ACCESS_TOKEN environment variable automatically
 }
 
 # Data source to get account information
