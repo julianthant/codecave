@@ -1,13 +1,17 @@
-# Production Dockerfile for NestJS API
-FROM node:18-alpine
+# Multi-stage production Dockerfile for NestJS API
+# ===================================================
+
+# Stage 1: Build Stage
+# This stage includes all dependencies (dev + prod) needed for building
+FROM node:18-alpine AS builder
 
 # Set working directory
 WORKDIR /app
 
-# Install pnpm globally
+# Install pnpm globally with specific version for consistency
 RUN npm install -g pnpm@8.15.0
 
-# Copy package files for the entire monorepo
+# Copy package files for dependency resolution
 COPY package*.json ./
 COPY pnpm-lock.yaml ./
 COPY pnpm-workspace.yaml ./
@@ -16,14 +20,52 @@ COPY pnpm-workspace.yaml ./
 COPY apps/api/package*.json ./apps/api/
 COPY apps/web/package*.json ./apps/web/
 
-# Install production dependencies
-RUN pnpm install --filter @codecave/api --prod --no-frozen-lockfile
+# Install ALL dependencies (including dev dependencies needed for build)
+RUN pnpm install --filter @codecave/api --no-frozen-lockfile
 
 # Copy source code
 COPY . .
 
-# Build the API
+# Build the API (this needs @nestjs/cli and other dev dependencies)
 RUN pnpm --filter @codecave/api build
+
+# ===================================================
+
+# Stage 2: Production Stage
+# This stage only includes production dependencies and built files
+FROM node:18-alpine AS production
+
+# Set working directory
+WORKDIR /app
+
+# Install pnpm globally
+RUN npm install -g pnpm@8.15.0
+
+# Copy package files for dependency resolution
+COPY package*.json ./
+COPY pnpm-lock.yaml ./
+COPY pnpm-workspace.yaml ./
+
+# Copy package.json files for all workspace packages
+COPY apps/api/package*.json ./apps/api/
+COPY apps/web/package*.json ./apps/web/
+
+# Install ONLY production dependencies (smaller image, faster startup)
+RUN pnpm install --filter @codecave/api --prod --no-frozen-lockfile
+
+# Copy built application from builder stage
+COPY --from=builder /app/apps/api/dist ./apps/api/dist
+
+# Copy any additional files needed at runtime
+COPY --from=builder /app/apps/api/package*.json ./apps/api/
+
+# Create non-root user for security
+RUN addgroup -g 1001 -S nodejs && \
+    adduser -S nextjs -u 1001
+
+# Change ownership of app directory
+RUN chown -R nextjs:nodejs /app
+USER nextjs
 
 # Expose the port
 EXPOSE 3001

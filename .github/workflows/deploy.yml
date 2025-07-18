@@ -26,7 +26,7 @@ jobs:
           
           # Stop existing services
           echo "🛑 Stopping existing services..."
-          doppler run --config=prd --project=codecave -- docker-compose -f docker-compose.prod.yml down
+          doppler run --config=prd_all --project=codecave -- docker-compose -f docker-compose.prod.yml down
           
           # Remove old images to ensure fresh build
           echo "🧹 Cleaning up old images..."
@@ -34,7 +34,7 @@ jobs:
           
           # Build and start services
           echo "🚀 Building and starting services..."
-          doppler run --config=prd --project=codecave -- docker-compose -f docker-compose.prod.yml up -d --build
+          doppler run --config=prd_all --project=codecave -- docker-compose -f docker-compose.prod.yml up -d --build
           
           # Show running containers
           echo "✅ Deployment complete! Running containers:"

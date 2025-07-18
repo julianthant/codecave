@@ -1,11 +1,8 @@
 name: Terraform Infrastructure
 
 on:
-  push:
-    branches: [main]
-    paths: 
-      - 'infra/terraform/**'
-      - '.github/workflows/terraform.yml'
+  # Only run manually or when terraform files change in PRs
+  workflow_dispatch:  # Manual trigger
   pull_request:
     branches: [main]
     paths:

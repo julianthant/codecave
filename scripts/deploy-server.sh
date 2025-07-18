@@ -25,7 +25,7 @@ git pull origin main
 
 # Stop existing services
 echo "🛑 Stopping existing services..."
-doppler run --config=prd --project=codecave -- docker-compose -f docker-compose.prod.yml down || true
+doppler run --config=prd_all --project=codecave -- docker-compose -f docker-compose.prod.yml down || true
 
 # Clean up old images and containers
 echo "🧹 Cleaning up old images..."
@@ -34,7 +34,7 @@ docker container prune -f
 
 # Build and start services
 echo "🚀 Building and starting services..."
-doppler run --config=prd --project=codecave -- docker-compose -f docker-compose.prod.yml up -d --build
+doppler run --config=prd_all --project=codecave -- docker-compose -f docker-compose.prod.yml up -d --build
 
 # Wait for services to start
 echo "⏳ Waiting for services to start..."
