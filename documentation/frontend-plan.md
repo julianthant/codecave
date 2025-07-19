@@ -6,192 +6,297 @@
 
 ### **Core Principles**
 - **Developer-First**: Clean, intuitive interface that developers love
-- **Mobile-First**: Designed for mobile app development with responsive web
-- **Community-Focused**: Emphasizing collaboration and project sharing
-- **User-Centric**: Built with continuous user feedback integration
+- **Frictionless Experience**: Easy sign-in and seamless navigation
+- **Content-Focused**: Projects and code take center stage
 - **Performance-Driven**: Fast loading, smooth interactions
+- **Mobile-Responsive**: Works beautifully on all devices
 
 ### **User Experience Goals**
-- **Zero-Friction Sign-in**: OAuth-based authentication (Google, GitHub, Guest)
+- **Zero-Friction Sign-in**: One-click authentication
 - **Instant Value**: Users see great content immediately
-- **Easy Collaboration**: Simple project sharing and collaboration requests
+- **Easy Sharing**: Simple project posting flow
 - **Discoverable**: Easy to find interesting projects and developers
-- **Community-Driven**: Groups, feedback, and unique value propositions
+- **Engaging**: Encouraging community interaction
+
+## 📁 **Next.js Project Structure**
+
+Based on Next.js 15 App Router best practices and successful community sites analysis:
+
+```
+apps/web/
+├── src/
+│   ├── app/                          # App Router (Next.js 15)
+│   │   ├── layout.tsx               # Root layout with metadata
+│   │   ├── page.tsx                 # Landing page
+│   │   ├── globals.css              # Global styles
+│   │   ├── loading.tsx              # Loading UI
+│   │   ├── error.tsx                # Error UI
+│   │   ├── not-found.tsx            # 404 page
+│   │   ├── (auth)/                  # Route groups for organization
+│   │   │   ├── login/
+│   │   │   │   └── page.tsx
+│   │   │   └── register/
+│   │   │       └── page.tsx
+│   │   ├── (dashboard)/             # Protected routes
+│   │   │   ├── feed/
+│   │   │   │   └── page.tsx
+│   │   │   ├── profile/
+│   │   │   │   └── page.tsx
+│   │   │   └── create/
+│   │   │       └── page.tsx
+│   │   ├── api/                     # API routes
+│   │   │   ├── auth/
+│   │   │   ├── projects/
+│   │   │   └── users/
+│   │   └── (public)/                # Public routes
+│   │       ├── about/
+│   │       └── privacy/
+│   ├── components/                   # Reusable components
+│   │   ├── ui/                      # Base UI components
+│   │   │   ├── button.tsx
+│   │   │   ├── input.tsx
+│   │   │   ├── modal.tsx
+│   │   │   └── card.tsx
+│   │   ├── layout/                  # Layout components
+│   │   │   ├── navbar.tsx
+│   │   │   ├── sidebar.tsx
+│   │   │   └── footer.tsx
+│   │   ├── forms/                   # Form components
+│   │   │   ├── login-form.tsx
+│   │   │   └── project-form.tsx
+│   │   └── features/                # Feature-specific components
+│   │       ├── projects/
+│   │       ├── auth/
+│   │       └── profile/
+│   ├── lib/                         # Utility functions
+│   │   ├── auth.ts
+│   │   ├── db.ts
+│   │   ├── utils.ts
+│   │   └── validations.ts
+│   ├── hooks/                       # Custom React hooks
+│   │   ├── use-auth.ts
+│   │   └── use-projects.ts
+│   ├── providers/                   # Context providers
+│   │   ├── auth-provider.tsx
+│   │   └── theme-provider.tsx
+│   ├── styles/                      # Additional styles
+│   │   ├── components.css
+│   │   └── utilities.css
+│   └── types/                       # TypeScript type definitions
+│       ├── auth.ts
+│       ├── project.ts
+│       └── user.ts
+├── public/                          # Static assets
+│   ├── images/
+│   ├── icons/
+│   └── logos/
+├── next.config.ts                   # Next.js configuration
+├── tailwind.config.ts              # Tailwind CSS configuration
+├── tsconfig.json                   # TypeScript configuration
+└── package.json                    # Dependencies
+```
+
+## 🚀 **Next.js 15 Best Practices & SEO Optimization**
+
+### **Server-Side Optimization**
+- **App Router**: Using Next.js 15 App Router for better performance
+- **Server Components**: Default to Server Components for better SEO
+- **Static Generation**: Pre-render pages where possible
+- **Edge Runtime**: Use Edge Runtime for API routes when appropriate
+- **Streaming**: Implement React Suspense for progressive loading
+
+### **SEO Best Practices**
+- **Metadata API**: Use Next.js 15 generateMetadata for dynamic SEO
+- **Structured Data**: Implement JSON-LD for rich snippets
+- **Open Graph**: Proper OG tags for social sharing
+- **Sitemap**: Auto-generated sitemap.xml
+- **Robot.txt**: Proper crawling directives
+
+### **Performance Optimization**
+- **Image Optimization**: next/image for optimized images
+- **Font Optimization**: next/font for web font optimization
+- **Code Splitting**: Automatic code splitting with App Router
+- **Lazy Loading**: Implement React.lazy() for components
+- **Bundle Analysis**: Regular bundle size monitoring
+
+## 🎨 **Landing Page Content Strategy**
+
+Based on successful community sites (Discord, Reddit, LinkedIn, dev.to), here's the content strategy:
+
+### **Hero Section**
+- **Primary Headline**: "Where developers share their coding journey"
+- **Subheadline**: "Discover projects, connect with developers, and showcase your work in a community that celebrates code"
+- **CTA**: "Join CodeCave" / "Start Building"
+- **Visual**: Animated code snippets or developer workspace
+
+### **Value Propositions**
+1. **"Showcase Your Work"**
+   - Share your projects with developers worldwide
+   - Get feedback and recognition from the community
+   - Build your developer portfolio
+
+2. **"Discover Amazing Projects"**
+   - Find inspiration from fellow developers
+   - Explore trending technologies and frameworks
+   - Learn from real-world implementations
+
+3. **"Connect & Collaborate"**
+   - Network with developers globally
+   - Find collaborators for your next project
+   - Join discussions about latest tech trends
+
+### **Trust Signals**
+- **Developer Stats**: "Join 10,000+ developers already building on CodeCave"
+- **Project Showcase**: Featured projects from the community
+- **Technology Logos**: React, Next.js, Python, etc.
+
+### **Social Proof**
+- **Featured Projects**: Grid of impressive community projects
+- **Developer Testimonials**: Real quotes from active users
+- **Community Stats**: Numbers that matter (projects, developers, interactions)
 
 ## 🔐 **Authentication & Onboarding**
 
-### **Sign-In Strategy: OAuth + Guest Access**
-**Primary Options:**
-- **🐙 GitHub OAuth**: Perfect for developers, auto-imports repos
-- **🎯 Google OAuth**: Broader reach, easy sign-up
-- **🔍 Guest Browse**: No friction exploration
-- **📧 Magic Link Email**: Passwordless, secure alternative
-
-**Additional OAuth Considerations:**
-- **🔷 LinkedIn**: Professional networking (future feature)
-- **🦋 Twitter/X**: Developer community presence
-- **🎨 Discord**: Developer community integration
-
-**Two-Column Landing Page Layout:**
+### **Sign-In Strategy: Maximum Simplicity**
 ```
-┌─────────────────────────────────────────────────────────────┐
-│                     CodeCave.tech                           │
-├─────────────────────────────────────────────────────────────┤
-│ Left Column (60%)          │    Right Column (40%)          │
-│ ┌─────────────────────────┐│  ┌─────────────────────────┐   │
-│ │ 🚀 What is CodeCave?    ││  │     Join the Community   │   │
-│ │                         ││  │                         │   │
-│ │ "Where developers share ││  │ ┌─────────────────────┐ │   │
-│ │ their journey and build ││  │ │ 🐙 Continue with    │ │   │
-│ │ amazing projects        ││  │ │    GitHub           │ │   │
-│ │ together."              ││  │ └─────────────────────┘ │   │
-│ │                         ││  │                         │   │
-│ │ ✨ Showcase your work   ││  │ ┌─────────────────────┐ │   │
-│ │ 🤝 Find collaborators   ││  │ │ 🎯 Continue with    │ │   │
-│ │ 🌟 Join developer groups││  │ │    Google           │ │   │
-│ │ 📈 Track your growth    ││  │ └─────────────────────┘ │   │
-│ │ 💡 Get feedback         ││  │                         │   │
-│ │                         ││  │ ┌─────────────────────┐ │   │
-│ │ 🎯 What We Have That    ││  │ │ 📧 Magic Link Email │ │   │
-│ │    Others Don't:        ││  │ └─────────────────────┘ │   │
-│ │ • Real code showcase    ││  │                         │   │
-│ │ • Collaboration-focused ││  │ ┌─────────────────────┐ │   │
-│ │ • No toxic negativity   ││  │ │ 🔍 Browse as Guest  │ │   │
-│ │ • Dev-specific features ││  │ └─────────────────────┘ │   │
-│ │ • Project-based groups  ││  │                         │   │
-│ └─────────────────────────┘│  └─────────────────────────┘   │
-└─────────────────────────────────────────────────────────────┘
+┌─────────────────────────────────────┐
+│           Welcome to CodeCave        │
+│                                     │
+│  🚀 Discover amazing developer      │
+│     projects and connect with       │
+│     the community                   │
+│                                     │
+│  ┌─────────────────────────────────┐ │
+│  │   🐙 Continue with GitHub      │ │
+│  └─────────────────────────────────┘ │
+│  ┌─────────────────────────────────┐ │
+│  │   📧 Continue with Email       │ │
+│  └─────────────────────────────────┘ │
+│  ┌─────────────────────────────────┐ │
+│  │   🔍 Browse as Guest           │ │
+│  └─────────────────────────────────┘ │
+│                                     │
+│  No passwords, no forms, no hassle  │
+└─────────────────────────────────────┘
 ```
+
+### **Quick Onboarding Flow**
+1. **Welcome Screen**: Showcase value proposition
+2. **One-Click Sign-In**: GitHub OAuth (primary) or magic link email
+3. **Profile Setup**: Auto-populate from GitHub, optional enhancements
+4. **Interest Selection**: Quick tags/technologies you're interested in
+5. **Follow Suggestions**: Recommended developers and projects
+6. **First Post Prompt**: Encourage sharing first project
 
 ## 📱 **Page Layouts & Structure**
 
-### **1. Landing Page (Unauthenticated) - Updated**
+### **1. Landing Page (Unauthenticated)**
 ```
 ┌─────────────────────────────────────────────────────────────┐
-│ NavBar: [🏠 CodeCave] [🔍 Explore] [📈 Trending] [🚀 Join Us] │
+│ NavBar: [🏠 CodeCave] [🔍 Search] [📈 Trending] [🚀 Sign In] │
 ├─────────────────────────────────────────────────────────────┤
 │                    Hero Section                             │
-│  Left: Value Proposition    │    Right: Authentication      │
-│  🎯 "Developer Community"   │    🔐 OAuth Sign-In Options   │
-│  📱 Success Stories         │    🎨 Clean, Simple UI       │
-├─────────────────────────────────────────────────────────────┤
-│                  What Makes Us Different                    │
-│  🚀 Real Code Showcase  •  🤝 Collaboration Focus          │
-│  💡 No Toxicity Policy •  🎯 Developer-Specific Features   │
-│  📈 Project-Based Groups • 🔍 Quality Over Quantity        │
+│  🎯 "Where developers share their journey"                  │
+│  📱 Featured projects grid (3x2)                           │
+│  🌟 Call-to-action: "Join the Community"                   │
 ├─────────────────────────────────────────────────────────────┤
 │                  Trending Projects                          │
-│  📊 Horizontal scroll of featured projects                  │
-│  🏷️ Filter by: [React] [Python] [AI] [Collaboration]      │
+│  📊 Horizontal scroll of popular projects                   │
+│  🏷️ Filter by: [React] [Python] [AI] [Open Source]        │
 ├─────────────────────────────────────────────────────────────┤
 │                    Community Stats                         │
-│  👥 X developers • 🚀 Y projects • 🤝 Z collaborations     │
-│  🌍 Global developer showcase                              │
-├─────────────────────────────────────────────────────────────┤
-│                    Feedback Section                        │
-│  💬 "Help us improve - Your voice matters!"                │
-│  📝 Quick feedback form for suggestions                    │
-│  🎯 "Built by developers, for developers"                  │
+│  👥 X developers • 🚀 Y projects • 💬 Z discussions        │
+│  🌍 Global developer map                                    │
 └─────────────────────────────────────────────────────────────┘
 ```
 
-### **2. Main Feed (Authenticated) - LinkedIn-Style**
+### **2. Main Feed (Authenticated)**
 ```
 ┌─────────────────────────────────────────────────────────────┐
-│ NavBar: [🏠 Feed] [🔍 Search] [🤝 Collabs] [👥 Groups] [👤 You] │
+│ NavBar: [🏠 Feed] [🔍 Search] [🔔 Notifications] [👤 Profile] │
 ├─────────────────────────────────────────────────────────────┤
 │ LeftSidebar          │           Main Feed           │ Right │
 │ ┌─────────────────┐  │  ┌─────────────────────────┐  │ Panel │
-│ │ 👤 Your Profile │  │  │ 📱 Project Post         │  │ ┌───┐ │
-│ │ 📊 Quick Stats  │  │  │ 👤 @username            │  │ │📈 │ │
-│ │ 🔥 Trending     │  │  │ 🏷️ #react #nextjs      │  │ │Pro│ │
-│ │ 🎯 Explore      │  │  │ 🖼️ Project Demo        │  │ │💎 │ │
-│ │ 👥 Groups       │  │  │ 📝 "Check out my new   │  │ └───┘ │
-│ │ 🤝 Collaborations│  │  │ dashboard app..."       │  │ ┌───┐ │
-│ └─────────────────┘  │  │ 👍 ❤️ 💬 🔗 ⭐         │  │ │📢 │ │
-│                      │  └─────────────────────────┘  │ │Pro│ │
-│ ┌─────────────────┐  │                              │ │mos│ │
-│ │ 🎯 Suggestions  │  │  ┌─────────────────────────┐  │ └───┘ │
-│ │ 👥 Developers   │  │  │ 🤝 Collab Request       │  │ ┌───┐ │
-│ │ 🚀 Projects     │  │  │ 👤 @dev2 looking for    │  │ │👥 │ │
-│ │ 📈 Achievements │  │  │ 🎯 "React dev for my    │  │ │Sug│ │
-│ └─────────────────┘  │  │ startup idea"           │  │ │ges│ │
-│                      │  │ 🏷️ #react #startup     │  │ │ted│ │
+│ │ 📝 New Project  │  │  │ 📱 Project Post Card    │  │ ┌───┐ │
+│ │ 🔥 Trending     │  │  │ 👤 @username            │  │ │🎯 │ │
+│ │ 👥 Following    │  │  │ 🏷️ #react #nextjs      │  │ │Pro│ │
+│ │ 💼 Jobs         │  │  │ 🖼️ Project Screenshot   │  │ │💎 │ │
+│ │ 🎯 Explore      │  │  │ 📝 Description          │  │ └───┘ │
+│ └─────────────────┘  │  │ 👍 ❤️ 💬 🔗 ⭐         │  │ ┌───┐ │
+│                      │  └─────────────────────────┘  │ │📈 │ │
+│ ┌─────────────────┐  │                              │ │Ads│ │
+│ │ 🔥 Quick Stats  │  │  ┌─────────────────────────┐  │ └───┘ │
+│ │ 📊 Your Impact  │  │  │ 📱 Another Project      │  │ ┌───┐ │
+│ │ 🌟 Achievements │  │  │ 👤 @developer2          │  │ │👥 │ │
+│ └─────────────────┘  │  │ 🏷️ #python #ai         │  │ │Sug│ │
+│                      │  │ 🖼️ Demo GIF             │  │ │ges│ │
+│                      │  │ 📝 Project details      │  │ │ted│ │
 │                      │  │ 👍 ❤️ 💬 🔗 ⭐         │  │ └───┘ │
 │                      │  └─────────────────────────┘  │       │
 └─────────────────────────────────────────────────────────────┘
 ```
 
-### **3. Collaboration Requests Tab**
+### **3. Project Detail Page**
 ```
 ┌─────────────────────────────────────────────────────────────┐
-│ NavBar: [🏠 Feed] [🔍 Search] [🤝 Collabs] [👥 Groups] [👤 You] │
+│ NavBar: [🏠 Feed] [🔍 Search] [🔔 Notifications] [👤 Profile] │
 ├─────────────────────────────────────────────────────────────┤
-│                    Collaboration Hub                        │
-│  🤝 Find your next project partner or join exciting teams   │
-│  📝 [Post New Request] • 🔍 [Search Requests]              │
+│                    Project Header                           │
+│  📱 Project Title • 🏷️ #react #nextjs #typescript          │
+│  👤 by @username • 📅 2 days ago • 👍 24 • 💬 8 • ⭐ 12     │
+│  🔗 [Live Demo] [GitHub] [📤 Share]                         │
 ├─────────────────────────────────────────────────────────────┤
-│ Filter Sidebar          │         Collaboration Requests     │
-│ ┌─────────────────┐    │  ┌─────────────────────────────┐    │
-│ │ 🎯 Type         │    │  │ 🤝 Looking for Frontend Dev │    │
-│ │ ☐ Frontend      │    │  │ 👤 @startup_founder         │    │
-│ │ ☐ Backend       │    │  │ 🎯 "Building a SaaS tool    │    │
-│ │ ☐ Full-Stack    │    │  │ for developers, need React  │    │
-│ │ ☐ Design        │    │  │ expert for 3-month project" │    │
-│ │ ☐ DevOps        │    │  │ 🏷️ #react #saas #paid      │    │
-│ └─────────────────┘    │  │ 💰 Paid • 📅 3 months      │    │
-│                        │  │ 👥 5 interested             │    │
-│ ┌─────────────────┐    │  └─────────────────────────────┘    │
-│ │ 💰 Compensation │    │                                    │
-│ │ ☐ Paid          │    │  ┌─────────────────────────────┐    │
-│ │ ☐ Equity        │    │  │ 🚀 Open Source Contributors │    │
-│ │ ☐ Learning      │    │  │ 👤 @oss_maintainer          │    │
-│ │ ☐ Portfolio     │    │  │ 🎯 "Help build the future   │    │
-│ └─────────────────┘    │  │ of web development tools"   │    │
-│                        │  │ 🏷️ #opensource #typescript │    │
-│ ┌─────────────────┐    │  │ 🎓 Learning • 📈 Portfolio  │    │
-│ │ 🕐 Duration     │    │  │ 👥 12 interested            │    │
-│ │ ○ < 1 month     │    │  └─────────────────────────────┘    │
-│ │ ○ 1-3 months    │    │                                    │
-│ │ ○ 3-6 months    │    │                                    │
-│ │ ○ Long-term     │    │                                    │
-│ └─────────────────┘    │                                    │
+│ Main Content                     │        Project Sidebar    │
+│ ┌─────────────────────────────┐  │  ┌─────────────────────┐  │
+│ │ 🖼️ Project Gallery          │  │  │ 🛠️ Tech Stack       │  │
+│ │ 📸 Screenshots & GIFs       │  │  │ ⚛️ React           │  │
+│ │ 🎥 Demo Videos              │  │  │ 🔷 TypeScript      │  │
+│ └─────────────────────────────┘  │  │ 🎨 Tailwind CSS   │  │
+│                                  │  └─────────────────────┘  │
+│ ┌─────────────────────────────┐  │  ┌─────────────────────┐  │
+│ │ 📝 Project Description      │  │  │ 📊 Project Stats    │  │
+│ │ 💡 Features & Highlights    │  │  │ 👀 1.2k views      │  │
+│ │ 🎯 Goals & Roadmap         │  │  │ 📈 95% uptime      │  │
+│ │ 🤝 Looking for: Frontend   │  │  │ 🌟 Rising project  │  │
+│ └─────────────────────────────┘  │  └─────────────────────┘  │
+│                                  │  ┌─────────────────────┐  │
+│ ┌─────────────────────────────┐  │  │ 👤 About Author     │  │
+│ │ 💬 Comments Section         │  │  │ 🎯 Full-stack dev   │  │
+│ │ 👥 12 comments              │  │  │ 📍 San Francisco    │  │
+│ │ 🔄 Real-time updates        │  │  │ 🔗 [Follow] [Message] │
+│ └─────────────────────────────┘  │  └─────────────────────┘  │
 └─────────────────────────────────────────────────────────────┘
 ```
 
-### **4. Groups Tab**
+### **4. Developer Profile Page**
 ```
 ┌─────────────────────────────────────────────────────────────┐
-│ NavBar: [🏠 Feed] [🔍 Search] [🤝 Collabs] [👥 Groups] [👤 You] │
+│ NavBar: [🏠 Feed] [🔍 Search] [🔔 Notifications] [👤 Profile] │
 ├─────────────────────────────────────────────────────────────┤
-│                    Developer Groups                         │
-│  👥 Join communities around your interests and projects     │
-│  ➕ [Create Group] • 🔍 [Search Groups] • 📈 [Trending]    │
+│                    Profile Header                           │
+│  👤 Profile Picture • 🎯 @username • 💼 Full-stack Developer │
+│  📍 San Francisco • 🌐 portfolio.com • 🔗 GitHub           │
+│  👥 1.2k followers • 🔄 Following 345 • 📈 Pro Member       │
+│  🔘 [Follow] [Message] [🔗 Share Profile]                   │
 ├─────────────────────────────────────────────────────────────┤
-│ Group Categories       │            Groups Feed             │
-│ ┌─────────────────┐   │  ┌─────────────────────────────┐   │
-│ │ 🏠 Your Groups  │   │  │ ⚛️ React Developers Hub      │   │
-│ │ • React Hub     │   │  │ 👥 2.3k members • 🔥 Active │   │
-│ │ • Python Masters│   │  │ 📝 "Weekly React tips and   │   │
-│ │ • AI Builders   │   │  │ project showcases"          │   │
-│ │                 │   │  │ 🎯 [Join] [View Posts]      │   │
-│ │ 🔍 Discover     │   │  └─────────────────────────────┘   │
-│ │ • Tech Stacks   │   │                                   │
-│ │ • Project Types │   │  ┌─────────────────────────────┐   │
-│ │ • Skill Levels  │   │  │ 🐍 Python for Everyone      │   │
-│ │ • Locations     │   │  │ 👥 1.8k members • 📈 Growing│   │
-│ │                 │   │  │ 📝 "From beginners to       │   │
-│ │ 🎯 Trending     │   │  │ experts, all welcome"       │   │
-│ │ • AI & ML       │   │  │ 🎯 [Join] [View Posts]      │   │
-│ │ • Web3          │   │  └─────────────────────────────┘   │
-│ │ • DevOps        │   │                                   │
-│ │ • Mobile        │   │  ┌─────────────────────────────┐   │
-│ └─────────────────┘   │  │ 🚀 Indie Hackers Unite     │   │
-│                       │  │ 👥 945 members • 💡 Creative │   │
-│                       │  │ 📝 "Building and launching  │   │
-│                       │  │ projects solo"              │   │
-│                       │  │ 🎯 [Join] [View Posts]      │   │
-│                       │  └─────────────────────────────┘   │
+│ Profile Content                  │        Profile Sidebar    │
+│ ┌─────────────────────────────┐  │  ┌─────────────────────┐  │
+│ │ 📊 Activity Feed            │  │  │ 🛠️ Tech Stack       │  │
+│ │ 🚀 Latest Projects          │  │  │ ⚛️ React 95%       │  │
+│ │ 💬 Recent Comments          │  │  │ 🔷 TypeScript 88%  │  │
+│ │ 👍 Liked Projects           │  │  │ 🐍 Python 72%     │  │
+│ └─────────────────────────────┘  │  └─────────────────────┘  │
+│                                  │  ┌─────────────────────┐  │
+│ 📱 Projects Grid (3 columns)     │  │ 🏆 Achievements     │  │
+│ ┌─────┐ ┌─────┐ ┌─────┐        │  │ 🌟 Rising Star      │  │
+│ │Proj1│ │Proj2│ │Proj3│        │  │ 🔥 Trending Creator │  │
+│ │⭐ 45│ │⭐ 32│ │⭐ 18│        │  │ 💬 Community Helper │  │
+│ └─────┘ └─────┘ └─────┘        │  └─────────────────────┘  │
+│                                  │  ┌─────────────────────┐  │
+│ ┌─────────────────────────────┐  │  │ 📈 Analytics (Pro)  │  │
+│ │ 📊 Contribution Graph        │  │  │ 👀 Profile views    │  │
+│ │ 🔥 365-day activity streak   │  │  │ 📈 Growth metrics   │  │
+│ └─────────────────────────────┘  │  └─────────────────────┘  │
 └─────────────────────────────────────────────────────────────┘
 ```
 
@@ -416,54 +521,3 @@ Code: JetBrains Mono (developer-friendly)
 ---
 
 **This frontend plan provides a comprehensive roadmap for building CodeCave.tech with a focus on developer experience, easy sign-in, and engaging community features.** 🚀 
-
-### **What Makes CodeCave Different from Reddit & Others:**
-
-1. **🚀 Real Code Showcase**: Unlike Reddit's text-heavy discussions, CodeCave focuses on actual project demonstrations with live demos, code snippets, and visual proof of work.
-
-2. **🤝 Collaboration-First**: Built specifically for finding project partners and collaborators, not just discussion. Direct collaboration request system.
-
-3. **🎯 Developer-Specific Features**: 
-   - GitHub integration for automatic portfolio building
-   - Code syntax highlighting in posts
-   - Project analytics and tracking
-   - Skills-based matching for collaborations
-
-4. **💡 Constructive Feedback Culture**: 
-   - No downvoting system to prevent toxicity
-   - Feedback-focused rather than criticism-focused
-   - Built-in project improvement suggestions
-
-5. **📈 Growth-Oriented**: 
-   - Track your development journey
-   - Portfolio building integrated into the platform
-   - Achievement system for learning milestones
-
-6. **🌟 Quality Over Quantity**: 
-   - Curated content over viral posts
-   - Project-based communities rather than general discussion
-   - Focus on actual building and creating
-
-7. **🎮 Project-Based Groups**: 
-   - Groups form around specific projects and technologies
-   - Temporary groups for hackathons and challenges
-   - Skill-level appropriate groupings
-
-8. **🔍 No Algorithm Manipulation**: 
-   - Chronological feeds option
-   - Transparent discovery mechanisms
-   - User-controlled content filtering
-
-### **Removed Features (Based on User Feedback):**
-- ❌ Traditional job postings (feature flag for later)
-- ❌ Following tab (replaced with Groups focus)
-- ❌ New Project button in sidebar (integrated into main flow)
-- ❌ Traditional advertising (replaced with project promotions)
-
-### **Enhanced Features:**
-- ✅ LinkedIn-style professional feed
-- ✅ Collaboration request system
-- ✅ Advanced group management
-- ✅ Project-based promotions instead of ads
-- ✅ Integrated feedback system
-- ✅ Mobile-first responsive design 
