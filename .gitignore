@@ -188,3 +188,6 @@ docker-compose.local.yml
 *.backup
 *.bak
 *.old
+
+#claude
+*.claude

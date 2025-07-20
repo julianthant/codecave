@@ -1,26 +1,329 @@
 @import "tailwindcss";
 
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  /* Brand Colors - Light Theme */
+  --primary: 16 100% 60%;           /* Orange #FF6B35 */
+  --primary-matte: 16 45% 55%;      /* Matte Orange */
+  --secondary: 212 72% 59%;         /* Soft Blue #4A90E2 */
+  --secondary-matte: 212 35% 54%;   /* Matte Blue */
+  --accent: 51 100% 67%;            /* Yellow #FDD835 */
+  
+  /* Base Colors - Light Theme */
+  --background: 0 0% 100%;          /* Pure white */
+  --surface: 220 17% 98%;           /* Very light blue-gray */
+  --surface-variant: 215 25% 96%;   /* Softer light gray */
+  
+  /* Text Colors - Light Theme */
+  --foreground: 222 47% 11%;        /* Dark slate for text */
+  --muted: 215 16% 57%;             /* Medium gray */
+  --subtle: 215 20% 70%;            /* Light gray */
+  
+  /* Interactive Elements - Light Theme */
+  --border: 215 25% 90%;            /* Light borders */
+  --border-variant: 215 20% 85%;    /* Hover borders */
+  --shadow-primary: 16 100% 60%;    /* Orange shadow color */
+  
+  /* Code Syntax Colors - Light Theme */
+  --code-keyword: 16 100% 60%;      /* Keywords: Orange theme */
+  --code-string: 142 76% 56%;       /* Strings: Green */
+  --code-comment: 215 16% 57%;      /* Comments: Muted gray */
+  --code-function: 212 72% 59%;     /* Functions: Blue theme */
+}
+
+.dark {
+  /* Brand Colors - Dark Theme */
+  --primary: 16 100% 65%;           /* Slightly brighter orange #FF7A47 */
+  --primary-matte: 16 40% 60%;      /* Matte Orange - Dark */
+  --secondary: 212 72% 70%;         /* Brighter soft blue #5BA0F2 */
+  --secondary-matte: 212 30% 65%;   /* Matte Blue - Dark */
+  --accent: 51 100% 75%;            /* Brighter yellow #FFE554 */
+  
+  /* Base Colors - Dark Theme */
+  --background: 222 47% 11%;        /* Dark slate #0F172A */
+  --surface: 215 28% 17%;           /* Dark surface #1E293B */
+  --surface-variant: 215 20% 25%;   /* Lighter dark surface #334155 */
+  
+  /* Text Colors - Dark Theme */
+  --foreground: 210 40% 98%;        /* Light text #F8FAFC */
+  --muted: 215 20% 65%;             /* Light muted #CBD5E1 */
+  --subtle: 215 16% 57%;            /* Medium gray #94A3B8 */
+  
+  /* Interactive Elements - Dark Theme */
+  --border: 215 20% 25%;            /* Dark borders */
+  --border-variant: 215 16% 35%;    /* Lighter dark borders */
+  --shadow-primary: 16 100% 65%;    /* Orange shadow color */
+  
+  /* Code Syntax Colors - Dark Theme */
+  --code-keyword: 16 100% 70%;      /* Keywords: Brighter orange */
+  --code-string: 142 76% 65%;       /* Strings: Brighter green */
+  --code-comment: 215 16% 67%;      /* Comments: Light muted gray */
+  --code-function: 212 72% 75%;     /* Functions: Brighter blue */
 }
 
 @theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
+  /* Colors */
+  --color-background: hsl(var(--background));
+  --color-foreground: hsl(var(--foreground));
+  --color-primary: hsl(var(--primary));
+  --color-primary-matte: hsl(var(--primary-matte));
+  --color-secondary: hsl(var(--secondary));
+  --color-secondary-matte: hsl(var(--secondary-matte));
+  --color-accent: hsl(var(--accent));
+  --color-surface: hsl(var(--surface));
+  --color-surface-variant: hsl(var(--surface-variant));
+  --color-muted: hsl(var(--muted));
+  --color-subtle: hsl(var(--subtle));
+  --color-border: hsl(var(--border));
+  --color-border-variant: hsl(var(--border-variant));
+  
+  /* Code Syntax Colors */
+  --color-code-keyword: hsl(var(--code-keyword));
+  --color-code-string: hsl(var(--code-string));
+  --color-code-comment: hsl(var(--code-comment));
+  --color-code-function: hsl(var(--code-function));
+  
+  /* Typography */
+  --font-sans: var(--font-inter), system-ui, sans-serif;
+  --font-mono: var(--font-jetbrains-mono), 'Consolas', monospace;
+  --font-display: var(--font-inter), system-ui, sans-serif;
+  
+  /* Spacing & Sizing */
+  --container-padding: 1.5rem;
+  --nav-height: 4rem;
+  --nav-height-mobile: 3.5rem;
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+/* Base Styles */
+* {
+  border-color: hsl(var(--border));
 }
 
 body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  background: hsl(var(--background));
+  color: hsl(var(--foreground));
+  font-family: var(--font-sans);
+  font-feature-settings: 'rlig' 1, 'calt' 1;
+}
+
+/* Custom Animations */
+@keyframes slideUp {
+  from {
+    transform: translateY(20px);
+    opacity: 0;
+  }
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+
+@keyframes conveyor-right {
+  0% {
+    transform: translateX(0);
+  }
+  100% {
+    transform: translateX(-50%);
+  }
+}
+
+@keyframes conveyor-left {
+  0% {
+    transform: translateX(-50%);
+  }
+  100% {
+    transform: translateX(0);
+  }
+}
+
+@keyframes cursorBlink {
+  0%, 50% {
+    opacity: 1;
+  }
+  51%, 100% {
+    opacity: 0;
+  }
+}
+
+@keyframes glow {
+  0%, 100% {
+    box-shadow: 0 0 5px hsl(var(--primary) / 0.5);
+  }
+  50% {
+    box-shadow: 0 0 20px hsl(var(--primary) / 0.8);
+  }
+}
+
+@keyframes float {
+  0%, 100% { 
+    transform: translateY(0px) rotate(0deg); 
+  }
+  33% { 
+    transform: translateY(-8px) rotate(1deg); 
+  }
+  66% { 
+    transform: translateY(-4px) rotate(-0.5deg); 
+  }
+}
+
+@keyframes fade-in-out {
+  0%, 100% { 
+    opacity: 0; 
+    transform: translateY(10px); 
+  }
+  50% { 
+    opacity: 0.6; 
+    transform: translateY(0px); 
+  }
+}
+
+/* Utility Classes */
+.slide-up {
+  animation: slideUp 0.6s ease-out forwards;
+}
+
+.animate-conveyor-right {
+  animation: conveyor-right 30s linear infinite;
+}
+
+.animate-conveyor-left {
+  animation: conveyor-left 30s linear infinite;
+}
+
+.cursor-blink {
+  animation: cursorBlink 1s infinite;
+}
+
+.glow-effect {
+  animation: glow 2s ease-in-out infinite;
+}
+
+.animate-float {
+  animation: float 6s ease-in-out infinite;
+}
+
+.animate-fade-in-out {
+  animation: fade-in-out 8s ease-in-out infinite;
+}
+
+.gradient-text {
+  background: linear-gradient(45deg, hsl(var(--primary)), hsl(var(--secondary)));
+  background-clip: text;
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-size: 200% 200%;
+}
+
+/* Terminal/Code Styling */
+.terminal-card {
+  background: hsl(var(--surface) / 0.8);
+  border: 1px solid hsl(var(--border));
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+}
+
+.code-syntax {
+  font-family: var(--font-mono);
+}
+
+/* Component-specific Styles */
+.nav-blur {
+  background: hsl(var(--background) / 0.8);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+}
+
+.hero-gradient {
+  background: linear-gradient(135deg, 
+    hsl(var(--primary) / 0.05) 0%, 
+    transparent 50%, 
+    hsl(var(--secondary) / 0.05) 100%);
+}
+
+/* Button Styles */
+.btn-primary {
+  background: linear-gradient(45deg, hsl(var(--primary)), hsl(var(--secondary)));
+  color: white;
+  font-weight: 600;
+  transition: all 0.2s ease;
+}
+
+.btn-primary:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 10px 25px hsl(var(--primary) / 0.4);
+}
+
+.btn-secondary {
+  border: 1px solid hsl(var(--border-variant));
+  color: hsl(var(--muted));
+  background: transparent;
+  transition: all 0.2s ease;
+}
+
+.btn-secondary:hover {
+  border-color: hsl(var(--primary));
+  color: hsl(var(--foreground));
+  background: hsl(var(--surface) / 0.5);
+}
+
+/* OAuth Button Styles */
+.oauth-button {
+  background: hsl(var(--surface));
+  border: 1px solid hsl(var(--border-variant));
+  transition: all 0.2s ease;
+}
+
+.oauth-button:hover {
+  border-color: hsl(var(--primary));
+  background: hsl(var(--surface-variant));
+}
+
+/* Scrollbar Styling */
+::-webkit-scrollbar {
+  width: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: hsl(var(--surface));
+}
+
+::-webkit-scrollbar-thumb {
+  background: hsl(var(--border-variant));
+  border-radius: 3px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: hsl(var(--muted));
+}
+
+/* Selection Styling */
+::selection {
+  background: hsl(var(--primary) / 0.3);
+}
+
+/* Focus Styles */
+:focus-visible {
+  outline: 2px solid hsl(var(--primary));
+  outline-offset: 2px;
+}
+
+/* Smooth Scrolling */
+html {
+  scroll-behavior: smooth;
+}
+
+/* Line Clamp Utilities */
+.line-clamp-3 {
+  overflow: hidden;
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 3;
+}
+
+/* Navbar Transparency States */
+.navbar-transparent {
+  background-color: transparent;
+}
+
+.navbar-scrolled {
+  background-color: hsl(var(--background));
 }

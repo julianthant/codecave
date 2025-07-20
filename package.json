@@ -15,13 +15,16 @@
     "test:e2e": "pnpm --filter @codecave/web test"
   },
   "devDependencies": {
-    "turbo": "^2.0.0",
+    "@types/node": "^20",
     "prettier": "^3.0.0",
-    "@types/node": "^20"
+    "turbo": "^2.0.0"
   },
   "engines": {
     "node": ">=18.0.0",
     "pnpm": ">=8.0.0"
   },
-  "packageManager": "pnpm@8.15.0"
+  "packageManager": "pnpm@8.15.0",
+  "dependencies": {
+    "require-in-the-middle": "^7.5.2"
+  }
 }

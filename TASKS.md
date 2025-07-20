@@ -1,15 +1,13 @@
-Before you begin:
+** RESPONSES ** DO CHECKS AT THE END \*\*
 
-1) Do you know the best practices for writing nextjs code? I want this server side optimized. Add SEOs.
+-> Will these
 
-2) Give me a clear structure of the frontend. How will you create the folder structure? Make it clear and understandable. Add this in the fronend plan.
+\*\* CHECKS
 
-3) Do you have a clear vision of what the landing page will look like? If not, brainstrom through the most popular sites for communities like discord, reddit, linkedin, ect... Go to those websites and view their landing pages. How do they build the navbar, the layout, the structure. What makes these layouts successful? I want mine to be unique but also at the same time be successful like that.
+-> Go through all the files you created. Optimize them if you can. If the component can be split more into server side and client side, do it. dont have unnecessary client side components.
 
-4) Have you thought of the texts that will be put in each section? Does it align with the project?
+-> Don't use useEffect, at all. There are always better alternatives. Go through the files to see if there is useEffect being used.
 
-5) I have uploaded documentation of the official next js in the cursor settings. Read through it for the latest nextjs version before building. 
+-> Check through all your files and make sure they are compliant with my request. Go through them to look for runtime errors. ALWAYS DOUBLE CHECK THE FILES AFTER YOU CREATE THEM FOR ERRORS.
 
-6) Make sure your code is readable and reusable. Optimize it.
-
-7) I want you to build the navbar and the landing page. 
+-> Remove any unused components and imports.
