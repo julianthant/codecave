@@ -35,11 +35,41 @@ systemctl start docker
 curl -L "https://github.com/docker/compose/releases/latest/download/docker-compose-$(uname -s)-$(uname -m)" -o /usr/local/bin/docker-compose
 chmod +x /usr/local/bin/docker-compose
 
-# Create application directory
-mkdir -p /opt/codecave
+# Create application directory structure
+echo "Setting up application directories..."
+mkdir -p /root/codecave  # Main application directory
 mkdir -p /opt/codecave/data
-mkdir -p /opt/codecave/logs
+mkdir -p /opt/codecave/logs  
 mkdir -p /opt/codecave/backups
+mkdir -p /mnt/volume_nyc3_01/app-logs
+mkdir -p /mnt/volume_nyc3_01/meilisearch
+mkdir -p /mnt/volume_nyc3_01/rabbitmq
+mkdir -p /mnt/volume_nyc3_01/redis
+mkdir -p /mnt/volume_nyc3_01/kong-ssl
+
+# Install Doppler CLI
+echo "Installing Doppler CLI..."
+curl -Ls https://cli.doppler.com/install.sh | sh
+
+# Add Doppler to PATH for all users
+echo 'export PATH="/usr/local/bin:$PATH"' >> /etc/profile
+echo 'export PATH="/usr/local/bin:$PATH"' >> /root/.bashrc
+
+# Clone the codecave repository
+echo "Cloning CodeCave repository..."
+cd /root
+if [ ! -d "codecave" ]; then
+    git clone https://github.com/julianthant/codecave.git
+fi
+cd codecave
+
+# Create swap space for builds
+echo "Creating swap space..."
+fallocate -l 2G /swapfile
+chmod 600 /swapfile
+mkswap /swapfile
+swapon /swapfile
+echo '/swapfile none swap sw 0 0' >> /etc/fstab
 
 # Set up basic firewall
 ufw --force enable
@@ -158,4 +188,26 @@ chmod +x /opt/codecave/backup.sh
 # Set up daily backup
 (crontab -l 2>/dev/null; echo "0 2 * * * /opt/codecave/backup.sh") | crontab -
 
-echo "CodeCave $ENVIRONMENT droplet initialization completed on $(date)" 
+# Create deployment helper script
+cat > /root/codecave/quick-deploy.sh << 'EOF'
+#!/bin/bash
+cd /root/codecave
+git pull origin main
+chmod +x scripts/cleanup-production.sh
+./scripts/cleanup-production.sh
+doppler run --config=prd_all --project=codecave -- docker-compose -f docker-compose.prod.yml down --remove-orphans
+docker system prune -f
+doppler run --config=prd_all --project=codecave -- docker-compose -f docker-compose.prod.yml up -d --build
+EOF
+
+chmod +x /root/codecave/quick-deploy.sh
+
+echo "CodeCave $ENVIRONMENT droplet initialization completed on $(date)"
+echo "Next steps:"
+echo "1. SSH to server: ssh root@$(curl -s http://checkip.amazonaws.com)"
+echo "2. Configure Doppler: doppler configure set token <your-token>"
+echo "3. Configure Doppler project: cd /root/codecave && doppler configure set project codecave config prd_all"
+echo "4. Run deployment: ./quick-deploy.sh"
+
+# Create completion marker for Terraform
+touch /tmp/user_data_complete 

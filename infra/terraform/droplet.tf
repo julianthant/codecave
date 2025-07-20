@@ -44,16 +44,12 @@ resource "digitalocean_droplet" "app_server" {
     destination = "/opt/codecave/docker-compose.yml"
   }
 
-  provisioner "file" {
-    source      = "${path.module}/../../scripts/"
-    destination = "/opt/codecave/scripts/"
-  }
-
-  # Run initial setup
+  # Wait for user_data script to complete
   provisioner "remote-exec" {
     inline = [
-      "chmod +x /opt/codecave/scripts/*.sh",
-      "cd /opt/codecave && ./scripts/setup-production.sh",
+      "echo 'Waiting for user_data script to complete...'",
+      "while [ ! -f /tmp/user_data_complete ]; do sleep 5; done",
+      "echo 'User data script completed successfully'",
     ]
   }
 }
