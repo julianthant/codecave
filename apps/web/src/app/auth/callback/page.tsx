@@ -5,16 +5,30 @@ interface CallbackParams {
     token?: string;
     refresh?: string;
     error?: string;
+    existing_provider?: string;
+    attempted_provider?: string;
   }>;
 }
 
 export default async function AuthCallback({ searchParams }: CallbackParams) {
   const params = await searchParams;
-  const { token, refresh, error } = params;
+  const { token, refresh, error, existing_provider, attempted_provider } =
+    params;
 
   if (error) {
-    // Redirect to login with error
-    redirect(`/?error=${encodeURIComponent(error)}`);
+    // Handle specific "account exists with different provider" error
+    const isAccountExistsError = error === "account_exists";
+    const hasProviderInfo = existing_provider && attempted_provider;
+
+    if (isAccountExistsError && hasProviderInfo) {
+      const errorMessage = `An account with this email already exists and is linked to ${existing_provider}. Please sign in with ${existing_provider} instead of ${attempted_provider}.`;
+      redirect(
+        `/?error=${encodeURIComponent(errorMessage)}&error_type=account_exists&existing_provider=${existing_provider}`
+      );
+    } else {
+      // Handle other errors
+      redirect(`/?error=${encodeURIComponent(error)}`);
+    }
   }
 
   if (token && refresh) {
@@ -30,7 +44,7 @@ export default async function AuthCallback({ searchParams }: CallbackParams) {
               __html: `
                 localStorage.setItem('accessToken', '${token}');
                 localStorage.setItem('refreshToken', '${refresh}');
-                window.location.href = '/dashboard';
+                window.location.href = '/home';
               `,
             }}
           />
