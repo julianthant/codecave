@@ -29,7 +29,6 @@ export default function Home() {
               <div className="items-center gap-16 grid grid-cols-5 h-full">
                 <div className="col-span-3"></div>
                 <div className="flex justify-center items-center col-span-2">
-                  <p>hi</p>
                   <HeroIllustration
                     className="opacity-20 scale-75"
                     animated={true}
