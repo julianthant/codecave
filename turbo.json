@@ -6,7 +6,8 @@
     "SENTRY_ORG",
     "SENTRY_PROJECT",
     "NEXT_PUBLIC_SUPABASE_URL",
-    "NEXT_PUBLIC_SUPABASE_ANON_KEY"
+    "NEXT_PUBLIC_SUPABASE_ANON_KEY",
+    "NEXT_PUBLIC_API_URL"
   ],
   "tasks": {
     "build": {
@@ -18,7 +19,8 @@
         "SENTRY_PROJECT",
         "NODE_ENV",
         "NEXT_PUBLIC_SUPABASE_URL",
-        "NEXT_PUBLIC_SUPABASE_ANON_KEY"
+        "NEXT_PUBLIC_SUPABASE_ANON_KEY",
+        "NEXT_PUBLIC_API_URL"
       ]
     },
     "dev": {
