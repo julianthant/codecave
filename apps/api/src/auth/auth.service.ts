@@ -17,42 +17,68 @@ export class AuthService {
     profile: OAuthProfile,
     provider: AuthProvider
   ): Promise<User> {
-    // Check if user exists by provider and ID
-    let user = await this.usersService.findByProviderAndId(
-      provider,
-      profile.id
-    );
+    try {
+      console.log(`Validating OAuth user for ${provider}:`, profile);
 
-    if (!user) {
-      // Check if user exists by email (for linking accounts)
-      const existingUser = await this.usersService.findByEmail(profile.email);
+      // Check if user exists by provider and ID
+      let user = await this.usersService.findByProviderAndId(
+        provider,
+        profile.id
+      );
 
-      if (existingUser) {
-        // User exists with different provider - could implement account linking here
-        // For now, we'll create a new user with the same email but different provider
-        user = await this.usersService.createUser(profile, provider);
+      if (!user) {
+        // Check if user exists by email (for linking accounts)
+        const existingUser = await this.usersService.findByEmail(profile.email);
+
+        if (existingUser) {
+          console.log(
+            `User exists with email ${profile.email} and provider ${existingUser.provider}`
+          );
+          // User exists with different provider - throw error to redirect with message
+          const providerNames = {
+            [AuthProvider.GITHUB]: "GitHub",
+            [AuthProvider.GOOGLE]: "Google",
+            [AuthProvider.LINKEDIN]: "LinkedIn",
+          };
+
+          const existingProviderName =
+            providerNames[existingUser.provider] || existingUser.provider;
+          const currentProviderName = providerNames[provider] || provider;
+
+          throw new Error(
+            `ACCOUNT_EXISTS_WITH_DIFFERENT_PROVIDER:${existingProviderName}:${currentProviderName}`
+          );
+        } else {
+          console.log(`Creating new user for ${profile.email}`);
+          // Create new user
+          user = await this.usersService.createUser(profile, provider);
+        }
       } else {
-        // Create new user
-        user = await this.usersService.createUser(profile, provider);
+        console.log(
+          `Updating existing user ${user.id} with latest profile info`
+        );
+        // Update existing user with latest profile info
+        user = await this.usersService.updateUser(user.id, {
+          name: profile.name,
+          avatar: profile.avatar,
+          bio: profile.bio,
+          website: profile.website,
+          location: profile.location,
+          company: profile.company,
+          githubUsername: profile.githubUsername,
+          linkedinProfile: profile.linkedinProfile,
+        });
       }
-    } else {
-      // Update existing user with latest profile info
-      user = await this.usersService.updateUser(user.id, {
-        name: profile.name,
-        avatar: profile.avatar,
-        bio: profile.bio,
-        website: profile.website,
-        location: profile.location,
-        company: profile.company,
-        githubUsername: profile.githubUsername,
-        linkedinProfile: profile.linkedinProfile,
-      });
+
+      // Update last login
+      await this.usersService.updateLastLogin(user.id);
+
+      console.log(`OAuth validation successful for user ${user.id}`);
+      return user;
+    } catch (error) {
+      console.error(`OAuth validation error for ${provider}:`, error);
+      throw error;
     }
-
-    // Update last login
-    await this.usersService.updateLastLogin(user.id);
-
-    return user;
   }
 
   async generateAuthTokens(user: User): Promise<{
