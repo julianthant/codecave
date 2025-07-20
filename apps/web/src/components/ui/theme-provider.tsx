@@ -1,22 +1,18 @@
-'use client';
+"use client";
 
-import React from 'react';
-import { ThemeProvider as NextThemesProvider } from 'next-themes';
+import React from "react";
+import { ThemeProvider as NextThemesProvider } from "next-themes";
 
 interface CodeCaveThemeProviderProps {
   children: React.ReactNode;
-  [key: string]: any;
+  [key: string]: unknown;
 }
 
-export const ThemeProvider: React.FC<CodeCaveThemeProviderProps> = ({ 
-  children, 
-  ...props 
+export const ThemeProvider: React.FC<CodeCaveThemeProviderProps> = ({
+  children,
+  ...props
 }) => {
-  return (
-    <NextThemesProvider {...props}>
-      {children}
-    </NextThemesProvider>
-  );
+  return <NextThemesProvider {...props}>{children}</NextThemesProvider>;
 };
 
-export default ThemeProvider; 
+export default ThemeProvider;
