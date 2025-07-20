@@ -5,6 +5,16 @@ import { ConfigService } from "@nestjs/config";
 import { AuthService } from "../auth.service";
 import { AuthProvider } from "../../users/entities/user.entity";
 
+interface OAuthProfile {
+  id: string;
+  email: string;
+  name: string;
+  avatar?: string;
+  bio?: string;
+  website?: string;
+  location?: string;
+}
+
 interface GoogleProfile {
   id: string;
   displayName: string;
@@ -38,15 +48,7 @@ export class GoogleStrategy extends PassportStrategy(Strategy, "google") {
     done: VerifyCallback
   ): Promise<void> {
     try {
-      const oauthProfile = {
-        id: profile.id,
-        email: profile.emails?.[0]?.value || "",
-        name: profile.displayName,
-        avatar: profile.photos?.[0]?.value,
-        bio: profile._json?.bio,
-        website: profile._json?.url,
-        location: profile._json?.location,
-      };
+      const oauthProfile = this.createOauthProfile(profile);
 
       const user = await this.authService.validateOAuthUser(
         oauthProfile,
@@ -57,5 +59,41 @@ export class GoogleStrategy extends PassportStrategy(Strategy, "google") {
     } catch (error) {
       done(error as Error, false);
     }
+  }
+
+  private createOauthProfile(profile: GoogleProfile): OAuthProfile {
+    return this.buildOAuthProfile(profile);
+  }
+
+  private buildOAuthProfile(profile: GoogleProfile): OAuthProfile {
+    return {
+      id: profile.id,
+      email: this.extractEmail(profile),
+      name: profile.displayName,
+      avatar: this.extractAvatar(profile),
+      bio: this.extractBio(profile),
+      website: this.extractWebsite(profile),
+      location: this.extractLocation(profile),
+    };
+  }
+
+  private extractEmail(profile: GoogleProfile): string {
+    return profile.emails?.[0]?.value || "";
+  }
+
+  private extractAvatar(profile: GoogleProfile): string | undefined {
+    return profile.photos?.[0]?.value;
+  }
+
+  private extractBio(profile: GoogleProfile): string {
+    return profile._json?.bio;
+  }
+
+  private extractWebsite(profile: GoogleProfile): string {
+    return profile._json?.url;
+  }
+
+  private extractLocation(profile: GoogleProfile): string {
+    return profile._json?.location;
   }
 }
