@@ -1,5 +1,12 @@
-import React from 'react';
-import { Search, Users, TrendingUp, Star, ArrowRight, LucideIcon } from 'lucide-react';
+import React from "react";
+import {
+  Search,
+  Users,
+  TrendingUp,
+  Star,
+  ArrowRight,
+  LucideIcon,
+} from "lucide-react";
 
 interface Feature {
   icon: LucideIcon;
@@ -9,35 +16,39 @@ interface Feature {
 
 // Server-side BrowserHeader component
 const BrowserHeader: React.FC = () => (
-  <div className="bg-gray-900 px-6 py-4 flex items-center justify-between">
+  <div className="flex justify-between items-center bg-gray-900 px-6 py-4">
     <div className="flex items-center space-x-3">
-      <div className="w-3 h-3 bg-red-500 rounded-full" aria-hidden="true"></div>
-      <div className="w-3 h-3 bg-yellow-500 rounded-full" aria-hidden="true"></div>
-      <div className="w-3 h-3 bg-green-500 rounded-full" aria-hidden="true"></div>
+      <div className="bg-red-500 rounded-full w-3 h-3" aria-hidden="true"></div>
+      <div
+        className="bg-yellow-500 rounded-full w-3 h-3"
+        aria-hidden="true"
+      ></div>
+      <div
+        className="bg-green-500 rounded-full w-3 h-3"
+        aria-hidden="true"
+      ></div>
     </div>
-    <span className="text-gray-400 text-sm font-mono">
-      codecave.tech
-    </span>
+    <span className="font-mono text-gray-400 text-sm">codecave.tech</span>
   </div>
 );
 
 // Server-side FeatureCard component
-const FeatureCard: React.FC<{ feature: Feature; index: number }> = ({ feature, index }) => {
+const FeatureCard: React.FC<{ feature: Feature }> = ({ feature }) => {
   const IconComponent = feature.icon;
-  
+
   return (
-    <article className="bg-gray-50 border border-gray-200 rounded-lg p-6 hover:bg-white hover:shadow-md transition-all duration-200">
-      <header className="flex items-center justify-between mb-4">
+    <article className="bg-gray-50 hover:bg-white hover:shadow-md p-6 border border-gray-200 rounded-lg transition-all duration-200">
+      <header className="flex justify-between items-center mb-4">
         <div className="flex items-center space-x-3">
-          <div className="w-8 h-8 bg-blue-100 rounded-lg flex items-center justify-center">
+          <div className="flex justify-center items-center bg-blue-100 rounded-lg w-8 h-8">
             <IconComponent className="w-5 h-5 text-blue-600" />
           </div>
-          <h3 className="font-semibold font-mono text-gray-900">
+          <h3 className="font-mono font-semibold text-gray-900">
             {feature.title}
           </h3>
         </div>
       </header>
-      <p className="text-gray-600 text-sm font-mono leading-relaxed">
+      <p className="font-mono text-gray-600 text-sm leading-relaxed">
         {feature.desc}
       </p>
     </article>
@@ -47,13 +58,13 @@ const FeatureCard: React.FC<{ feature: Feature; index: number }> = ({ feature, i
 // Server-side SectionHeader component
 const SectionHeader: React.FC = () => (
   <header className="mb-8">
-    <h2 className="text-3xl font-bold font-mono mb-4 text-gray-900">
+    <h2 className="mb-4 font-mono font-bold text-gray-900 text-3xl">
       Why choose CodeCave?
     </h2>
-    <p className="text-lg text-gray-600 font-mono leading-relaxed">
-      Stop wasting time on scattered platforms and noise. CodeCave
-      connects you with quality projects, meaningful collaborations,
-      and a community that values real innovation over hype.
+    <p className="font-mono text-gray-600 text-lg leading-relaxed">
+      Stop wasting time on scattered platforms and noise. CodeCave connects you
+      with quality projects, meaningful collaborations, and a community that
+      values real innovation over hype.
     </p>
   </header>
 );
@@ -85,30 +96,26 @@ const features: Feature[] = [
 // Main server component
 const WhyCodecaveSection: React.FC = () => {
   return (
-    <section className="py-24 px-8 bg-white">
-      <div className="max-w-7xl mx-auto">
-        <div className="bg-white rounded-lg shadow-lg border border-gray-200 overflow-hidden">
+    <section className="bg-white px-8 py-24">
+      <div className="mx-auto max-w-7xl">
+        <div className="bg-white shadow-lg border border-gray-200 rounded-lg overflow-hidden">
           <BrowserHeader />
 
           <div className="p-8">
             <SectionHeader />
 
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              {features.map((feature, index) => (
-                <FeatureCard 
-                  key={feature.title} 
-                  feature={feature} 
-                  index={index}
-                />
+            <div className="gap-6 grid grid-cols-1 md:grid-cols-2">
+              {features.map((feature) => (
+                <FeatureCard key={feature.title} feature={feature} />
               ))}
             </div>
           </div>
         </div>
 
-        <footer className="text-center mt-8">
+        <footer className="mt-8 text-center">
           <a
             href="#dashboard"
-            className="bg-gradient-to-r from-orange-500 to-orange-600 hover:from-orange-600 hover:to-orange-700 text-white px-8 py-4 rounded-lg font-semibold font-mono text-lg inline-flex items-center shadow-lg hover:shadow-xl transition-all duration-200 transform hover:scale-105 cursor-pointer"
+            className="inline-flex items-center bg-gradient-to-r from-orange-500 hover:from-orange-600 to-orange-600 hover:to-orange-700 shadow-lg hover:shadow-xl px-8 py-4 rounded-lg font-mono font-semibold text-white text-lg hover:scale-105 transition-all duration-200 cursor-pointer transform"
           >
             Access Dashboard
             <ArrowRight className="ml-2 w-4 h-4" />
@@ -119,4 +126,4 @@ const WhyCodecaveSection: React.FC = () => {
   );
 };
 
-export default WhyCodecaveSection; 
+export default WhyCodecaveSection;
