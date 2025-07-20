@@ -16,34 +16,36 @@ jobs:
           host: ${{ secrets.PRODUCTION_HOST }}
           username: ${{ secrets.PRODUCTION_USER }}
           key: ${{ secrets.PRODUCTION_SSH_KEY }}
-          script: |
-            # Navigate to project directory
-            cd ~/codecave
+        script: |
+          # Navigate to project directory
+          cd ~/codecave
 
           # Pull latest changes
           echo "🔄 Pulling latest changes from main..."
           git pull origin main
-          
+
           # Clean up unnecessary files for production
           echo "🧹 Cleaning up unnecessary files..."
           chmod +x scripts/cleanup-production.sh
-          ./scripts/cleanup-production.sh            # Stop existing services and remove orphaned containers
-            echo "🛑 Stopping existing services..."
-            doppler run --config=prd_all --project=codecave -- docker-compose -f docker-compose.prod.yml down --remove-orphans
+          ./scripts/cleanup-production.sh
 
-            # Remove old images to ensure fresh build
-            echo "🧹 Cleaning up old images..."
-            docker image prune -f
+          # Stop existing services and remove orphaned containers
+          echo "🛑 Stopping existing services..."
+          doppler run --config=prd_all --project=codecave -- docker-compose -f docker-compose.prod.yml down --remove-orphans
 
-            # Build and start services
-            echo "🚀 Building and starting services..."
-            doppler run --config=prd_all --project=codecave -- docker-compose -f docker-compose.prod.yml up -d --build
+          # Remove old images to ensure fresh build
+          echo "🧹 Cleaning up old images..."
+          docker image prune -f
 
-            # Show running containers
-            echo "✅ Deployment complete! Running containers:"
-            docker ps --format "table {{.Names}}\t{{.Status}}\t{{.Ports}}"
+          # Build and start services
+          echo "🚀 Building and starting services..."
+          doppler run --config=prd_all --project=codecave -- docker-compose -f docker-compose.prod.yml up -d --build
 
-            # Show service health
-            echo "🏥 Service health check:"
-            sleep 5
-            curl -f http://localhost:3001/health || echo "⚠️  API health check failed"
+          # Show running containers
+          echo "✅ Deployment complete! Running containers:"
+          docker ps --format "table {{.Names}}\t{{.Status}}\t{{.Ports}}"
+
+          # Show service health
+          echo "🏥 Service health check:"
+          sleep 5
+          curl -f http://localhost:3001/health || echo "⚠️  API health check failed"
