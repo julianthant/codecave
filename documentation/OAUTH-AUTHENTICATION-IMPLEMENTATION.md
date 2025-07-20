@@ -380,7 +380,7 @@ async generateAuthTokens(user: User) {
 // Frontend - Token management
 localStorage.setItem("accessToken", token);
 localStorage.setItem("refreshToken", refresh);
-window.location.href = "/dashboard";
+window.location.href = "/home";
 ```
 
 ## 🧪 **Testing & Verification**
