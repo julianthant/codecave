@@ -1,16 +1,19 @@
 import { createClient } from "@supabase/supabase-js";
 
 const supabaseUrl =
-  process.env.NEXT_PUBLIC_SUPABASE_URL || "your_supabase_url_here";
+  process.env.NEXT_PUBLIC_SUPABASE_URL || "https://placeholder.supabase.co";
 const supabaseAnonKey =
-  process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || "your_supabase_anon_key_here";
+  process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || "placeholder_key";
 
-if (!supabaseUrl || supabaseUrl === "your_supabase_url_here") {
-  console.warn("Missing NEXT_PUBLIC_SUPABASE_URL environment variable");
-}
+// Validate environment variables at runtime
+const isValidConfig = 
+  supabaseUrl !== "https://placeholder.supabase.co" && 
+  supabaseAnonKey !== "placeholder_key" &&
+  process.env.NEXT_PUBLIC_SUPABASE_URL &&
+  process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
 
-if (!supabaseAnonKey || supabaseAnonKey === "your_supabase_anon_key_here") {
-  console.warn("Missing NEXT_PUBLIC_SUPABASE_ANON_KEY environment variable");
+if (!isValidConfig && typeof window !== 'undefined') {
+  console.error("Missing NEXT_PUBLIC_SUPABASE_URL or NEXT_PUBLIC_SUPABASE_ANON_KEY environment variables");
 }
 
 export const supabase = createClient(supabaseUrl, supabaseAnonKey);

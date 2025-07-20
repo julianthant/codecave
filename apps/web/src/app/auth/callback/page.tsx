@@ -4,6 +4,9 @@ import { useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { supabase } from "../../../lib/supabase";
 
+// Force dynamic rendering to prevent build-time static generation issues
+export const dynamic = 'force-dynamic';
+
 export default function AuthCallback() {
   const router = useRouter();
 
