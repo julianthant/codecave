@@ -1,4 +1,4 @@
-import { Check, X, Zap, Crown, Users, Star } from "lucide-react";
+import { Check, X, Zap, Crown, Users } from "lucide-react";
 
 interface PricingPlan {
   name: string;
