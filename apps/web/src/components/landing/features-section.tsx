@@ -120,7 +120,7 @@ const FeaturesSection = () => {
 
         {/* Features Grid */}
         <div className="gap-8 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 mb-16">
-          {platformFeatures.map((feature, index) => (
+          {platformFeatures.map((feature) => (
             <FeatureCard key={feature.title} feature={feature} />
           ))}
         </div>
