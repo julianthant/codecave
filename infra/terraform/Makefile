@@ -18,16 +18,16 @@ init: ## Initialize Terraform
 
 plan: ## Create and show execution plan
 	@echo "Creating execution plan..."
-	doppler run -- terraform plan
+	doppler run --command="sh -c 'export DIGITALOCEAN_ACCESS_TOKEN=\$$DO_API_TOKEN && export TF_VAR_spaces_access_key=\$$DO_SPACES_KEY && export TF_VAR_spaces_secret_key=\$$DO_SPACES_SECRET && terraform plan'"
 
 apply: ## Build or change infrastructure
 	@echo "Applying infrastructure changes..."
-	doppler run -- terraform apply
+	doppler run --command="sh -c 'export DIGITALOCEAN_ACCESS_TOKEN=\$$DO_API_TOKEN && export TF_VAR_spaces_access_key=\$$DO_SPACES_KEY && export TF_VAR_spaces_secret_key=\$$DO_SPACES_SECRET && terraform apply'"
 
 destroy: ## Destroy infrastructure (use with caution!)
 	@echo "⚠️  WARNING: This will destroy all infrastructure!"
 	@read -p "Are you sure? Type 'yes' to continue: " confirm && [ "$$confirm" = "yes" ]
-	doppler run -- terraform destroy
+	doppler run --command="sh -c 'export DIGITALOCEAN_ACCESS_TOKEN=\$$DO_API_TOKEN && export TF_VAR_spaces_access_key=\$$DO_SPACES_KEY && export TF_VAR_spaces_secret_key=\$$DO_SPACES_SECRET && terraform destroy'"
 
 validate: ## Validate Terraform configuration
 	@echo "Validating configuration..."

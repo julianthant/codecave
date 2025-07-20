@@ -67,10 +67,10 @@ output "deployment_info" {
   description = "Deployment information"
   value = {
     droplet_ip   = digitalocean_droplet.app_server.ipv4_address
-    database_host = digitalocean_database_cluster.codecave_db.host
     vpc_id       = digitalocean_vpc.codecave.id
     environment  = var.environment
     region       = var.droplet_region
+    database     = "Supabase (managed)"
   }
 }
 
