@@ -26,6 +26,9 @@ RUN pnpm install --filter @codecave/api --no-frozen-lockfile
 # Copy source code
 COPY . .
 
+# Generate Prisma client before building
+RUN cd apps/api && npx prisma generate --schema=./prisma/schema.prisma
+
 # Build the API (this needs @nestjs/cli and other dev dependencies)
 RUN pnpm --filter @codecave/api build
 
@@ -55,6 +58,9 @@ RUN pnpm install --filter @codecave/api --prod --no-frozen-lockfile
 
 # Copy built application from builder stage
 COPY --from=builder /app/apps/api/dist ./apps/api/dist
+
+# Copy generated Prisma client
+COPY --from=builder /app/apps/api/generated ./apps/api/generated
 
 # Copy any additional files needed at runtime
 COPY --from=builder /app/apps/api/package*.json ./apps/api/
