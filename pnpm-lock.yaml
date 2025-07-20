@@ -178,6 +178,9 @@ importers:
       axios:
         specifier: ^1.10.0
         version: 1.10.0
+      import-in-the-middle:
+        specifier: ^1.14.2
+        version: 1.14.2
       js-cookie:
         specifier: ^3.0.5
         version: 3.0.5
