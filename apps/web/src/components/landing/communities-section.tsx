@@ -1,4 +1,6 @@
-import { Users, MessageCircle, Globe, Zap, Heart, Code2 } from "lucide-react";
+import React from "react";
+import Image from "next/image";
+import { Users, MessageCircle, Globe, Code2, Zap, Heart } from "lucide-react";
 
 interface CommunityStats {
   number: string;
@@ -29,9 +31,11 @@ const StatCard = ({ stat }: { stat: CommunityStats }) => (
 const CommunityCard = ({ community }: { community: CommunityHighlight }) => (
   <article className="group bg-white hover:shadow-lg border border-gray-200 hover:border-orange-300 rounded-xl overflow-hidden transition-all duration-300">
     <div className="relative h-48 overflow-hidden">
-      <img
+      <Image
         src={community.image}
         alt={`${community.title} community`}
+        width={400}
+        height={192}
         className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
         loading="lazy"
       />
