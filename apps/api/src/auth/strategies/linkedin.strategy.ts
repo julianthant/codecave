@@ -34,7 +34,8 @@ export class LinkedInStrategy extends PassportStrategy(Strategy, "linkedin") {
       clientID: configService.get<string>("LINKEDIN_CLIENT_ID"),
       clientSecret: configService.get<string>("LINKEDIN_CLIENT_SECRET"),
       callbackURL: configService.get<string>("LINKEDIN_CALLBACK_URL"),
-      scope: ["r_emailaddress", "r_liteprofile"],
+      scope: ["openid", "profile", "email"],
+      state: true,
     });
   }
 
@@ -45,14 +46,19 @@ export class LinkedInStrategy extends PassportStrategy(Strategy, "linkedin") {
     done: (error: Error | null, user?: Express.User | false) => void
   ): Promise<void> {
     try {
+      console.log("LinkedIn strategy validate called with profile:", profile);
       const oauthProfile = this.extractOAuthProfile(profile);
-      const user = await this.authService.validateOAuthUser.call(
-        this,
+      console.log("Created OAuth profile:", oauthProfile);
+
+      const user = await this.authService.validateOAuthUser(
         oauthProfile,
         AuthProvider.LINKEDIN
       );
+
+      console.log("User validated successfully:", user);
       done(null, user);
     } catch (error) {
+      console.error("LinkedIn strategy error:", error);
       done(error as Error, false);
     }
   }
