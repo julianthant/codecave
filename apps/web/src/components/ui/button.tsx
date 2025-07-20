@@ -59,104 +59,64 @@ const getSizeClasses = (size: ButtonSize): string => {
   return sizes[size];
 };
 
-// Shared button content renderer to eliminate duplication
-const renderButtonContent = (
-  Icon: LucideIcon | undefined,
-  iconPosition: "left" | "right",
-  children: React.ReactNode
-) => (
-  <>
-    {Icon && iconPosition === "left" && <Icon className="w-4 h-4" />}
-    {children}
-    {Icon && iconPosition === "right" && <Icon className="ml-2 w-4 h-4" />}
-  </>
-);
-
-// Shared class names builder to eliminate duplication
-const buildButtonClasses = (
-  variant: ButtonVariant,
-  size: ButtonSize,
-  className: string,
-  isLink: boolean = false
-): string => {
+// Generic button component that handles both button and link cases
+const ButtonComponent = <T extends Record<string, unknown>>({
+  as,
+  variant = "primary",
+  size = "md",
+  icon,
+  iconPosition = "left",
+  children,
+  className = "",
+  ...props
+}: {
+  as: "button" | "a";
+  variant?: ButtonVariant;
+  size?: ButtonSize;
+  icon?: LucideIcon;
+  iconPosition?: "left" | "right";
+  children: React.ReactNode;
+  className?: string;
+} & T) => {
+  const isLink = as === "a";
   const baseClasses = `inline-flex items-center justify-center font-mono rounded-lg transition-all duration-200 hover:scale-[1.02] active:scale-[0.98] ${
     isLink ? "gap-2" : "disabled:opacity-50 disabled:pointer-events-none"
   }`;
   const variantClasses = getVariantClasses(variant);
   const sizeClasses = getSizeClasses(size);
+  const finalClassName = `${baseClasses} ${variantClasses} ${sizeClasses} ${className}`;
 
-  return `${baseClasses} ${variantClasses} ${sizeClasses} ${className}`;
-};
-
-// Generic button renderer to eliminate duplication
-const renderButton = <T extends Record<string, unknown>>(
-  Element: "button" | "a",
-  props: T,
-  variant: ButtonVariant,
-  size: ButtonSize,
-  icon: LucideIcon | undefined,
-  iconPosition: "left" | "right",
-  children: React.ReactNode,
-  className: string,
-  isLink: boolean = false
-) => {
-  const elementProps = {
-    className: buildButtonClasses(variant, size, className, isLink),
-    ...props,
-  };
+  const content = (
+    <>
+      {icon &&
+        iconPosition === "left" &&
+        React.createElement(icon, { className: "w-4 h-4" })}
+      {children}
+      {icon &&
+        iconPosition === "right" &&
+        React.createElement(icon, { className: "ml-2 w-4 h-4" })}
+    </>
+  );
 
   return React.createElement(
-    Element,
-    elementProps,
-    renderButtonContent(icon, iconPosition, children)
+    as,
+    {
+      className: finalClassName,
+      ...props,
+    },
+    content
   );
 };
 
 // Base button component
-export const BaseButton: React.FC<ButtonProps> = ({
-  variant = "primary",
-  size = "md",
-  icon,
-  iconPosition = "left",
-  children,
-  className = "",
-  ...props
-}) => {
-  return renderButton(
-    "button",
-    props,
-    variant,
-    size,
-    icon,
-    iconPosition,
-    children,
-    className
-  );
-};
+export const BaseButton: React.FC<ButtonProps> = (props) => (
+  <ButtonComponent as="button" {...props} />
+);
 
 // Link button component
-export const LinkButton: React.FC<LinkButtonProps> = ({
-  variant = "primary",
-  size = "md",
-  icon,
-  iconPosition = "left",
-  children,
-  className = "",
-  href,
-  ...props
-}) => {
-  return renderButton(
-    "a",
-    { href, ...props },
-    variant,
-    size,
-    icon,
-    iconPosition,
-    children,
-    className,
-    true
-  );
-};
+export const LinkButton: React.FC<LinkButtonProps> = (props) => (
+  <ButtonComponent as="a" {...props} />
+);
 
 // Export individual variants for convenience
 export const PrimaryButton: React.FC<ButtonProps> = (props) => (

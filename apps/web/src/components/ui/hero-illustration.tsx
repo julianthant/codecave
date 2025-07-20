@@ -50,219 +50,189 @@ const SvgGradients = () => (
   </defs>
 );
 
-// Analytics/Growth platform layer component
-const AnalyticsLayer = ({ animated }: { animated: boolean }) => (
-  <g
-    className={animated ? "animate-float" : ""}
-    style={{ animationDelay: "0s" }}
-  >
-    <g transform="translate(200, 120)">
+// Common platform layer component
+const PlatformLayer = ({
+  animated,
+  animationDelay,
+  transform,
+  rx,
+  ry,
+  gradient,
+  topOffset,
+  label,
+  labelY,
+  children,
+}: {
+  animated: boolean;
+  animationDelay: string;
+  transform: string;
+  rx: number;
+  ry: number;
+  gradient: string;
+  topOffset: number;
+  label: string;
+  labelY: number;
+  children: React.ReactNode;
+}) => (
+  <g className={animated ? "animate-float" : ""} style={{ animationDelay }}>
+    <g transform={transform}>
       {/* Platform Surface */}
       <ellipse
         cx="0"
         cy="0"
-        rx="80"
-        ry="25"
-        fill="url(#platformGradient1)"
+        rx={rx}
+        ry={ry}
+        fill={`url(#${gradient})`}
         fillOpacity="0.8"
         filter="url(#dropShadow)"
       />
-      <ellipse cx="0" cy="-8" rx="80" ry="25" fill="url(#platformGradient1)" />
+      <ellipse
+        cx="0"
+        cy={-topOffset}
+        rx={rx}
+        ry={ry}
+        fill={`url(#${gradient})`}
+      />
 
-      {/* Analytics Icons */}
+      {/* Layer-specific content */}
       <g fill="white" fillOpacity="0.9">
-        <rect x="-15" y="-12" width="8" height="16" rx="1" />
-        <rect x="-4" y="-8" width="8" height="12" rx="1" />
-        <rect x="7" y="-16" width="8" height="20" rx="1" />
-
-        {/* Trend Line */}
-        <path
-          d="M-25 0 L-15 -8 L-5 -4 L5 -12 L15 -16 L25 -20"
-          stroke="white"
-          strokeWidth="2"
-          strokeOpacity="0.7"
-          fill="none"
-        />
+        {children}
       </g>
 
       {/* Label */}
       <text
         x="0"
-        y="15"
+        y={labelY}
         textAnchor="middle"
         className="fill-white font-mono text-xs"
         fillOpacity="0.8"
       >
-        Growth
+        {label}
       </text>
     </g>
   </g>
+);
+
+// Analytics/Growth platform layer component
+const AnalyticsLayer = ({ animated }: { animated: boolean }) => (
+  <PlatformLayer
+    animated={animated}
+    animationDelay="0s"
+    transform="translate(200, 120)"
+    rx={80}
+    ry={25}
+    gradient="platformGradient1"
+    topOffset={8}
+    label="Growth"
+    labelY={15}
+  >
+    <rect x="-15" y="-12" width="8" height="16" rx="1" />
+    <rect x="-4" y="-8" width="8" height="12" rx="1" />
+    <rect x="7" y="-16" width="8" height="20" rx="1" />
+
+    {/* Trend Line */}
+    <path
+      d="M-25 0 L-15 -8 L-5 -4 L5 -12 L15 -16 L25 -20"
+      stroke="white"
+      strokeWidth="2"
+      strokeOpacity="0.7"
+      fill="none"
+    />
+  </PlatformLayer>
 );
 
 // Community platform layer component
 const CommunityLayer = ({ animated }: { animated: boolean }) => (
-  <g
-    className={animated ? "animate-float" : ""}
-    style={{ animationDelay: "0.5s" }}
+  <PlatformLayer
+    animated={animated}
+    animationDelay="0.5s"
+    transform="translate(200, 170)"
+    rx={90}
+    ry={30}
+    gradient="platformGradient2"
+    topOffset={10}
+    label="Community"
+    labelY={18}
   >
-    <g transform="translate(200, 170)">
-      {/* Platform Surface */}
-      <ellipse
-        cx="0"
-        cy="0"
-        rx="90"
-        ry="30"
-        fill="url(#platformGradient2)"
-        fillOpacity="0.8"
-        filter="url(#dropShadow)"
-      />
-      <ellipse cx="0" cy="-10" rx="90" ry="30" fill="url(#platformGradient2)" />
+    {/* User circles */}
+    <circle cx="-20" cy="-15" r="6" />
+    <circle cx="0" cy="-18" r="6" />
+    <circle cx="20" cy="-15" r="6" />
 
-      {/* Community Icons */}
-      <g fill="white" fillOpacity="0.9">
-        {/* User circles */}
-        <circle cx="-20" cy="-15" r="6" />
-        <circle cx="0" cy="-18" r="6" />
-        <circle cx="20" cy="-15" r="6" />
-
-        {/* Connection lines */}
-        <path
-          d="M-14 -12 L-6 -15 M6 -15 L14 -12"
-          stroke="white"
-          strokeWidth="2"
-          strokeOpacity="0.6"
-        />
-      </g>
-
-      <text
-        x="0"
-        y="18"
-        textAnchor="middle"
-        className="fill-white font-mono text-xs"
-        fillOpacity="0.8"
-      >
-        Community
-      </text>
-    </g>
-  </g>
+    {/* Connection lines */}
+    <path
+      d="M-14 -12 L-6 -15 M6 -15 L14 -12"
+      stroke="white"
+      strokeWidth="2"
+      strokeOpacity="0.6"
+    />
+  </PlatformLayer>
 );
 
 // Collaboration platform layer component
 const CollaborationLayer = ({ animated }: { animated: boolean }) => (
-  <g
-    className={animated ? "animate-float" : ""}
-    style={{ animationDelay: "1s" }}
+  <PlatformLayer
+    animated={animated}
+    animationDelay="1s"
+    transform="translate(200, 220)"
+    rx={100}
+    ry={35}
+    gradient="platformGradient3"
+    topOffset={12}
+    label="Collaboration"
+    labelY={22}
   >
-    <g transform="translate(200, 220)">
-      {/* Platform Surface */}
-      <ellipse
-        cx="0"
-        cy="0"
-        rx="100"
-        ry="35"
-        fill="url(#platformGradient3)"
-        fillOpacity="0.8"
-        filter="url(#dropShadow)"
-      />
-      <ellipse
-        cx="0"
-        cy="-12"
-        rx="100"
-        ry="35"
-        fill="url(#platformGradient3)"
-      />
+    {/* Git merge icon */}
+    <circle cx="-25" cy="-18" r="4" />
+    <circle cx="25" cy="-18" r="4" />
+    <circle cx="0" cy="-10" r="4" />
+    <path
+      d="M-21 -16 Q0 -8 21 -16"
+      stroke="white"
+      strokeWidth="2"
+      fill="none"
+      strokeOpacity="0.7"
+    />
 
-      {/* Collaboration Icons */}
-      <g fill="white" fillOpacity="0.9">
-        {/* Git merge icon */}
-        <circle cx="-25" cy="-18" r="4" />
-        <circle cx="25" cy="-18" r="4" />
-        <circle cx="0" cy="-10" r="4" />
-        <path
-          d="M-21 -16 Q0 -8 21 -16"
-          stroke="white"
-          strokeWidth="2"
-          fill="none"
-          strokeOpacity="0.7"
-        />
-
-        {/* Handshake */}
-        <path
-          d="M-8 -15 L8 -15 M-4 -18 L4 -12"
-          stroke="white"
-          strokeWidth="2"
-          strokeOpacity="0.6"
-        />
-      </g>
-
-      <text
-        x="0"
-        y="22"
-        textAnchor="middle"
-        className="fill-white font-mono text-xs"
-        fillOpacity="0.8"
-      >
-        Collaboration
-      </text>
-    </g>
-  </g>
+    {/* Handshake */}
+    <path
+      d="M-8 -15 L8 -15 M-4 -18 L4 -12"
+      stroke="white"
+      strokeWidth="2"
+      strokeOpacity="0.6"
+    />
+  </PlatformLayer>
 );
 
 // Project sharing platform layer component
 const ProjectSharingLayer = ({ animated }: { animated: boolean }) => (
-  <g
-    className={animated ? "animate-float" : ""}
-    style={{ animationDelay: "1.5s" }}
+  <PlatformLayer
+    animated={animated}
+    animationDelay="1.5s"
+    transform="translate(200, 270)"
+    rx={110}
+    ry={40}
+    gradient="platformGradient1"
+    topOffset={15}
+    label="Project Sharing"
+    labelY={25}
   >
-    <g transform="translate(200, 270)">
-      {/* Platform Surface */}
-      <ellipse
-        cx="0"
-        cy="0"
-        rx="110"
-        ry="40"
-        fill="url(#platformGradient1)"
-        fillOpacity="0.8"
-        filter="url(#dropShadow)"
-      />
-      <ellipse
-        cx="0"
-        cy="-15"
-        rx="110"
-        ry="40"
-        fill="url(#platformGradient1)"
-      />
+    {/* Code blocks */}
+    <rect x="-30" y="-25" width="20" height="12" rx="2" />
+    <rect x="-5" y="-22" width="20" height="12" rx="2" />
+    <rect x="20" y="-25" width="20" height="12" rx="2" />
 
-      {/* Project Icons */}
-      <g fill="white" fillOpacity="0.9">
-        {/* Code blocks */}
-        <rect x="-30" y="-25" width="20" height="12" rx="2" />
-        <rect x="-5" y="-22" width="20" height="12" rx="2" />
-        <rect x="20" y="-25" width="20" height="12" rx="2" />
-
-        {/* Brackets inside */}
-        <text x="-20" y="-17" textAnchor="middle" className="font-mono text-xs">
-          {"<>"}
-        </text>
-        <text x="5" y="-14" textAnchor="middle" className="font-mono text-xs">
-          {"{ }"}
-        </text>
-        <text x="30" y="-17" textAnchor="middle" className="font-mono text-xs">
-          {"[ ]"}
-        </text>
-      </g>
-
-      <text
-        x="0"
-        y="25"
-        textAnchor="middle"
-        className="fill-white font-mono text-xs"
-        fillOpacity="0.8"
-      >
-        Project Sharing
-      </text>
-    </g>
-  </g>
+    {/* Brackets inside */}
+    <text x="-20" y="-17" textAnchor="middle" className="font-mono text-xs">
+      {"<>"}
+    </text>
+    <text x="5" y="-14" textAnchor="middle" className="font-mono text-xs">
+      {"{ }"}
+    </text>
+    <text x="30" y="-17" textAnchor="middle" className="font-mono text-xs">
+      {"[ ]"}
+    </text>
+  </PlatformLayer>
 );
 
 // Connecting lines and structural elements
