@@ -1,72 +1,90 @@
 ** RESPONSES ** DO CHECKS AT THE END \*\*
 
--> I am getting this error from vercel:
+-> I am getting this error from the build:
 
-Error: Hydration failed because the server rendered HTML didn't match the client. As a result this tree will be regenerated on the client. This can happen if a SSR-ed Client Component used:
+i got this from the terminal for your build:
+• Packages in scope: @codecave/api, @codecave/web
+• Running build in 2 packages
+• Remote caching disabled
+@codecave/web:build: cache miss, executing 38a3405c5c8ee52b
+@codecave/api:build: cache miss, executing 4627400561ebd375
+@codecave/web:build:
+@codecave/api:build:
+@codecave/web:build:
+@codecave/web:build: > @codecave/web@0.1.0 build /Users/julianhein/Work/Personal Projects/codecave/apps/web
+@codecave/web:build: > next build
+@codecave/web:build:
+@codecave/api:build:
+@codecave/api:build: > @codecave/api@0.1.0 build /Users/julianhein/Work/Personal Projects/codecave/apps/api
+@codecave/api:build: > nest build
+@codecave/api:build:
+@codecave/web:build: ⚠ Warning: Found multiple lockfiles. Selecting /Users/julianhein/Work/Personal Projects/package-lock.json.
+@codecave/web:build: Consider removing the lockfiles at:
+@codecave/web:build: \* /Users/julianhein/Work/Personal Projects/codecave/pnpm-lock.yaml
+@codecave/web:build:
+@codecave/web:build: ▲ Next.js 15.4.1
+@codecave/web:build: - Environments: .env.local
+@codecave/web:build: - Experiments (use with caution):
+@codecave/web:build: · clientTraceMetadata
+@codecave/web:build:
+@codecave/web:build: Creating an optimized production build ...
+@codecave/web:build: ✓ Compiled successfully in 9.0s
 
-- A server/client branch `if (typeof window !== 'undefined')`.
-- Variable input such as `Date.now()` or `Math.random()` which changes each time it's called.
-- Date formatting in a user's locale which doesn't match the server.
-- External changing data without sending a snapshot of it along with the HTML.
-- Invalid HTML tag nesting.
+@codecave/web:build: Failed to compile.
 
-It can also happen if the client has a browser extension installed which messes with the HTML before React loaded.
+@codecave/web:build: ./src/app/auth/callback/page.tsx
+@codecave/web:build: 1:10 Warning: 'NextRequest' is defined but never used. @typescript-eslint/no-unused-vars
+@codecave/web:build:
+@codecave/web:build: ./src/components/landing/communities-section.tsx
+@codecave/web:build: 32:7 Warning: Using `<img>` could result in slower LCP and higher bandwidth. Consider using `<Image />` from `next/image` or a custom image loader to automatically optimize images. This may incur additional usage or cost from your provider. See: https://nextjs.org/docs/messages/no-img-element @next/next/no-img-element
+@codecave/web:build:
+@codecave/web:build: ./src/components/landing/features-section.tsx
+@codecave/web:build: 123:43 Warning: 'index' is defined but never used. @typescript-eslint/no-unused-vars
+@codecave/web:build:
+@codecave/web:build: ./src/components/landing/mobile-menu-toggle.tsx
+@codecave/web:build: 36:58 Warning: 'onClose' is defined but never used. @typescript-eslint/no-unused-vars
+@codecave/web:build:
+@codecave/web:build: ./src/components/landing/navigation.tsx
+@codecave/web:build: 2:10 Warning: 'ArrowRight' is defined but never used. @typescript-eslint/no-unused-vars
+@codecave/web:build:
+@codecave/web:build: ./src/components/landing/pricing-section.tsx
+@codecave/web:build: 1:39 Warning: 'Star' is defined but never used. @typescript-eslint/no-unused-vars
+@codecave/web:build:
+@codecave/web:build: ./src/components/landing/ready-to-start-section.tsx
+@codecave/web:build: 2:10 Warning: 'Smartphone' is defined but never used. @typescript-eslint/no-unused-vars
+@codecave/web:build:
+@codecave/web:build: ./src/components/landing/trending-projects-cards.tsx
+@codecave/web:build: 23:7 Warning: Using `<img>` could result in slower LCP and higher bandwidth. Consider using `<Image />` from `next/image` or a custom image loader to automatically optimize images. This may incur additional usage or cost from your provider. See: https://nextjs.org/docs/messages/no-img-element @next/next/no-img-element
+@codecave/web:build:
+@codecave/web:build: ./src/components/landing/trending-projects.tsx
+@codecave/web:build: 2:18 Warning: 'ExternalLink' is defined but never used. @typescript-eslint/no-unused-vars
+@codecave/web:build: 73:7 Warning: 'SocialEngagement' is assigned a value but never used. @typescript-eslint/no-unused-vars
+@codecave/web:build: 214:7 Warning: Using `<img>` could result in slower LCP and higher bandwidth. Consider using `<Image />` from `next/image` or a custom image loader to automatically optimize images. This may incur additional usage or cost from your provider. See: https://nextjs.org/docs/messages/no-img-element @next/next/no-img-element
+@codecave/web:build:
+@codecave/web:build: ./src/components/landing/why-codecave-section.tsx
+@codecave/web:build: 25:80 Warning: 'index' is defined but never used. @typescript-eslint/no-unused-vars
+@codecave/web:build:
+@codecave/web:build: ./src/components/ui/codecave-logo.tsx
+@codecave/web:build: 76:13 Warning: Using `<img>` could result in slower LCP and higher bandwidth. Consider using `<Image />` from `next/image` or a custom image loader to automatically optimize images. This may incur additional usage or cost from your provider. See: https://nextjs.org/docs/messages/no-img-element @next/next/no-img-element
+@codecave/web:build: 82:13 Warning: Using `<img>` could result in slower LCP and higher bandwidth. Consider using `<Image />` from `next/image` or a custom image loader to automatically optimize images. This may incur additional usage or cost from your provider. See: https://nextjs.org/docs/messages/no-img-element @next/next/no-img-element
+@codecave/web:build: 89:13 Warning: Using `<img>` could result in slower LCP and higher bandwidth. Consider using `<Image />` from `next/image` or a custom image loader to automatically optimize images. This may incur additional usage or cost from your provider. See: https://nextjs.org/docs/messages/no-img-element @next/next/no-img-element
+@codecave/web:build: 101:13 Warning: Using `<img>` could result in slower LCP and higher bandwidth. Consider using `<Image />` from `next/image` or a custom image loader to automatically optimize images. This may incur additional usage or cost from your provider. See: https://nextjs.org/docs/messages/no-img-element @next/next/no-img-element
+@codecave/web:build:
+@codecave/web:build: ./src/components/ui/theme-provider.tsx
+@codecave/web:build: 8:18 Error: Unexpected any. Specify a different type. @typescript-eslint/no-explicit-any
+@codecave/web:build:
+@codecave/web:build: info - Need to disable some ESLint rules? Learn more here: https://nextjs.org/docs/app/api-reference/config/eslint#disabling-rules
+@codecave/web:build:  ELIFECYCLE  Command failed with exit code 1.
+@codecave/web:build: ERROR: command finished with error: command (/Users/julianhein/Work/Personal Projects/codecave/apps/web) /Users/julianhein/Work/Personal Projects/node_modules/.bin/pnpm run build exited (1)
+@codecave/web#build: command (/Users/julianhein/Work/Personal Projects/codecave/apps/web) /Users/julianhein/Work/Personal Projects/node_modules/.bin/pnpm run build exited (1)
 
-https://react.dev/link/hydration-mismatch
+Tasks: 1 successful, 2 total
+Cached: 0 cached, 2 total
+Time: 12.977s
+Failed: @codecave/web#build
 
-...
-<InnerLayoutRouter url="/" tree={[...]} cacheNode={{lazyData:null, ...}} segmentPath={[...]}>
-<Home>
-<Home>
-<Navigation>
-<ScrollNavigation>
-
-<header ref={function headerRef} className="fixed top-..." style={{...}}>
-<nav className="container ...">
-<div className="flex items...">
-<div>
-<div>
-<div className="flex items...">
-<ThemeToggle>
-<button onClick={function toggleTheme} className={"\n ..."} title="Switch to ..." ...>
-<div className="relative">
-<div className="transform ...">
-<Moon className="w-5 h-5">
-<svg
-ref={null}
-xmlns="http://www.w3.org/2000/svg"
-width={24}
-height={24}
-viewBox="0 0 24 24"
-fill="none"
-stroke="currentColor"
-strokeWidth={2}
-strokeLinecap="round"
-strokeLinejoin="round"
-
--                                 className="lucide lucide-moon w-5 h-5"
-
-*                                 className="lucide lucide-monitor w-5 h-5"
-                                  aria-hidden="true"
-                                >
-
--                                 <path d="M12 3a6 6 0 0 0 9 9 9 9 0 1 1-9-9Z">
-
-*                                 <rect width="20" height="14" x="2" y="3" rx="2">
-                            ...
-                      ...
-        ...
-      ...
-
-  at throwOnHydrationMismatch (http://localhost:3000/_next/static/chunks/40646_next_dist_compiled_react-dom_c3343f7a._.js:2891:56)
-  at beginWork (http://localhost:3000/_next/static/chunks/40646_next_dist_compiled_react-dom_c3343f7a._.js:6089:918)
-  at runWithFiberInDEV (http://localhost:3000/_next/static/chunks/40646_next_dist_compiled_react-dom_c3343f7a._.js:890:74)
-  at performUnitOfWork (http://localhost:3000/_next/static/chunks/40646_next_dist_compiled_react-dom_c3343f7a._.js:8236:97)
-  at workLoopConcurrentByScheduler (http://localhost:3000/_next/static/chunks/40646_next_dist_compiled_react-dom_c3343f7a._.js:8232:58)
-  at renderRootConcurrent (http://localhost:3000/_next/static/chunks/40646_next_dist_compiled_react-dom_c3343f7a._.js:8214:71)
-  at performWorkOnRoot (http://localhost:3000/_next/static/chunks/40646_next_dist_compiled_react-dom_c3343f7a._.js:7846:176)
-  at performWorkOnRootViaSchedulerTask (http://localhost:3000/_next/static/chunks/40646_next_dist_compiled_react-dom_c3343f7a._.js:8820:9)
-  at MessagePort.performWorkUntilDeadline (http://localhost:3000/_next/static/chunks/40646_next_dist_compiled_43afad38._.js:3218:64)
+ERROR run failed: command exited (1)
+julianhein@Julians-MacBook-Pro codecave %
 
 \*\* CHECKS
 
