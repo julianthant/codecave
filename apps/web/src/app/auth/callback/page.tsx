@@ -1,16 +1,16 @@
-import { NextRequest } from "next/server";
 import { redirect } from "next/navigation";
 
 interface CallbackParams {
-  searchParams: {
+  searchParams: Promise<{
     token?: string;
     refresh?: string;
     error?: string;
-  };
+  }>;
 }
 
-export default function AuthCallback({ searchParams }: CallbackParams) {
-  const { token, refresh, error } = searchParams;
+export default async function AuthCallback({ searchParams }: CallbackParams) {
+  const params = await searchParams;
+  const { token, refresh, error } = params;
 
   if (error) {
     // Redirect to login with error
