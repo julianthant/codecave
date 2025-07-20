@@ -1,5 +1,4 @@
-import React from 'react';
-import { Check, X, Zap, Crown, Users } from 'lucide-react';
+import { Check, X, Zap, Crown, Users, Star } from "lucide-react";
 
 interface PricingPlan {
   name: string;
@@ -16,37 +15,33 @@ interface PricingPlan {
 }
 
 // Server-side PricingCard component
-const PricingCard: React.FC<{ plan: PricingPlan }> = ({ plan }) => (
-  <article className={`relative rounded-2xl border p-8 transition-all duration-300 hover:shadow-lg ${
-    plan.recommended 
-      ? 'border-orange-500 bg-gradient-to-b from-orange-50 to-transparent shadow-lg scale-105' 
-      : 'border-gray-200 bg-white hover:border-orange-300'
-  }`}>
+const PricingCard = ({ plan }: { plan: PricingPlan }) => (
+  <article
+    className={`relative rounded-2xl border p-8 transition-all duration-300 hover:shadow-lg ${
+      plan.recommended
+        ? "border-orange-500 bg-gradient-to-b from-orange-50 to-transparent shadow-lg scale-105"
+        : "border-gray-200 bg-white hover:border-orange-300"
+    }`}
+  >
     {plan.recommended && (
-      <div className="absolute -top-4 left-1/2 transform -translate-x-1/2">
-        <div className="bg-gradient-to-r from-orange-500 to-orange-600 text-white px-6 py-2 rounded-full text-sm font-mono font-semibold">
+      <div className="-top-4 left-1/2 absolute -translate-x-1/2 transform">
+        <div className="bg-gradient-to-r from-orange-500 to-orange-600 px-6 py-2 rounded-full font-mono font-semibold text-white text-sm">
           Most Popular
         </div>
       </div>
     )}
-    
-    <header className="text-center mb-8">
-      <div className="flex justify-center mb-4">
-        {plan.icon}
-      </div>
-      <h3 className="text-2xl font-bold font-mono text-gray-900 mb-2">
+
+    <header className="mb-8 text-center">
+      <div className="flex justify-center mb-4">{plan.icon}</div>
+      <h3 className="mb-2 font-mono font-bold text-gray-900 text-2xl">
         {plan.name}
       </h3>
-      <p className="text-gray-600 font-mono text-sm mb-6">
-        {plan.description}
-      </p>
+      <p className="mb-6 font-mono text-gray-600 text-sm">{plan.description}</p>
       <div className="mb-2">
-        <span className="text-4xl font-bold font-mono text-gray-900">
+        <span className="font-mono font-bold text-gray-900 text-4xl">
           {plan.price}
         </span>
-        <span className="text-gray-500 font-mono text-lg">
-          /{plan.period}
-        </span>
+        <span className="font-mono text-gray-500 text-lg">/{plan.period}</span>
       </div>
     </header>
 
@@ -58,9 +53,11 @@ const PricingCard: React.FC<{ plan: PricingPlan }> = ({ plan }) => (
           ) : (
             <X className="w-5 h-5 text-gray-400" />
           )}
-          <span className={`font-mono text-sm ${
-            feature.included ? 'text-gray-900' : 'text-gray-400'
-          }`}>
+          <span
+            className={`font-mono text-sm ${
+              feature.included ? "text-gray-900" : "text-gray-400"
+            }`}
+          >
             {feature.name}
           </span>
         </div>
@@ -72,8 +69,8 @@ const PricingCard: React.FC<{ plan: PricingPlan }> = ({ plan }) => (
         href="#signup"
         className={`w-full inline-flex items-center justify-center px-6 py-3 rounded-lg font-mono font-semibold text-sm transition-all duration-200 cursor-pointer ${
           plan.recommended
-            ? 'bg-gradient-to-r from-orange-500 to-orange-600 hover:from-orange-600 hover:to-orange-700 text-white transform hover:scale-105'
-            : 'bg-gray-100 hover:bg-gray-200 text-gray-900 hover:scale-105'
+            ? "bg-gradient-to-r from-orange-500 to-orange-600 hover:from-orange-600 hover:to-orange-700 text-white transform hover:scale-105"
+            : "bg-gray-100 hover:bg-gray-200 text-gray-900 hover:scale-105"
         }`}
       >
         {plan.cta}
@@ -98,9 +95,9 @@ const pricingPlans: PricingPlan[] = [
       { name: "Private projects", included: false },
       { name: "Advanced analytics", included: false },
       { name: "Priority support", included: false },
-      { name: "Custom domains", included: false }
+      { name: "Custom domains", included: false },
     ],
-    cta: "Get Started Free"
+    cta: "Get Started Free",
   },
   {
     name: "Pro",
@@ -117,9 +114,9 @@ const pricingPlans: PricingPlan[] = [
       { name: "Analytics dashboard", included: true },
       { name: "Priority support", included: true },
       { name: "Custom domains", included: false },
-      { name: "Team collaboration", included: false }
+      { name: "Team collaboration", included: false },
     ],
-    cta: "Start Pro Trial"
+    cta: "Start Pro Trial",
   },
   {
     name: "Team",
@@ -135,43 +132,42 @@ const pricingPlans: PricingPlan[] = [
       { name: "Advanced analytics", included: true },
       { name: "White-label options", included: true },
       { name: "Dedicated support", included: true },
-      { name: "SSO integration", included: true }
+      { name: "SSO integration", included: true },
     ],
-    cta: "Contact Sales"
-  }
+    cta: "Contact Sales",
+  },
 ];
 
 // Main server component
-const PricingSection: React.FC = () => {
+const PricingSection = () => {
   return (
-    <section className="py-24 bg-white">
-      <div className="container mx-auto px-6 max-w-7xl">
-        
+    <section className="bg-white py-24">
+      <div className="mx-auto px-6 max-w-7xl container">
         {/* Section Header - Minimal variant */}
-        <header className="text-center mb-16">
-          <h2 className="text-5xl md:text-6xl font-bold font-mono text-gray-900 mb-4">
+        <header className="mb-16 text-center">
+          <h2 className="mb-4 font-mono font-bold text-gray-900 text-5xl md:text-6xl">
             Choose Your Plan
           </h2>
-          <div className="w-24 h-1 bg-gradient-to-r from-orange-500 to-blue-500 mx-auto mb-6 rounded-full"></div>
-          <p className="text-xl text-gray-600 font-mono max-w-3xl mx-auto leading-relaxed">
-            Start free and scale as you grow. All plans include access to our community 
-            and core features. Upgrade anytime for additional capabilities.
+          <div className="bg-gradient-to-r from-orange-500 to-blue-500 mx-auto mb-6 rounded-full w-24 h-1"></div>
+          <p className="mx-auto max-w-3xl font-mono text-gray-600 text-xl leading-relaxed">
+            Start free and scale as you grow. All plans include access to our
+            community and core features. Upgrade anytime for additional
+            capabilities.
           </p>
-          <div className="text-sm font-medium font-mono text-gray-400 uppercase tracking-wider mt-4">
+          <div className="mt-4 font-mono font-medium text-gray-400 text-sm uppercase tracking-wider">
             Pricing Plans
           </div>
         </header>
 
         {/* Pricing Cards */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+        <div className="gap-8 grid grid-cols-1 md:grid-cols-3">
           {pricingPlans.map((plan, index) => (
             <PricingCard key={index} plan={plan} />
           ))}
         </div>
-        
       </div>
     </section>
   );
 };
 
-export default PricingSection; 
+export default PricingSection;
