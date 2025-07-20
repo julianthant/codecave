@@ -1,21 +1,24 @@
-import React from 'react';
-import { LucideIcon } from 'lucide-react';
+import React from "react";
+import { LucideIcon } from "lucide-react";
 
-type ButtonVariant = 'primary' | 'secondary' | 'outline' | 'ghost' | 'muted';
-type ButtonSize = 'sm' | 'md' | 'lg';
-
+type ButtonVariant = "primary" | "secondary" | "outline" | "ghost" | "muted";
+type ButtonSize = "sm" | "md" | "lg";
 
 interface BaseButtonProps {
   variant?: ButtonVariant;
   size?: ButtonSize;
   icon?: LucideIcon;
-  iconPosition?: 'left' | 'right';
+  iconPosition?: "left" | "right";
   children: React.ReactNode;
 }
 
-interface ButtonProps extends BaseButtonProps, Omit<React.ButtonHTMLAttributes<HTMLButtonElement>, 'children'> {}
+interface ButtonProps
+  extends BaseButtonProps,
+    Omit<React.ButtonHTMLAttributes<HTMLButtonElement>, "children"> {}
 
-interface LinkButtonProps extends BaseButtonProps, Omit<React.AnchorHTMLAttributes<HTMLAnchorElement>, 'children'> {
+interface LinkButtonProps
+  extends BaseButtonProps,
+    Omit<React.AnchorHTMLAttributes<HTMLAnchorElement>, "children"> {
   href: string;
 }
 
@@ -23,85 +26,135 @@ interface LinkButtonProps extends BaseButtonProps, Omit<React.AnchorHTMLAttribut
 const getVariantClasses = (variant: ButtonVariant): string => {
   const variants = {
     // Primary: Matte purple with project theme
-    primary: 'bg-primary text-white hover:bg-primary/90 border border-primary hover:border-primary/90 font-semibold',
-    
-    // Secondary: Matte blue with project theme  
-    secondary: 'bg-secondary text-white hover:bg-secondary/90 border border-secondary hover:border-secondary/90 font-semibold',
-    
+    primary:
+      "bg-primary text-white hover:bg-primary/90 border border-primary hover:border-primary/90 font-semibold",
+
+    // Secondary: Matte blue with project theme
+    secondary:
+      "bg-secondary text-white hover:bg-secondary/90 border border-secondary hover:border-secondary/90 font-semibold",
+
     // Outline: Transparent with primary border
-    outline: 'bg-transparent text-primary border border-primary/30 hover:border-primary/50 hover:bg-primary/5 font-medium',
-    
+    outline:
+      "bg-transparent text-primary border border-primary/30 hover:border-primary/50 hover:bg-primary/5 font-medium",
+
     // Ghost: Minimal styling
-    ghost: 'bg-transparent text-muted hover:text-foreground hover:bg-surface/50 border border-transparent font-medium',
-    
+    ghost:
+      "bg-transparent text-muted hover:text-foreground hover:bg-surface/50 border border-transparent font-medium",
+
     // Muted: Surface background
-    muted: 'bg-surface text-foreground hover:bg-surface-variant border border-border hover:border-border-variant font-medium',
+    muted:
+      "bg-surface text-foreground hover:bg-surface-variant border border-border hover:border-border-variant font-medium",
   };
-  
+
   return variants[variant];
 };
 
 const getSizeClasses = (size: ButtonSize): string => {
   const sizes = {
-    sm: 'px-3 py-2 text-sm',
-    md: 'px-6 py-2.5 text-sm',
-    lg: 'px-8 py-3 text-base',
+    sm: "px-3 py-2 text-sm",
+    md: "px-6 py-2.5 text-sm",
+    lg: "px-8 py-3 text-base",
   };
-  
+
   return sizes[size];
+};
+
+// Shared button content renderer to eliminate duplication
+const renderButtonContent = (
+  Icon: LucideIcon | undefined,
+  iconPosition: "left" | "right",
+  children: React.ReactNode
+) => (
+  <>
+    {Icon && iconPosition === "left" && <Icon className="w-4 h-4" />}
+    {children}
+    {Icon && iconPosition === "right" && <Icon className="ml-2 w-4 h-4" />}
+  </>
+);
+
+// Shared class names builder to eliminate duplication
+const buildButtonClasses = (
+  variant: ButtonVariant,
+  size: ButtonSize,
+  className: string,
+  isLink: boolean = false
+): string => {
+  const baseClasses = `inline-flex items-center justify-center font-mono rounded-lg transition-all duration-200 hover:scale-[1.02] active:scale-[0.98] ${
+    isLink ? "gap-2" : "disabled:opacity-50 disabled:pointer-events-none"
+  }`;
+  const variantClasses = getVariantClasses(variant);
+  const sizeClasses = getSizeClasses(size);
+
+  return `${baseClasses} ${variantClasses} ${sizeClasses} ${className}`;
+};
+
+// Generic button renderer to eliminate duplication
+const renderButton = <T extends Record<string, unknown>>(
+  Element: "button" | "a",
+  props: T,
+  variant: ButtonVariant,
+  size: ButtonSize,
+  icon: LucideIcon | undefined,
+  iconPosition: "left" | "right",
+  children: React.ReactNode,
+  className: string,
+  isLink: boolean = false
+) => {
+  const elementProps = {
+    className: buildButtonClasses(variant, size, className, isLink),
+    ...props,
+  };
+
+  return React.createElement(
+    Element,
+    elementProps,
+    renderButtonContent(icon, iconPosition, children)
+  );
 };
 
 // Base button component
 export const BaseButton: React.FC<ButtonProps> = ({
-  variant = 'primary',
-  size = 'md',
-  icon: Icon,
-  iconPosition = 'left',
+  variant = "primary",
+  size = "md",
+  icon,
+  iconPosition = "left",
   children,
-  className = '',
+  className = "",
   ...props
 }) => {
-  const baseClasses = 'inline-flex items-center justify-center font-mono rounded-lg transition-all duration-200 hover:scale-[1.02] active:scale-[0.98] disabled:opacity-50 disabled:pointer-events-none';
-  const variantClasses = getVariantClasses(variant);
-  const sizeClasses = getSizeClasses(size);
-
-  return (
-    <button
-      className={`${baseClasses} ${variantClasses} ${sizeClasses} ${className}`}
-      {...props}
-    >
-      {Icon && iconPosition === 'left' && <Icon className="h-4 w-4" />}
-      {children}
-      {Icon && iconPosition === 'right' && <Icon className="ml-2 h-4 w-4" />}
-    </button>
+  return renderButton(
+    "button",
+    props,
+    variant,
+    size,
+    icon,
+    iconPosition,
+    children,
+    className
   );
 };
 
 // Link button component
 export const LinkButton: React.FC<LinkButtonProps> = ({
-  variant = 'primary',
-  size = 'md',
-  icon: Icon,
-  iconPosition = 'left',
+  variant = "primary",
+  size = "md",
+  icon,
+  iconPosition = "left",
   children,
-  className = '',
+  className = "",
   href,
   ...props
 }) => {
-  const baseClasses = 'inline-flex items-center justify-center font-mono rounded-lg transition-all duration-200 hover:scale-[1.02] active:scale-[0.98] gap-2';
-  const variantClasses = getVariantClasses(variant);
-  const sizeClasses = getSizeClasses(size);
-
-  return (
-    <a
-      href={href}
-      className={`${baseClasses} ${variantClasses} ${sizeClasses} ${className}`}
-      {...props}
-    >
-      {Icon && iconPosition === 'left' && <Icon className="h-4 w-4"/>}
-      {children}
-      {Icon && iconPosition === 'right' && <Icon className="h-4 w-4" />}
-    </a>
+  return renderButton(
+    "a",
+    { href, ...props },
+    variant,
+    size,
+    icon,
+    iconPosition,
+    children,
+    className,
+    true
   );
 };
 
@@ -141,4 +194,4 @@ export const OutlineLink: React.FC<LinkButtonProps> = (props) => (
 
 // Default export
 const Button = BaseButton;
-export default Button; 
+export default Button;
