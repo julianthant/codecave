@@ -40,13 +40,16 @@ export class GitHubStrategy extends PassportStrategy(Strategy, "github") {
     done: (error: Error | null, user?: Express.User | false) => void
   ): Promise<void> {
     try {
+      console.log("GitHub strategy validate called with profile:", profile);
       const oauthProfile = this.createOAuthProfile(profile);
-      const user = await this.authService.validateOAuthUser.call(
-        this,
+      console.log("Created OAuth profile:", oauthProfile);
+
+      const user = await this.authService.validateOAuthUser(
         oauthProfile,
         AuthProvider.GITHUB
       );
 
+      console.log("User validated successfully:", user);
       done(null, user);
     } catch (error) {
       done(error as Error, false);
