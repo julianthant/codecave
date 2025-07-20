@@ -40,19 +40,9 @@ export class GitHubStrategy extends PassportStrategy(Strategy, "github") {
     done: (error: Error | null, user?: Express.User | false) => void
   ): Promise<void> {
     try {
-      const oauthProfile = {
-        id: profile.id,
-        email: profile.emails?.[0]?.value || "",
-        name: profile.displayName || profile.username,
-        avatar: profile.photos?.[0]?.value,
-        bio: profile._json?.bio,
-        website: profile._json?.blog,
-        location: profile._json?.location,
-        company: profile._json?.company,
-        githubUsername: profile.username,
-      };
-
-      const user = await this.authService.validateOAuthUser(
+      const oauthProfile = this.createOAuthProfile(profile);
+      const user = await this.authService.validateOAuthUser.call(
+        this,
         oauthProfile,
         AuthProvider.GITHUB
       );
@@ -61,5 +51,47 @@ export class GitHubStrategy extends PassportStrategy(Strategy, "github") {
     } catch (error) {
       done(error as Error, false);
     }
+  }
+
+  private createOAuthProfile(profile: GitHubProfile) {
+    return {
+      id: profile.id,
+      email: this.extractEmail(profile),
+      name: this.extractName(profile),
+      avatar: this.extractAvatar(profile),
+      bio: this.extractBio(profile),
+      website: this.extractWebsite(profile),
+      location: this.extractLocation(profile),
+      company: this.extractCompany(profile),
+      githubUsername: profile.username,
+    };
+  }
+
+  private extractEmail(profile: GitHubProfile): string {
+    return profile.emails?.[0]?.value || "";
+  }
+
+  private extractName(profile: GitHubProfile): string {
+    return profile.displayName || profile.username;
+  }
+
+  private extractAvatar(profile: GitHubProfile): string {
+    return profile.photos?.[0]?.value || undefined;
+  }
+
+  private extractBio(profile: GitHubProfile): string {
+    return profile._json?.bio || undefined;
+  }
+
+  private extractWebsite(profile: GitHubProfile): string {
+    return profile._json?.blog || undefined;
+  }
+
+  private extractLocation(profile: GitHubProfile): string {
+    return profile._json?.location || undefined;
+  }
+
+  private extractCompany(profile: GitHubProfile): string {
+    return profile._json?.company || undefined;
   }
 }
