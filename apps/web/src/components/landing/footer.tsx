@@ -56,7 +56,7 @@ const footerSections: FooterSection[] = [
     links: [
       { name: "Features", href: "#features" },
       { name: "Pricing", href: "#pricing" },
-      { name: "Dashboard", href: "/dashboard" },
+      { name: "Dashboard", href: "/home" },
       { name: "API Documentation", href: "/docs/api" },
       { name: "Integrations", href: "/integrations" },
     ],
