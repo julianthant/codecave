@@ -4,24 +4,24 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Github, Chrome, MessageCircle, Terminal, Code2, Zap } from 'lucide-react';
 
 const CodeOAuthLogin = () => {
-  const [currentLine, setCurrentLine] = useState(0);
-  const [showCursor, setShowCursor] = useState(true);
+const [currentLine, setCurrentLine] = useState(0);
+const [showCursor, setShowCursor] = useState(true);
 
-  const codeLines = [
-    "// Initializing authentication module...",
-    "const auth = new OAuth({",
-    "  providers: ['github', 'google', 'discord'],",
-    "  secure: true,",
-    "  redirectUri: '/dashboard'",
-    "});",
-    "",
-    "// Ready for authentication ✓"
-  ];
+const codeLines = [
+"// Initializing authentication module...",
+"const auth = new OAuth({",
+" providers: ['github', 'google', 'discord'],",
+" secure: true,",
+" redirectUri: '/home'",
+"});",
+"",
+"// Ready for authentication ✓"
+];
 
-  useEffect(() => {
-    const interval = setInterval(() => {
-      setCurrentLine((prev) => (prev + 1) % codeLines.length);
-    }, 2000);
+useEffect(() => {
+const interval = setInterval(() => {
+setCurrentLine((prev) => (prev + 1) % codeLines.length);
+}, 2000);
 
     const cursorInterval = setInterval(() => {
       setShowCursor((prev) => !prev);
@@ -31,50 +31,50 @@ const CodeOAuthLogin = () => {
       clearInterval(interval);
       clearInterval(cursorInterval);
     };
-  }, []);
 
-  const oauthProviders = [
-    {
-      name: 'GitHub',
-      icon: Github,
-      color: 'hover:text-foreground',
-      description: 'git clone your-auth@github.com',
-      command: '$ auth.login("github")'
-    },
-    {
-      name: 'Google',
-      icon: Chrome,
-      color: 'hover:text-code-function',
-      description: 'import { user } from "google"',
-      command: '$ auth.login("google")'
-    },
-    {
-      name: 'Discord',
-      icon: MessageCircle,
-      color: 'hover:text-accent',
-      description: 'connect("discord://user")',
-      command: '$ auth.login("discord")'
-    }
-  ];
+}, []);
 
-  return (
-    <div className="min-h-screen flex items-center justify-center bg-background p-4 relative overflow-hidden">
-      {/* Matrix-style background effect */}
-      <div className="absolute inset-0 opacity-5">
-        {[...Array(20)].map((_, i) => (
-          <div
-            key={i}
-            className="absolute text-primary text-xs animate-matrix-rain font-mono"
-            style={{
+const oauthProviders = [
+{
+name: 'GitHub',
+icon: Github,
+color: 'hover:text-foreground',
+description: 'git clone your-auth@github.com',
+command: '$ auth.login("github")'
+},
+{
+name: 'Google',
+icon: Chrome,
+color: 'hover:text-code-function',
+description: 'import { user } from "google"',
+command: '$ auth.login("google")'
+},
+{
+name: 'Discord',
+icon: MessageCircle,
+color: 'hover:text-accent',
+description: 'connect("discord://user")',
+command: '$ auth.login("discord")'
+}
+];
+
+return (
+<div className="min-h-screen flex items-center justify-center bg-background p-4 relative overflow-hidden">
+{/_ Matrix-style background effect _/}
+<div className="absolute inset-0 opacity-5">
+{[...Array(20)].map((\_, i) => (
+<div
+key={i}
+className="absolute text-primary text-xs animate-matrix-rain font-mono"
+style={{
               left: `${Math.random() * 100}%`,
               animationDelay: `${Math.random() * 10}s`,
               animationDuration: `${10 + Math.random() * 10}s`
-            }}
-          >
-            {Math.random().toString(36).substring(2, 15)}
-          </div>
-        ))}
-      </div>
+            }} >
+{Math.random().toString(36).substring(2, 15)}
+</div>
+))}
+</div>
 
       <Card className="w-full max-w-md terminal-border bg-card/80 backdrop-blur-sm relative">
         <CardHeader className="text-center space-y-4">
@@ -86,7 +86,7 @@ const CodeOAuthLogin = () => {
               <span className="text-muted-foreground">{"{"}</span>
             </CardTitle>
           </div>
-          
+
           {/* Animated code display */}
           <div className="bg-secondary/30 rounded-lg p-4 text-left border border-border/50">
             <div className="flex items-center space-x-2 mb-2">
@@ -177,7 +177,8 @@ const CodeOAuthLogin = () => {
         </CardContent>
       </Card>
     </div>
-  );
+
+);
 };
 
 export default CodeOAuthLogin;
