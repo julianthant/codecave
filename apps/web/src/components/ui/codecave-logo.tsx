@@ -1,4 +1,5 @@
 import React from "react";
+import Image from "next/image";
 
 interface CodecaveLogoProps {
   className?: string;
@@ -37,16 +38,16 @@ const CodecaveLogo: React.FC<CodecaveLogoProps> = ({
 
     switch (variant) {
       case "svg-mask":
-        // Method 1: Use SVG as a mask over a colored div
+        // Method 1: Use PNG as a mask over a colored div
         return (
           <div
-            className={`${baseClasses} bg-black dark:bg-white`}
+            className={`${baseClasses} bg-black`}
             style={{
-              maskImage: "url(/codecave_logo.svg)",
+              maskImage: "url(/codecave_logo.png)",
               maskSize: "contain",
               maskRepeat: "no-repeat",
               maskPosition: "center",
-              WebkitMaskImage: "url(/codecave_logo.svg)",
+              WebkitMaskImage: "url(/codecave_logo.png)",
               WebkitMaskSize: "contain",
               WebkitMaskRepeat: "no-repeat",
               WebkitMaskPosition: "center",
@@ -55,16 +56,15 @@ const CodecaveLogo: React.FC<CodecaveLogoProps> = ({
         );
 
       case "css-background":
-        // Method 2: Use as background image with color filters
+        // Method 2: Use PNG as background image
         return (
           <div
             className={`${baseClasses}`}
             style={{
-              backgroundImage: "url(/codecave_logo.svg)",
+              backgroundImage: "url(/codecave_logo.png)",
               backgroundSize: "contain",
               backgroundRepeat: "no-repeat",
               backgroundPosition: "center",
-              filter: "brightness(0) dark:brightness(0) dark:invert(1)",
             }}
           />
         );
@@ -74,40 +74,43 @@ const CodecaveLogo: React.FC<CodecaveLogoProps> = ({
         return (
           <div className={`${baseClasses} relative`}>
             {/* Base layer */}
-            <img
-              src="/codecave_logo.svg"
+            <Image
+              src="/codecave_logo.png"
               alt=""
-              className="absolute inset-0 dark:invert w-full h-full object-contain"
+              width={100}
+              height={100}
+              className="absolute inset-0 w-full h-full object-contain"
             />
             {/* Fill layer with blur to create fill effect */}
-            <img
-              src="/codecave_logo.svg"
+            <Image
+              src="/codecave_logo.png"
               alt=""
-              className="absolute inset-0 dark:invert w-full h-full object-contain"
+              width={100}
+              height={100}
+              className="absolute inset-0 w-full h-full object-contain"
               style={{ filter: "blur(0.5px) contrast(10) brightness(2)" }}
             />
             {/* Top outline layer */}
-            <img
-              src="/codecave_logo.svg"
+            <Image
+              src="/codecave_logo.png"
               alt="CodeCave Logo"
-              className="z-10 relative dark:invert w-full h-full object-contain"
+              width={100}
+              height={100}
+              className="z-10 relative w-full h-full object-contain"
             />
           </div>
         );
 
       default:
-        // Method 4: Dark in light mode, light in dark mode
+        // Method 4: Use PNG without theme switching
         return (
           <div className={baseClasses}>
-            <img
-              src="/codecave_logo.svg"
+            <Image
+              src="/codecave_logo.png"
               alt="CodeCave Logo"
-              className="dark:hidden dark:invert w-full h-full object-contain"
-            />
-            <img
-              src="/codecave_logo.svg"
-              alt="CodeCave Logo"
-              className="dark:invert-0 w-full h-full object-contain"
+              width={100}
+              height={100}
+              className="w-full h-full object-contain"
             />
           </div>
         );
