@@ -28,17 +28,47 @@ export class AuthController {
   @Get("github/callback")
   @UseGuards(AuthGuard("github"))
   async githubCallback(@Req() req: Request, @Res() res: Response) {
-    const user = req.user as User;
-    const tokens = await this.authService.generateAuthTokens(user);
+    try {
+      console.log("GitHub callback - req.user:", req.user);
 
-    // Redirect to frontend with tokens
-    const frontendUrl = process.env.FRONTEND_URL || "http://localhost:3000";
-    const redirectUrl = `${frontendUrl}/auth/callback?token=${tokens.accessToken}&refresh=${tokens.refreshToken}`;
+      if (!req.user) {
+        console.error("No user found in request");
+        throw new Error("No user found in request");
+      }
 
-    res.redirect(redirectUrl);
-  }
+      const user = req.user as User;
+      console.log("Generating tokens for user:", user.id);
 
-  // Google OAuth routes
+      const tokens = await this.authService.generateAuthTokens(user);
+      console.log("Tokens generated successfully");
+
+      // Redirect to frontend with tokens
+      const frontendUrl = process.env.FRONTEND_URL || "http://localhost:3000";
+      const redirectUrl = `${frontendUrl}/auth/callback?token=${tokens.accessToken}&refresh=${tokens.refreshToken}`;
+
+      console.log("Redirecting to:", redirectUrl);
+      res.redirect(redirectUrl);
+    } catch (error) {
+      console.error("GitHub callback error:", error);
+
+      const frontendUrl = process.env.FRONTEND_URL || "http://localhost:3000";
+      let errorUrl;
+
+      // Check if it's the specific "account exists with different provider" error
+      if (
+        error.message &&
+        error.message.startsWith("ACCOUNT_EXISTS_WITH_DIFFERENT_PROVIDER:")
+      ) {
+        const [, existingProvider, attemptedProvider] =
+          error.message.split(":");
+        errorUrl = `${frontendUrl}/auth/callback?error=account_exists&existing_provider=${existingProvider}&attempted_provider=${attemptedProvider}`;
+      } else {
+        errorUrl = `${frontendUrl}/auth/callback?error=${encodeURIComponent(error.message || "Authentication failed")}`;
+      }
+
+      res.redirect(errorUrl);
+    }
+  } // Google OAuth routes
   @Get("google")
   @UseGuards(AuthGuard("google"))
   async googleAuth() {
@@ -48,14 +78,46 @@ export class AuthController {
   @Get("google/callback")
   @UseGuards(AuthGuard("google"))
   async googleCallback(@Req() req: Request, @Res() res: Response) {
-    const user = req.user as User;
-    const tokens = await this.authService.generateAuthTokens(user);
+    try {
+      console.log("Google callback - req.user:", req.user);
 
-    // Redirect to frontend with tokens
-    const frontendUrl = process.env.FRONTEND_URL || "http://localhost:3000";
-    const redirectUrl = `${frontendUrl}/auth/callback?token=${tokens.accessToken}&refresh=${tokens.refreshToken}`;
+      if (!req.user) {
+        console.error("No user found in request");
+        throw new Error("No user found in request");
+      }
 
-    res.redirect(redirectUrl);
+      const user = req.user as User;
+      console.log("Generating tokens for user:", user.id);
+
+      const tokens = await this.authService.generateAuthTokens(user);
+      console.log("Tokens generated successfully");
+
+      // Redirect to frontend with tokens
+      const frontendUrl = process.env.FRONTEND_URL || "http://localhost:3000";
+      const redirectUrl = `${frontendUrl}/auth/callback?token=${tokens.accessToken}&refresh=${tokens.refreshToken}`;
+
+      console.log("Redirecting to:", redirectUrl);
+      res.redirect(redirectUrl);
+    } catch (error) {
+      console.error("Google callback error:", error);
+
+      const frontendUrl = process.env.FRONTEND_URL || "http://localhost:3000";
+      let errorUrl;
+
+      // Check if it's the specific "account exists with different provider" error
+      if (
+        error.message &&
+        error.message.startsWith("ACCOUNT_EXISTS_WITH_DIFFERENT_PROVIDER:")
+      ) {
+        const [, existingProvider, attemptedProvider] =
+          error.message.split(":");
+        errorUrl = `${frontendUrl}/auth/callback?error=account_exists&existing_provider=${existingProvider}&attempted_provider=${attemptedProvider}`;
+      } else {
+        errorUrl = `${frontendUrl}/auth/callback?error=${encodeURIComponent(error.message || "Authentication failed")}`;
+      }
+
+      res.redirect(errorUrl);
+    }
   }
 
   // LinkedIn OAuth routes
@@ -68,14 +130,46 @@ export class AuthController {
   @Get("linkedin/callback")
   @UseGuards(AuthGuard("linkedin"))
   async linkedinCallback(@Req() req: Request, @Res() res: Response) {
-    const user = req.user as User;
-    const tokens = await this.authService.generateAuthTokens(user);
+    try {
+      console.log("LinkedIn callback - req.user:", req.user);
 
-    // Redirect to frontend with tokens
-    const frontendUrl = process.env.FRONTEND_URL || "http://localhost:3000";
-    const redirectUrl = `${frontendUrl}/auth/callback?token=${tokens.accessToken}&refresh=${tokens.refreshToken}`;
+      if (!req.user) {
+        console.error("No user found in request");
+        throw new Error("No user found in request");
+      }
 
-    res.redirect(redirectUrl);
+      const user = req.user as User;
+      console.log("Generating tokens for user:", user.id);
+
+      const tokens = await this.authService.generateAuthTokens(user);
+      console.log("Tokens generated successfully");
+
+      // Redirect to frontend with tokens
+      const frontendUrl = process.env.FRONTEND_URL || "http://localhost:3000";
+      const redirectUrl = `${frontendUrl}/auth/callback?token=${tokens.accessToken}&refresh=${tokens.refreshToken}`;
+
+      console.log("Redirecting to:", redirectUrl);
+      res.redirect(redirectUrl);
+    } catch (error) {
+      console.error("LinkedIn callback error:", error);
+
+      const frontendUrl = process.env.FRONTEND_URL || "http://localhost:3000";
+      let errorUrl;
+
+      // Check if it's the specific "account exists with different provider" error
+      if (
+        error.message &&
+        error.message.startsWith("ACCOUNT_EXISTS_WITH_DIFFERENT_PROVIDER:")
+      ) {
+        const [, existingProvider, attemptedProvider] =
+          error.message.split(":");
+        errorUrl = `${frontendUrl}/auth/callback?error=account_exists&existing_provider=${existingProvider}&attempted_provider=${attemptedProvider}`;
+      } else {
+        errorUrl = `${frontendUrl}/auth/callback?error=${encodeURIComponent(error.message || "Authentication failed")}`;
+      }
+
+      res.redirect(errorUrl);
+    }
   }
 
   // Token refresh endpoint
