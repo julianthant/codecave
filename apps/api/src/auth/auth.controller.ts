@@ -4,12 +4,10 @@ import {
   Post,
   UseGuards,
   Req,
-  Res,
   Body,
   UnauthorizedException,
 } from "@nestjs/common";
-import { AuthGuard } from "@nestjs/passport";
-import { Request, Response } from "express";
+import { Request } from "express";
 import { AuthService } from "./auth.service";
 import { JwtAuthGuard } from "./guards/jwt-auth.guard";
 import { User } from "../users/entities/user.entity";
@@ -18,183 +16,73 @@ import { User } from "../users/entities/user.entity";
 export class AuthController {
   constructor(private authService: AuthService) {}
 
-  // GitHub OAuth routes
-  @Get("github")
-  @UseGuards(AuthGuard("github"))
-  async githubAuth() {
-    // This route initiates the GitHub OAuth flow
-  }
-
-  @Get("github/callback")
-  @UseGuards(AuthGuard("github"))
-  async githubCallback(@Req() req: Request, @Res() res: Response) {
+  // Supabase OAuth callback - handles all providers (GitHub, Google, LinkedIn)
+  @Post("supabase/callback")
+  async supabaseCallback(
+    @Body() body: { access_token: string; refresh_token?: string }
+  ) {
     try {
-      console.log("GitHub callback - req.user:", req.user);
-
-      if (!req.user) {
-        console.error("No user found in request");
-        throw new Error("No user found in request");
+      if (!body.access_token) {
+        throw new UnauthorizedException("Access token is required");
       }
 
-      const user = req.user as User;
-      console.log("Generating tokens for user:", user.id);
+      // Verify the Supabase token and get/create user
+      const user = await this.authService.handleSupabaseAuth(body.access_token);
 
+      // Generate your app's JWT tokens
       const tokens = await this.authService.generateAuthTokens(user);
-      console.log("Tokens generated successfully");
 
-      // Redirect to frontend with tokens
-      const frontendUrl = process.env.FRONTEND_URL || "http://localhost:3000";
-      const redirectUrl = `${frontendUrl}/auth/callback?token=${tokens.accessToken}&refresh=${tokens.refreshToken}`;
-
-      console.log("Redirecting to:", redirectUrl);
-      res.redirect(redirectUrl);
+      return {
+        success: true,
+        user: {
+          id: user.id,
+          email: user.email,
+          name: user.name,
+        },
+        tokens,
+      };
     } catch (error) {
-      console.error("GitHub callback error:", error);
-
-      const frontendUrl = process.env.FRONTEND_URL || "http://localhost:3000";
-      let errorUrl;
-
-      // Check if it's the specific "account exists with different provider" error
-      if (
-        error.message &&
-        error.message.startsWith("ACCOUNT_EXISTS_WITH_DIFFERENT_PROVIDER:")
-      ) {
-        const [, existingProvider, attemptedProvider] =
-          error.message.split(":");
-        errorUrl = `${frontendUrl}/auth/callback?error=account_exists&existing_provider=${existingProvider}&attempted_provider=${attemptedProvider}`;
-      } else {
-        errorUrl = `${frontendUrl}/auth/callback?error=${encodeURIComponent(error.message || "Authentication failed")}`;
-      }
-
-      res.redirect(errorUrl);
-    }
-  } // Google OAuth routes
-  @Get("google")
-  @UseGuards(AuthGuard("google"))
-  async googleAuth() {
-    // This route initiates the Google OAuth flow
-  }
-
-  @Get("google/callback")
-  @UseGuards(AuthGuard("google"))
-  async googleCallback(@Req() req: Request, @Res() res: Response) {
-    try {
-      console.log("Google callback - req.user:", req.user);
-
-      if (!req.user) {
-        console.error("No user found in request");
-        throw new Error("No user found in request");
-      }
-
-      const user = req.user as User;
-      console.log("Generating tokens for user:", user.id);
-
-      const tokens = await this.authService.generateAuthTokens(user);
-      console.log("Tokens generated successfully");
-
-      // Redirect to frontend with tokens
-      const frontendUrl = process.env.FRONTEND_URL || "http://localhost:3000";
-      const redirectUrl = `${frontendUrl}/auth/callback?token=${tokens.accessToken}&refresh=${tokens.refreshToken}`;
-
-      console.log("Redirecting to:", redirectUrl);
-      res.redirect(redirectUrl);
-    } catch (error) {
-      console.error("Google callback error:", error);
-
-      const frontendUrl = process.env.FRONTEND_URL || "http://localhost:3000";
-      let errorUrl;
-
-      // Check if it's the specific "account exists with different provider" error
-      if (
-        error.message &&
-        error.message.startsWith("ACCOUNT_EXISTS_WITH_DIFFERENT_PROVIDER:")
-      ) {
-        const [, existingProvider, attemptedProvider] =
-          error.message.split(":");
-        errorUrl = `${frontendUrl}/auth/callback?error=account_exists&existing_provider=${existingProvider}&attempted_provider=${attemptedProvider}`;
-      } else {
-        errorUrl = `${frontendUrl}/auth/callback?error=${encodeURIComponent(error.message || "Authentication failed")}`;
-      }
-
-      res.redirect(errorUrl);
-    }
-  }
-
-  // LinkedIn OAuth routes
-  @Get("linkedin")
-  @UseGuards(AuthGuard("linkedin"))
-  async linkedinAuth() {
-    // This route initiates the LinkedIn OAuth flow
-  }
-
-  @Get("linkedin/callback")
-  @UseGuards(AuthGuard("linkedin"))
-  async linkedinCallback(@Req() req: Request, @Res() res: Response) {
-    try {
-      console.log("LinkedIn callback - req.user:", req.user);
-
-      if (!req.user) {
-        console.error("No user found in request");
-        throw new Error("No user found in request");
-      }
-
-      const user = req.user as User;
-      console.log("Generating tokens for user:", user.id);
-
-      const tokens = await this.authService.generateAuthTokens(user);
-      console.log("Tokens generated successfully");
-
-      // Redirect to frontend with tokens
-      const frontendUrl = process.env.FRONTEND_URL || "http://localhost:3000";
-      const redirectUrl = `${frontendUrl}/auth/callback?token=${tokens.accessToken}&refresh=${tokens.refreshToken}`;
-
-      console.log("Redirecting to:", redirectUrl);
-      res.redirect(redirectUrl);
-    } catch (error) {
-      console.error("LinkedIn callback error:", error);
-
-      const frontendUrl = process.env.FRONTEND_URL || "http://localhost:3000";
-      let errorUrl;
-
-      // Check if it's the specific "account exists with different provider" error
-      if (
-        error.message &&
-        error.message.startsWith("ACCOUNT_EXISTS_WITH_DIFFERENT_PROVIDER:")
-      ) {
-        const [, existingProvider, attemptedProvider] =
-          error.message.split(":");
-        errorUrl = `${frontendUrl}/auth/callback?error=account_exists&existing_provider=${existingProvider}&attempted_provider=${attemptedProvider}`;
-      } else {
-        errorUrl = `${frontendUrl}/auth/callback?error=${encodeURIComponent(error.message || "Authentication failed")}`;
-      }
-
-      res.redirect(errorUrl);
+      console.error("Supabase callback error:", error);
+      throw new UnauthorizedException("Authentication failed");
     }
   }
 
   // Token refresh endpoint
   @Post("refresh")
-  async refreshToken(@Body("refreshToken") refreshToken: string) {
-    if (!refreshToken) {
-      throw new UnauthorizedException("Refresh token is required");
-    }
+  async refreshToken(@Body() body: { refreshToken: string }) {
+    try {
+      if (!body.refreshToken) {
+        throw new UnauthorizedException("Refresh token is required");
+      }
 
-    return this.authService.refreshToken(refreshToken);
+      const tokens = await this.authService.refreshToken(body.refreshToken);
+      return { success: true, tokens };
+    } catch (error) {
+      console.error("Token refresh error:", error);
+      throw new UnauthorizedException("Token refresh failed");
+    }
   }
 
-  // Get current user profile
+  // Get current user info
   @Get("me")
   @UseGuards(JwtAuthGuard)
   async getProfile(@Req() req: Request) {
-    return req.user;
+    const user = req.user as User;
+    return {
+      id: user.id,
+      email: user.email,
+      name: user.name,
+      createdAt: user.createdAt,
+      updatedAt: user.updatedAt,
+    };
   }
 
   // Logout endpoint
   @Post("logout")
   @UseGuards(JwtAuthGuard)
-  async logout(@Res() res: Response) {
-    // For JWT, logout is typically handled on the frontend by removing tokens
-    // You could implement token blacklisting here if needed
-    res.json({ message: "Logged out successfully" });
+  async logout(@Req() req: Request) {
+    // For now, just return success since JWTs are stateless
+    // In the future, you might want to implement token blacklisting
+    return { success: true, message: "Logged out successfully" };
   }
 }

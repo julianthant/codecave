@@ -85,13 +85,13 @@ services:
       KONG_SSL_CERT: /etc/kong/ssl/fullchain.pem
       KONG_SSL_CERT_KEY: /etc/kong/ssl/privkey.pem
     ports:
-      - "80:8000"    # HTTP on standard port 80
-      - "443:8443"   # HTTPS on standard port 443  
-      - "8001:8001"  # Keep admin on 8001
+      - "80:8000" # HTTP on standard port 80
+      - "443:8443" # HTTPS on standard port 443
+      - "8001:8001" # Keep admin on 8001
     volumes:
       - ./kong/kong.yml:/opt/kong/kong.yml:ro
-      - /etc/letsencrypt:/etc/letsencrypt  # SSL certificates (read/write for ACME)
-      - /mnt/volume_nyc3_01/kong-ssl:/etc/kong/ssl  # Kong SSL storage
+      - /etc/letsencrypt:/etc/letsencrypt # SSL certificates (read/write for ACME)
+      - /mnt/volume_nyc3_01/kong-ssl:/etc/kong/ssl # Kong SSL storage
     depends_on:
       - kong-migrations
     restart: unless-stopped
@@ -110,36 +110,29 @@ services:
     environment:
       NODE_ENV: production
       PORT: 3001
-      
+
       # Database configuration
       DATABASE_URL: ${DATABASE_URL}
-      
-      # JWT secrets
+
+      # Supabase configuration
+      SUPABASE_URL: ${SUPABASE_URL}
+      SUPABASE_ANON_KEY: ${SUPABASE_ANON_KEY}
+      SUPABASE_SERVICE_ROLE_KEY: ${SUPABASE_SERVICE_ROLE_KEY}
+      SUPABASE_JWT_SECRET: ${SUPABASE_JWT_SECRET}
+
+      # JWT secrets for your app tokens
       JWT_SECRET: ${JWT_SECRET}
       JWT_REFRESH_SECRET: ${JWT_REFRESH_SECRET}
       JWT_EXPIRES_IN: ${JWT_EXPIRES_IN}
-      
-      # OAuth configuration
-      GITHUB_CLIENT_ID: ${GITHUB_CLIENT_ID}
-      GITHUB_CLIENT_SECRET: ${GITHUB_CLIENT_SECRET}
-      GITHUB_CALLBACK_URL: ${GITHUB_CALLBACK_URL}
-      
-      GOOGLE_CLIENT_ID: ${GOOGLE_CLIENT_ID}
-      GOOGLE_CLIENT_SECRET: ${GOOGLE_CLIENT_SECRET}
-      GOOGLE_CALLBACK_URL: ${GOOGLE_CALLBACK_URL}
-      
-      LINKEDIN_CLIENT_ID: ${LINKEDIN_CLIENT_ID}
-      LINKEDIN_CLIENT_SECRET: ${LINKEDIN_CLIENT_SECRET}
-      LINKEDIN_CALLBACK_URL: ${LINKEDIN_CALLBACK_URL}
-      
+
       # Internal service URLs (Docker network)
       MEILI_HOST: http://search:7700
       RABBITMQ_URL: amqp://${RABBITMQ_USER}:${RABBITMQ_PASS}@mq:5672/codecave
       REDIS_URL: redis://:${REDIS_PASSWORD}@redis:6379
-      
+
       # Frontend URL for CORS
       FRONTEND_URL: ${FRONTEND_URL}
-      
+
     ports:
       - "3001:3001"
     volumes:
@@ -169,14 +162,14 @@ volumes:
       type: none
       o: bind
       device: /mnt/volume_nyc3_01/meilisearch
-  
+
   rabbitmq_data:
     driver: local
     driver_opts:
       type: none
       o: bind
       device: /mnt/volume_nyc3_01/rabbitmq
-  
+
   redis_data:
     driver: local
     driver_opts:
@@ -186,4 +179,4 @@ volumes:
 
 networks:
   default:
-    name: codecave-prod-network 
+    name: codecave-prod-network

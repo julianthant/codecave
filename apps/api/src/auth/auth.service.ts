@@ -1,16 +1,19 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { Injectable, UnauthorizedException } from "@nestjs/common";
 import { JwtService } from "@nestjs/jwt";
 import { ConfigService } from "@nestjs/config";
 import { UsersService } from "../users/users.service";
 import { User, AuthProvider } from "../users/entities/user.entity";
 import { JwtPayload, OAuthProfile } from "./interfaces/auth.interface";
+import { SupabaseService } from "../supabase/supabase.service";
 
 @Injectable()
 export class AuthService {
   constructor(
     private usersService: UsersService,
     private jwtService: JwtService,
-    private configService: ConfigService
+    private configService: ConfigService,
+    private supabaseService: SupabaseService
   ) {}
 
   async validateOAuthUser(
@@ -149,6 +152,126 @@ export class AuthService {
       };
     } catch (error) {
       throw new UnauthorizedException("Invalid refresh token");
+    }
+  }
+
+  async handleSupabaseAuth(accessToken: string): Promise<User> {
+    try {
+      const supabaseUser = await this.verifySupabaseToken(accessToken);
+
+      const provider = this.getProviderFromSupabaseUser(supabaseUser);
+
+      const user = await this.findOrCreateUser(supabaseUser, provider);
+
+      return user;
+    } catch (error) {
+      console.error("Supabase auth error:", error);
+      throw new UnauthorizedException("Supabase authentication failed");
+    }
+  }
+
+  private async verifySupabaseToken(accessToken: string): Promise<any> {
+    const supabaseUser =
+      await this.supabaseService.verifySupabaseToken(accessToken);
+    if (!supabaseUser) {
+      throw new UnauthorizedException("Invalid Supabase token");
+    }
+    return supabaseUser;
+  }
+
+  private async findOrCreateUser(
+    supabaseUser: any,
+    provider: AuthProvider
+  ): Promise<User> {
+    let user = await this.usersService.findByEmail(supabaseUser.email);
+    if (!user) {
+      user = await this.createUser(supabaseUser, provider);
+    } else {
+      user = await this.updateUserIfNeeded(user, supabaseUser, provider);
+    }
+    return user;
+  }
+
+  private async createUser(
+    supabaseUser: any,
+    provider: AuthProvider
+  ): Promise<User> {
+    const profileData: OAuthProfile = this.extractProfileData(supabaseUser);
+    return await this.usersService.createUser(profileData, provider);
+  }
+
+  private extractProfileData(supabaseUser: any): OAuthProfile {
+    return {
+      id: supabaseUser.id,
+      email: supabaseUser.email,
+      name: this.extractName(supabaseUser),
+      avatar: supabaseUser.user_metadata?.avatar_url,
+      bio: supabaseUser.user_metadata?.bio,
+      website: supabaseUser.user_metadata?.website,
+      location: supabaseUser.user_metadata?.location,
+      company: supabaseUser.user_metadata?.company,
+      githubUsername: supabaseUser.user_metadata?.user_name,
+      linkedinProfile: supabaseUser.user_metadata?.linkedin_profile,
+    };
+  }
+
+  private extractName(supabaseUser: any): string {
+    return (
+      supabaseUser.user_metadata?.full_name ||
+      supabaseUser.user_metadata?.name ||
+      supabaseUser.email
+    );
+  }
+
+  private async updateUserIfNeeded(
+    user: User,
+    supabaseUser: any,
+    provider: AuthProvider
+  ): Promise<User> {
+    if (user.provider !== provider || user.providerId !== supabaseUser.id) {
+      return await this.usersService.updateUser(user.id, {
+        provider,
+        providerId: supabaseUser.id,
+      });
+    }
+    return user;
+  }
+
+  private getProviderFromSupabaseUser(supabaseUser: any): AuthProvider {
+    const identityProvider = this.getProviderFromIdentities(supabaseUser);
+    if (identityProvider) return identityProvider;
+
+    const metadataProvider = this.getProviderFromMetadata(supabaseUser);
+    if (metadataProvider) return metadataProvider;
+
+    return AuthProvider.GITHUB; // Default fallback
+  }
+
+  private getProviderFromIdentities(supabaseUser: any): AuthProvider | null {
+    if (supabaseUser.identities && supabaseUser.identities.length > 0) {
+      const identity = supabaseUser.identities[0];
+      return this.mapProvider(identity.provider);
+    }
+    return null;
+  }
+
+  private getProviderFromMetadata(supabaseUser: any): AuthProvider | null {
+    if (supabaseUser.app_metadata?.provider) {
+      return this.mapProvider(supabaseUser.app_metadata.provider);
+    }
+    return null;
+  }
+
+  private mapProvider(provider: string): AuthProvider {
+    switch (provider) {
+      case "github":
+        return AuthProvider.GITHUB;
+      case "google":
+        return AuthProvider.GOOGLE;
+      case "linkedin":
+        return AuthProvider.LINKEDIN;
+      default:
+        return AuthProvider.GITHUB; // Default fallback
     }
   }
 }

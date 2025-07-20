@@ -84,24 +84,9 @@ variable "monitoring_enabled" {
   default     = true
 }
 
-# Database Configuration
-variable "database_cluster_size" {
-  description = "Size of the database cluster"
-  type        = string
-  default     = "db-s-1vcpu-1gb" # 1 vCPU, 1GB RAM, 10GB storage
-}
-
-variable "database_engine" {
-  description = "Database engine"
-  type        = string
-  default     = "pg"
-}
-
-variable "database_version" {
-  description = "Database version"
-  type        = string
-  default     = "17"
-}
+# Database Configuration - REMOVED
+# Database functionality migrated to Supabase
+# See PROJECT-PLAN.md for current architecture
 
 # Tags
 variable "tags" {

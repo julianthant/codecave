@@ -1,6 +1,7 @@
 "use client";
 
 import { Code2 } from "lucide-react";
+import { supabase } from "../../lib/supabase";
 
 const oauthProviders = [
   {
@@ -38,9 +39,43 @@ const oauthProviders = [
   },
 ];
 
-function handleOAuthClick(providerName: string) {
-  const baseUrl = process.env.NEXT_PUBLIC_API_URL || "http://localhost:3001";
-  window.location.href = `${baseUrl}/auth/${providerName.toLowerCase()}`;
+async function handleOAuthClick(providerName: string) {
+  try {
+    // Map provider names to Supabase provider types
+    const providerMap: {
+      [key: string]: "github" | "google" | "linkedin_oidc";
+    } = {
+      github: "github",
+      google: "google",
+      linkedin: "linkedin_oidc",
+    };
+
+    const supabaseProvider = providerMap[providerName.toLowerCase()];
+    if (!supabaseProvider) {
+      throw new Error(`Unsupported provider: ${providerName}`);
+    }
+
+    const { error } = await supabase.auth.signInWithOAuth({
+      provider: supabaseProvider,
+      options: {
+        redirectTo: `${window.location.origin}/auth/callback`,
+        scopes:
+          supabaseProvider === "github"
+            ? "read:user user:email"
+            : supabaseProvider === "linkedin_oidc"
+              ? "openid profile email"
+              : undefined,
+      },
+    });
+
+    if (error) {
+      console.error("OAuth error:", error);
+      alert("Authentication failed. Please try again.");
+    }
+  } catch (error) {
+    console.error("OAuth click error:", error);
+    alert("Authentication failed. Please try again.");
+  }
 }
 
 const OAuthButtons: React.FC = () => {

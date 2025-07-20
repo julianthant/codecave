@@ -1,69 +1,109 @@
-import { redirect } from "next/navigation";
+"use client";
 
-interface CallbackParams {
-  searchParams: Promise<{
-    token?: string;
-    refresh?: string;
-    error?: string;
-    existing_provider?: string;
-    attempted_provider?: string;
-  }>;
-}
+import { useEffect } from "react";
+import { useRouter } from "next/navigation";
+import { supabase } from "../../../lib/supabase";
 
-export default async function AuthCallback({ searchParams }: CallbackParams) {
-  const params = await searchParams;
-  const { token, refresh, error, existing_provider, attempted_provider } =
-    params;
+export default function AuthCallback() {
+  const router = useRouter();
 
-  if (error) {
-    // Handle specific "account exists with different provider" error
-    const isAccountExistsError = error === "account_exists";
-    const hasProviderInfo = existing_provider && attempted_provider;
+  useEffect(() => {
+    const handleAuthCallback = async () => {
+      try {
+        // Handle the OAuth callback
+        const { data, error } = await supabase.auth.getSession();
 
-    if (isAccountExistsError && hasProviderInfo) {
-      const errorMessage = `An account with this email already exists and is linked to ${existing_provider}. Please sign in with ${existing_provider} instead of ${attempted_provider}.`;
-      redirect(
-        `/?error=${encodeURIComponent(errorMessage)}&error_type=account_exists&existing_provider=${existing_provider}`
-      );
-    } else {
-      // Handle other errors
-      redirect(`/?error=${encodeURIComponent(error)}`);
-    }
-  }
+        if (error) {
+          console.error("Auth callback error:", error);
+          router.push(`/?error=${encodeURIComponent(error.message)}`);
+          return;
+        }
 
-  if (token && refresh) {
-    // Store tokens in localStorage via client-side script
-    return (
-      <html>
-        <head>
-          <title>Authentication Successful</title>
-        </head>
-        <body>
-          <script
-            dangerouslySetInnerHTML={{
-              __html: `
-                localStorage.setItem('accessToken', '${token}');
-                localStorage.setItem('refreshToken', '${refresh}');
-                window.location.href = '/home';
-              `,
-            }}
-          />
-          <div
-            style={{
-              display: "flex",
-              justifyContent: "center",
-              alignItems: "center",
-              height: "100vh",
-              fontFamily: "system-ui",
-            }}
-          >
-            <p>Authenticating... Please wait.</p>
-          </div>
-        </body>
-      </html>
-    );
-  }
+        if (data.session) {
+          const { access_token, refresh_token } = data.session;
 
-  // If no token, redirect to home
-  redirect("/");
+          // Send the Supabase tokens to your API for user creation/validation
+          try {
+            const apiUrl =
+              process.env.NEXT_PUBLIC_API_URL || "http://localhost:3001";
+            const response = await fetch(`${apiUrl}/auth/supabase/callback`, {
+              method: "POST",
+              headers: {
+                "Content-Type": "application/json",
+              },
+              body: JSON.stringify({
+                access_token,
+                refresh_token,
+              }),
+            });
+
+            if (!response.ok) {
+              throw new Error("Failed to authenticate with API");
+            }
+
+            const result = await response.json();
+
+            // Store your app's tokens
+            if (result.tokens) {
+              localStorage.setItem("accessToken", result.tokens.accessToken);
+              localStorage.setItem("refreshToken", result.tokens.refreshToken);
+            }
+
+            // Redirect to home/dashboard
+            router.push("/home");
+          } catch (apiError) {
+            console.error("API authentication error:", apiError);
+            router.push(
+              `/?error=${encodeURIComponent("Authentication with server failed")}`
+            );
+          }
+        } else {
+          // No session found, redirect to home
+          router.push("/");
+        }
+      } catch (error) {
+        console.error("Auth callback error:", error);
+        router.push(`/?error=${encodeURIComponent("Authentication failed")}`);
+      }
+    };
+
+    handleAuthCallback();
+  }, [router]);
+
+  return (
+    <div
+      style={{
+        display: "flex",
+        justifyContent: "center",
+        alignItems: "center",
+        height: "100vh",
+        fontFamily: "system-ui",
+      }}
+    >
+      <div style={{ textAlign: "center" }}>
+        <p>Authenticating... Please wait.</p>
+        <div
+          style={{
+            width: "40px",
+            height: "40px",
+            border: "4px solid #f3f3f3",
+            borderTop: "4px solid #3498db",
+            borderRadius: "50%",
+            animation: "spin 1s linear infinite",
+            margin: "20px auto",
+          }}
+        />
+        <style jsx>{`
+          @keyframes spin {
+            0% {
+              transform: rotate(0deg);
+            }
+            100% {
+              transform: rotate(360deg);
+            }
+          }
+        `}</style>
+      </div>
+    </div>
+  );
 }

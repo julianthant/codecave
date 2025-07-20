@@ -19,40 +19,9 @@ output "droplet_ipv6" {
   value       = digitalocean_droplet.app_server.ipv6_address
 }
 
-# Database Information
-output "database_host" {
-  description = "Database cluster host"
-  value       = digitalocean_database_cluster.codecave_db.host
-  sensitive   = true
-}
-
-output "database_port" {
-  description = "Database cluster port"
-  value       = digitalocean_database_cluster.codecave_db.port
-}
-
-output "database_name" {
-  description = "Main database name"
-  value       = digitalocean_database_db.codecave_main.name
-}
-
-output "database_username" {
-  description = "Database username"
-  value       = digitalocean_database_user.codecave_app.name
-  sensitive   = true
-}
-
-output "database_password" {
-  description = "Database password"
-  value       = digitalocean_database_user.codecave_app.password
-  sensitive   = true
-}
-
-output "database_connection_string" {
-  description = "Full database connection string"
-  value       = "postgresql://${digitalocean_database_user.codecave_app.name}:${digitalocean_database_user.codecave_app.password}@${digitalocean_database_cluster.codecave_db.host}:${digitalocean_database_cluster.codecave_db.port}/${digitalocean_database_db.codecave_main.name}?sslmode=require"
-  sensitive   = true
-}
+# Database Information - REMOVED
+# Database functionality migrated to Supabase
+# Connection details managed via Doppler environment variables
 
 # Network Information
 output "vpc_id" {

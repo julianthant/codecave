@@ -4,15 +4,14 @@ import { JwtModule } from "@nestjs/jwt";
 import { PassportModule } from "@nestjs/passport";
 
 import { AuthService } from "./auth.service";
-import { AuthController } from "./auth.controller";
+import { AuthController } from "./auth.controller"; // Use the main controller
 import { UsersModule } from "../users/users.module";
 import { PrismaModule } from "../prisma/prisma.module";
+import { SupabaseModule } from "../supabase/supabase.module";
 
 // Strategies
 import { JwtStrategy } from "./strategies/jwt.strategy";
-import { GitHubStrategy } from "./strategies/github.strategy";
-import { GoogleStrategy } from "./strategies/google.strategy";
-import { LinkedInStrategy } from "./strategies/linkedin.strategy";
+import { SupabaseStrategy } from "./strategies/supabase.strategy";
 
 @Module({
   imports: [
@@ -20,6 +19,7 @@ import { LinkedInStrategy } from "./strategies/linkedin.strategy";
     PassportModule,
     UsersModule,
     PrismaModule,
+    SupabaseModule,
     JwtModule.registerAsync({
       imports: [ConfigModule],
       useFactory: async (configService: ConfigService) => ({
@@ -35,9 +35,8 @@ import { LinkedInStrategy } from "./strategies/linkedin.strategy";
   providers: [
     AuthService,
     JwtStrategy,
-    GitHubStrategy,
-    GoogleStrategy,
-    LinkedInStrategy,
+    SupabaseStrategy,
+    // Removed individual OAuth strategies since we're using Supabase
   ],
   exports: [AuthService],
 })
