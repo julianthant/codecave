@@ -143,7 +143,7 @@ const AuthCard = () => {
               <div className="ml-4">
                 <span className="text-code-function">providers</span>
                 <span className="text-muted-foreground">:</span>{" "}
-                <span className="text-code-string">{`['github', 'google', 'linkedin']`}</span>
+                <span className="text-code-string">{`['github', 'google']`}</span>
                 <span className="text-muted-foreground">,</span>
               </div>
               <div className="ml-4">

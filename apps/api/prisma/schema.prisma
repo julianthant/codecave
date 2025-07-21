@@ -17,7 +17,6 @@ datasource db {
 enum AuthProvider {
   GITHUB
   GOOGLE
-  LINKEDIN
 }
 
 model User {
@@ -33,7 +32,6 @@ model User {
   provider        AuthProvider
   providerId      String
   githubUsername  String?
-  linkedinProfile String?
   projectsCount   Int          @default(0)
   followersCount  Int          @default(0)
   followingCount  Int          @default(0)
