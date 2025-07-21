@@ -1,12 +1,4 @@
-export interface JwtPayload {
-  sub: string;
-  email: string;
-  name: string;
-  provider: string;
-  iat?: number;
-  exp?: number;
-}
-
+// Better Auth compatible interfaces
 export interface OAuthProfile {
   id: string;
   email: string;
@@ -18,4 +10,13 @@ export interface OAuthProfile {
   company?: string;
   githubUsername?: string;
   linkedinProfile?: string;
+}
+
+// User session interface for Better Auth integration
+export interface UserSession {
+  id: string;
+  email: string;
+  name: string;
+  image?: string;
+  isActive: boolean;
 }

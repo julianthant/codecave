@@ -19,9 +19,52 @@ output "droplet_ipv6" {
   value       = digitalocean_droplet.app_server.ipv6_address
 }
 
-# Database Information - REMOVED
-# Database functionality migrated to Supabase
-# Connection details managed via Doppler environment variables
+# Database Information
+output "database_cluster_id" {
+  description = "Database cluster ID"
+  value       = digitalocean_database_cluster.codecave_postgres.id
+  sensitive   = true
+}
+
+output "database_host" {
+  description = "Database cluster host"
+  value       = digitalocean_database_cluster.codecave_postgres.host
+  sensitive   = true
+}
+
+output "database_port" {
+  description = "Database cluster port"
+  value       = digitalocean_database_cluster.codecave_postgres.port
+}
+
+output "database_name" {
+  description = "Database name"
+  value       = digitalocean_database_db.codecave_main.name
+}
+
+output "database_user" {
+  description = "Database user"
+  value       = digitalocean_database_user.codecave_app_user.name
+  sensitive   = true
+}
+
+output "database_password" {
+  description = "Database password"
+  value       = digitalocean_database_user.codecave_app_user.password
+  sensitive   = true
+}
+
+output "database_connection_string" {
+  description = "Database connection string"
+  value       = "postgresql://${digitalocean_database_user.codecave_app_user.name}:${digitalocean_database_user.codecave_app_user.password}@${digitalocean_database_cluster.codecave_postgres.host}:${digitalocean_database_cluster.codecave_postgres.port}/${digitalocean_database_db.codecave_main.name}?sslmode=require"
+  sensitive   = true
+}
+
+output "database_pool_connection_string" {
+  description = "Database connection pool string"
+  value       = "postgresql://${digitalocean_database_user.codecave_app_user.name}:${digitalocean_database_user.codecave_app_user.password}@${digitalocean_database_connection_pool.codecave_pool.host}:${digitalocean_database_connection_pool.codecave_pool.port}/${digitalocean_database_connection_pool.codecave_pool.name}?sslmode=require"
+  sensitive   = true
+}
 
 # Network Information
 output "vpc_id" {

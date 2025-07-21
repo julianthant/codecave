@@ -1,0 +1,133 @@
+# Development Docker Compose Quick Setup Guide
+# Following Context7 best practices for multi-service development environments
+
+# Quick Start Commands:
+# docker-compose up -d db redis search mq   # Start infrastructure only
+# docker-compose run --rm api npm run dev   # Run API in development mode
+# docker-compose up -d                      # Start all services
+# docker-compose logs -f api                # Follow API logs
+# docker-compose exec api bash              # Access API container
+# docker-compose down                       # Stop all services
+
+services:
+  # PostgreSQL Database - Development database with debugging enabled
+  db:
+    image: postgres:15-alpine
+    container_name: codecave-db-dev
+    environment:
+      POSTGRES_DB: codecave_dev
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      # Enable detailed logging for development
+      POSTGRES_INITDB_ARGS: "--auth-local=trust --auth-host=md5"
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_dev_data:/var/lib/postgresql/data
+      - ./scripts/init-db.sql:/docker-entrypoint-initdb.d/init-db.sql
+      # Development SQL scripts
+      - ./scripts/dev-seeds.sql:/docker-entrypoint-initdb.d/99-dev-seeds.sql
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres -d codecave_dev"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+      start_period: 10s
+    restart: unless-stopped
+    command: >
+      postgres
+      -c log_statement=all
+      -c log_duration=on
+      -c log_line_prefix='%t [%p]: [%l-1] user=%u,db=%d,app=%a,client=%h '
+
+  # Redis - Development cache with persistence disabled for faster restarts
+  redis:
+    image: redis:7-alpine
+    container_name: codecave-redis-dev
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_dev_data:/data
+    # Development-optimized Redis configuration
+    command: >
+      redis-server
+      --appendonly no
+      --save ""
+      --maxmemory 256mb
+      --maxmemory-policy allkeys-lru
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 3s
+      retries: 5
+      start_period: 5s
+    restart: unless-stopped
+
+  # Meilisearch - Search engine with development settings
+  search:
+    image: getmeili/meilisearch:v1.10
+    container_name: codecave-search-dev
+    environment:
+      MEILI_MASTER_KEY: development_key_for_local_only
+      MEILI_ENV: development
+      MEILI_HTTP_ADDR: 0.0.0.0:7700
+      # Development-specific settings
+      MEILI_LOG_LEVEL: DEBUG
+      MEILI_DB_PATH: /meili_data
+    ports:
+      - "7700:7700"
+    volumes:
+      - meilisearch_dev_data:/meili_data
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:7700/health"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 15s
+    restart: unless-stopped
+
+  # RabbitMQ - Message queue with management interface
+  mq:
+    image: rabbitmq:3-management-alpine
+    container_name: codecave-mq-dev
+    environment:
+      RABBITMQ_DEFAULT_USER: admin
+      RABBITMQ_DEFAULT_PASS: admin
+      RABBITMQ_DEFAULT_VHOST: codecave_dev
+      # Development-specific settings
+      RABBITMQ_LOG_LEVEL: debug
+    ports:
+      - "5672:5672" # AMQP port
+      - "15672:15672" # Management UI
+    volumes:
+      - rabbitmq_dev_data:/var/lib/rabbitmq
+      # Development RabbitMQ configuration
+      - ./config/rabbitmq.conf:/etc/rabbitmq/rabbitmq.conf:ro
+    healthcheck:
+      test: rabbitmq-diagnostics -q ping
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+    restart: unless-stopped
+
+# Development-specific volumes with clear naming
+volumes:
+  postgres_dev_data:
+    name: codecave_postgres_dev_data
+  redis_dev_data:
+    name: codecave_redis_dev_data
+  meilisearch_dev_data:
+    name: codecave_meilisearch_dev_data
+  rabbitmq_dev_data:
+    name: codecave_rabbitmq_dev_data
+
+# Development network with custom name
+networks:
+  default:
+    name: codecave-dev-network
+    driver: bridge
+    ipam:
+      driver: default
+      config:
+        - subnet: 172.20.0.0/16

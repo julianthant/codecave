@@ -28,7 +28,7 @@ resource "digitalocean_droplet" "app_server" {
     user        = "root"
     private_key = file(var.ssh_private_key_path)
     host        = self.ipv4_address
-    timeout     = "5m"
+    timeout     = "15m"  # Increased timeout for provisioning
   }
 
   # Create directories first
@@ -44,12 +44,17 @@ resource "digitalocean_droplet" "app_server" {
     destination = "/opt/codecave/docker-compose.yml"
   }
 
-  # Wait for user_data script to complete
+  # Wait for user_data script to complete with increased timeout
   provisioner "remote-exec" {
     inline = [
       "echo 'Waiting for user_data script to complete...'",
-      "while [ ! -f /tmp/user_data_complete ]; do sleep 5; done",
-      "echo 'User data script completed successfully'",
+      "timeout 900 bash -c 'while [ ! -f /tmp/user_data_complete ]; do sleep 5; done'",
+      "if [ -f /tmp/user_data_complete ]; then",
+      "  echo 'User data script completed successfully'",
+      "else", 
+      "  echo 'User data script timed out or failed'",
+      "  exit 1",
+      "fi",
     ]
   }
 }

@@ -84,9 +84,24 @@ variable "monitoring_enabled" {
   default     = true
 }
 
-# Database Configuration - REMOVED
-# Database functionality migrated to Supabase
-# See PROJECT-PLAN.md for current architecture
+# Database Configuration - Digital Ocean Managed Database
+variable "db_size" {
+  description = "Size of the database cluster"
+  type        = string
+  default     = "db-s-1vcpu-1gb" # 1 vCPU, 1GB RAM, 10GB storage
+}
+
+variable "db_node_count" {
+  description = "Number of database nodes"
+  type        = number
+  default     = 1
+}
+
+variable "region" {
+  description = "DigitalOcean region for all resources"
+  type        = string
+  default     = "sfo3"
+}
 
 # Tags
 variable "tags" {

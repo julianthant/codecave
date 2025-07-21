@@ -1,4 +1,4 @@
-import { User as PrismaUser, AuthProvider } from "../../../generated/prisma";
+import { User as PrismaUser } from "../../../generated/prisma";
 
 // Re-export Prisma types
 export { AuthProvider } from "../../../generated/prisma";

@@ -8,14 +8,50 @@ set -e
 PROJECT_NAME="${project_name}"
 ENVIRONMENT="${environment}"
 
+# Function to wait for network connectivity
+wait_for_network() {
+    echo "Waiting for network connectivity..."
+    for i in {1..30}; do
+        if curl -s --connect-timeout 5 http://checkip.amazonaws.com > /dev/null 2>&1; then
+            echo "Network connectivity established"
+            return 0
+        fi
+        echo "Attempt $i: Waiting for network..."
+        sleep 10
+    done
+    echo "Network connectivity timeout"
+    return 1
+}
+
+# Function to retry commands
+retry_command() {
+    local retries=3
+    local count=0
+    until [ $count -ge $retries ]; do
+        if "$@"; then
+            return 0
+        fi
+        count=$((count + 1))
+        echo "Command failed. Retry $count/$retries..."
+        sleep 5
+    done
+    echo "Command failed after $retries attempts"
+    return 1
+}
+
 echo "Starting CodeCave $ENVIRONMENT setup on $(date)"
 
-# Update system
-apt-get update -y
-apt-get upgrade -y
+# Wait for network before proceeding
+wait_for_network
 
-# Install essential packages
-apt-get install -y \
+# Update system with retries
+echo "Updating system packages..."
+retry_command apt-get update -y
+retry_command apt-get upgrade -y
+
+# Install essential packages with retries
+echo "Installing essential packages..."
+retry_command apt-get install -y \
   curl \
   wget \
   git \
@@ -31,8 +67,9 @@ apt-get install -y \
 systemctl enable docker
 systemctl start docker
 
-# Install Docker Compose v2
-curl -L "https://github.com/docker/compose/releases/latest/download/docker-compose-$(uname -s)-$(uname -m)" -o /usr/local/bin/docker-compose
+# Install Docker Compose v2 with retries
+echo "Installing Docker Compose..."
+retry_command curl -L "https://github.com/docker/compose/releases/latest/download/docker-compose-$(uname -s)-$(uname -m)" -o /usr/local/bin/docker-compose
 chmod +x /usr/local/bin/docker-compose
 
 # Create application directory structure
@@ -47,19 +84,19 @@ mkdir -p /mnt/volume_nyc3_01/rabbitmq
 mkdir -p /mnt/volume_nyc3_01/redis
 mkdir -p /mnt/volume_nyc3_01/kong-ssl
 
-# Install Doppler CLI
+# Install Doppler CLI with retries
 echo "Installing Doppler CLI..."
-curl -Ls https://cli.doppler.com/install.sh | sh
+retry_command curl -Ls https://cli.doppler.com/install.sh | sh
 
 # Add Doppler to PATH for all users
 echo 'export PATH="/usr/local/bin:$PATH"' >> /etc/profile
 echo 'export PATH="/usr/local/bin:$PATH"' >> /root/.bashrc
 
-# Clone the codecave repository
+# Clone the codecave repository with retries
 echo "Cloning CodeCave repository..."
 cd /root
 if [ ! -d "codecave" ]; then
-    git clone https://github.com/julianthant/codecave.git
+    retry_command git clone https://github.com/julianthant/codecave.git
 fi
 cd codecave
 

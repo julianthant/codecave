@@ -4,11 +4,9 @@ import { APP_FILTER } from "@nestjs/core";
 import { SentryModule, SentryGlobalFilter } from "@sentry/nestjs/setup";
 import { AppController } from "./app.controller";
 import { AppService } from "./app.service";
-import { SentryExampleController } from "./sentry-example.controller";
 import { PrismaModule } from "./prisma/prisma.module";
 import { AuthModule } from "./auth/auth.module";
 import { UsersModule } from "./users/users.module";
-import { SupabaseModule } from "./supabase/supabase.module";
 
 @Module({
   imports: [
@@ -17,11 +15,10 @@ import { SupabaseModule } from "./supabase/supabase.module";
     }),
     SentryModule.forRoot(),
     PrismaModule,
-    SupabaseModule,
     AuthModule,
     UsersModule,
   ],
-  controllers: [AppController, SentryExampleController],
+  controllers: [AppController],
   providers: [
     AppService,
     {

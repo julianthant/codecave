@@ -1,151 +1,76 @@
-interface User {
-  id: string;
-  email: string;
-  name: string;
-  avatar?: string;
-  bio?: string;
-  website?: string;
-  location?: string;
-  company?: string;
-  skills: string[];
-  provider: "GITHUB" | "GOOGLE" | "LINKEDIN";
-  githubUsername?: string;
-  linkedinProfile?: string;
-  projectsCount: number;
-  followersCount: number;
-  followingCount: number;
-  isActive: boolean;
-  isPro: boolean;
-  createdAt: string;
-  updatedAt: string;
-}
+import { betterAuth } from "better-auth";
+import { Pool } from "pg";
 
-interface AuthTokens {
-  accessToken: string;
-  refreshToken: string;
-}
-
-interface AuthResponse {
-  accessToken: string;
-  refreshToken: string;
-  user: User;
-}
-
-class AuthService {
-  private baseUrl: string;
-
-  constructor() {
-    this.baseUrl = process.env.NEXT_PUBLIC_API_URL || "http://localhost:3001";
-  }
-
-  private getStoredTokens(): AuthTokens | null {
-    if (typeof window === "undefined") return null;
-
-    const accessToken = localStorage.getItem("accessToken");
-    const refreshToken = localStorage.getItem("refreshToken");
-
-    if (!accessToken || !refreshToken) return null;
-
-    return { accessToken, refreshToken };
-  }
-
-  private setTokens(tokens: AuthTokens): void {
-    if (typeof window === "undefined") return;
-
-    localStorage.setItem("accessToken", tokens.accessToken);
-    localStorage.setItem("refreshToken", tokens.refreshToken);
-  }
-
-  private clearTokens(): void {
-    if (typeof window === "undefined") return;
-
-    localStorage.removeItem("accessToken");
-    localStorage.removeItem("refreshToken");
-  }
-
-  async getCurrentUser(): Promise<User | null> {
-    const tokens = this.getStoredTokens();
-    if (!tokens) return null;
-
-    try {
-      const response = await fetch(`${this.baseUrl}/auth/me`, {
-        headers: {
-          Authorization: `Bearer ${tokens.accessToken}`,
-        },
-      });
-
-      if (response.ok) {
-        return await response.json();
-      }
-
-      if (response.status === 401) {
-        // Try to refresh token
-        const refreshed = await this.refreshToken();
-        if (refreshed) {
-          return this.getCurrentUser();
-        }
-      }
-
-      this.clearTokens();
-      return null;
-    } catch (error) {
-      console.error("Error fetching current user:", error);
-      this.clearTokens();
-      return null;
-    }
-  }
-
-  async refreshToken(): Promise<boolean> {
-    const tokens = this.getStoredTokens();
-    if (!tokens) return false;
-
-    try {
-      const response = await fetch(`${this.baseUrl}/auth/refresh`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({ refreshToken: tokens.refreshToken }),
-      });
-
-      if (response.ok) {
-        const newTokens = await response.json();
-        this.setTokens(newTokens);
-        return true;
-      }
-
-      this.clearTokens();
-      return false;
-    } catch (error) {
-      console.error("Error refreshing token:", error);
-      this.clearTokens();
-      return false;
-    }
-  }
-
-  async logout(): Promise<void> {
-    const tokens = this.getStoredTokens();
-
-    if (tokens) {
-      try {
-        await fetch(`${this.baseUrl}/auth/logout`, {
-          method: "POST",
-          headers: {
-            Authorization: `Bearer ${tokens.accessToken}`,
-          },
-        });
-      } catch (error) {
-        console.error("Error during logout:", error);
-      }
-    }
-
-    this.clearTokens();
-  }
-
-  isAuthenticated(): boolean {
-    return this.getStoredTokens() !== null;
-  }
-}
-
-export const authService = new AuthService();
-export type { User, AuthTokens, AuthResponse };
+export const auth = betterAuth({
+  database: new Pool({
+    connectionString: process.env.DATABASE_URL,
+  }),
+  socialProviders: {
+    github: {
+      clientId: process.env.GITHUB_CLIENT_ID || "",
+      clientSecret: process.env.GITHUB_CLIENT_SECRET || "",
+    },
+    google: {
+      clientId: process.env.GOOGLE_CLIENT_ID || "",
+      clientSecret: process.env.GOOGLE_CLIENT_SECRET || "",
+    },
+  },
+  secret:
+    process.env.BETTER_AUTH_SECRET || "fallback-secret-for-development-only",
+  baseURL: process.env.BETTER_AUTH_URL || "http://localhost:3000",
+  user: {
+    additionalFields: {
+      bio: {
+        type: "string",
+        required: false,
+      },
+      website: {
+        type: "string",
+        required: false,
+      },
+      location: {
+        type: "string",
+        required: false,
+      },
+      company: {
+        type: "string",
+        required: false,
+      },
+      githubUsername: {
+        type: "string",
+        required: false,
+      },
+      linkedinProfile: {
+        type: "string",
+        required: false,
+      },
+      isActive: {
+        type: "boolean",
+        required: false,
+        defaultValue: true,
+      },
+      isPro: {
+        type: "boolean",
+        required: false,
+        defaultValue: false,
+      },
+    },
+  },
+  emailVerification: {
+    sendVerificationEmail: async ({ user, url }) => {
+      // TODO: Implement email sending logic
+      console.log(`Send verification email to ${user.email}: ${url}`);
+    },
+  },
+  advanced: {
+    cookies: {
+      session_token: {
+        name: "codecave_session",
+      },
+    },
+  },
+  trustedOrigins: [
+    process.env.FRONTEND_URL || "http://localhost:3000",
+    process.env.BACKEND_URL || "http://localhost:3001",
+  ],
+});

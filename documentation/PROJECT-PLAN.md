@@ -2,7 +2,7 @@ Building "CodeCave.tech": A Strategic Plan
 This document outlines a strategic approach to building, launching, and monetizing your social platform for the developer community.
 
 1. Monetization Strategies: Beyond Just Ads
-You mentioned charging for ads, which is a great starting point. Here are several avenues for generating revenue, which can be combined over time.
+   You mentioned charging for ads, which is a great starting point. Here are several avenues for generating revenue, which can be combined over time.
 
 Promoted Posts/Projects (Your Ad Model):
 
@@ -47,7 +47,7 @@ A company could sponsor a "Project of the Month" contest.
 A VC firm could sponsor a "Pitch Day" event hosted through your platform.
 
 2. Technology Stack & DevOps
-This section outlines the specific technologies and tools chosen to build, deploy, and manage CodeCave.tech for both web and mobile.
+   This section outlines the specific technologies and tools chosen to build, deploy, and manage CodeCave.tech for both web and mobile.
 
 Guiding Principle: Build the web application first. It's faster to iterate on and will serve as the foundation for the mobile app.
 
@@ -59,7 +59,7 @@ Backend: NestJS (a progressive Node.js framework) using a GraphQL API.
 
 API Gateway: A dedicated gateway (e.g., Kong) will be placed in front of all backend services to handle rate limiting, authentication, and routing.
 
-Database: Supabase (PostgreSQL).
+Database: Digital Ocean PostgreSQL (managed database).
 
 Search: Meilisearch for a fast, typo-tolerant search experience.
 
@@ -120,7 +120,7 @@ Polypane: A specialized browser for developers to build and test for responsiven
 Playwright: For end-to-end testing to automate user journeys and catch bugs before deployment.
 
 3. How to Start: A Phased Roadmap
-Don't try to build everything at once. Start with a Minimum Viable Product (MVP) and add features iteratively.
+   Don't try to build everything at once. Start with a Minimum Viable Product (MVP) and add features iteratively.
 
 Phase 1: The MVP (Goal: Launch in 1-2 months)
 
