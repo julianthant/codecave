@@ -16,9 +16,8 @@ COPY package*.json ./
 COPY pnpm-lock.yaml ./
 COPY pnpm-workspace.yaml ./
 
-# Copy package.json files for all workspace packages
+# Copy package.json files for API workspace
 COPY apps/api/package*.json ./apps/api/
-COPY apps/web/package*.json ./apps/web/
 
 # Install ALL dependencies (including dev dependencies needed for build)
 RUN pnpm install --filter @codecave/api --no-frozen-lockfile
@@ -51,9 +50,8 @@ COPY package*.json ./
 COPY pnpm-lock.yaml ./
 COPY pnpm-workspace.yaml ./
 
-# Copy package.json files for all workspace packages
+# Copy package.json files for API workspace
 COPY apps/api/package*.json ./apps/api/
-COPY apps/web/package*.json ./apps/web/
 
 # Install ONLY production dependencies (smaller image, faster startup)
 RUN pnpm install --filter @codecave/api --prod --no-frozen-lockfile
