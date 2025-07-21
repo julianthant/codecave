@@ -34,14 +34,14 @@ resource "digitalocean_droplet" "app_server" {
   # Create directories first
   provisioner "remote-exec" {
     inline = [
-      "mkdir -p /opt/codecave/scripts",
+      "mkdir -p /root/codecave/scripts",
     ]
   }
 
   # Copy docker-compose file and environment setup
   provisioner "file" {
     source      = "${path.module}/../../docker-compose.prod.yml"
-    destination = "/opt/codecave/docker-compose.yml"
+    destination = "/root/codecave/docker-compose.yml"
   }
 
   # Wait for user_data script to complete with increased timeout

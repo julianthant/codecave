@@ -23,13 +23,13 @@ jobs:
 
             # Navigate to project directory
             echo "📁 Navigating to project directory..."
-            cd ~/codecave || { echo "❌ Project directory not found"; exit 1; }
+            cd /root/codecave || { echo "❌ Project directory not found"; exit 1; }
 
             # Check if this is a git repository
             echo "🔍 Checking git repository status..."
             if [ ! -d ".git" ]; then
               echo "❌ Not a git repository. Cloning fresh copy..."
-              cd ~
+              cd /root
               rm -rf codecave
               git clone https://github.com/julianthant/codecave.git
               cd codecave

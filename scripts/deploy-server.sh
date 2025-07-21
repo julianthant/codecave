@@ -8,12 +8,6 @@ set -e  # Exit on any error
 
 echo "🚀 Starting CodeCave deployment..."
 
-# Check if we're in the right directory
-if [ ! -f "docker-compose.prod.yml" ]; then
-    echo "❌ Error: docker-compose.prod.yml not found. Please run this from the project root."
-    exit 1
-fi
-
 # Check if DOPPLER_TOKEN is provided
 if [ -z "$DOPPLER_TOKEN" ]; then
     echo "❌ Error: DOPPLER_TOKEN environment variable not set."
@@ -28,9 +22,30 @@ if ! command -v doppler &> /dev/null; then
     echo "✅ Doppler CLI installed"
 fi
 
-# Pull latest changes
-echo "🔄 Pulling latest changes from main..."
-git pull origin main
+# Ensure we're in the right directory with the project
+DEPLOY_DIR="/root/codecave"
+if [ ! -d "$DEPLOY_DIR" ]; then
+    echo "📁 Creating deployment directory..."
+    mkdir -p "$DEPLOY_DIR"
+fi
+
+cd "$DEPLOY_DIR"
+
+# Clone or update the repository
+if [ ! -d ".git" ]; then
+    echo "📥 Cloning repository..."
+    git clone https://github.com/julianthant/codecave.git .
+else
+    echo "🔄 Pulling latest changes from main..."
+    git fetch origin
+    git reset --hard origin/main
+fi
+
+# Check if we're in the right directory
+if [ ! -f "docker-compose.prod.yml" ]; then
+    echo "❌ Error: docker-compose.prod.yml not found after repository setup."
+    exit 1
+fi
 
 # Prevent DOPPLER_TOKEN from being recorded in bash history
 export HISTIGNORE='export DOPPLER_TOKEN*'
