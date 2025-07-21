@@ -293,11 +293,173 @@ doppler secrets delete KEY
 
 ### **Environment Switching**
 
-```bash
+````bash
 # Switch to development
 doppler configure set config dev
 
-# Switch to production
+## 🖥️ **Digital Ocean Droplet Configuration**
+
+### **Production Droplet Setup**
+
+For production deployment on Digital Ocean droplets, Doppler is integrated into the Docker containers and deployment scripts.
+
+#### **Automatic Installation**
+
+Doppler CLI is automatically installed during droplet initialization via `user_data.sh`:
+
+```bash
+# Install Doppler CLI with verification
+curl -Ls https://cli.doppler.com/install.sh | sh
+
+# Add to PATH
+echo 'export PATH="/usr/local/bin:$PATH"' >> /etc/profile
+echo 'export DOPPLER_CONFIG_DIR="/root/.doppler"' >> /etc/profile
+````
+
+#### **Service Token Configuration (Recommended)**
+
+For production droplets, use service tokens instead of personal authentication:
+
+1. **Create Service Token**
+   - Go to https://dashboard.doppler.com
+   - Navigate to: CodeCave project → prd_all config → Access
+   - Create a new Service Token with read permissions
+   - Copy the token (starts with `dp.st.prd.`)
+
+2. **Configure on Droplet**
+
+   ```bash
+   # SSH to your droplet
+   ssh root@your-droplet-ip
+
+   # Run setup script
+   cd /root/codecave
+   ./scripts/setup-doppler.sh
+
+   # Or manually configure
+   export DOPPLER_TOKEN="dp.st.prd.your-token-here"
+   echo 'export DOPPLER_TOKEN="dp.st.prd.your-token-here"' >> /root/.bashrc
+   ```
+
+3. **Verify Configuration**
+
+   ```bash
+   # Test secret access
+   doppler secrets --only-names
+
+   # Test environment injection
+   doppler run -- env | grep DATABASE_URL
+   ```
+
+#### **Docker Integration**
+
+The production Docker Compose configuration uses Doppler for environment variable injection:
+
+```bash
+# Start services with Doppler
+cd /root/codecave
+doppler run -- docker-compose -f docker-compose.prod.yml up -d
+
+# Or use the deployment script
+./scripts/deploy-production.sh
+```
+
+#### **High Availability Setup**
+
+For production resilience, create encrypted fallback snapshots:
+
+```bash
+# Create encrypted secrets snapshot
+doppler secrets download --no-file --format env > /opt/codecave/doppler/doppler.encrypted.json
+
+# Use fallback in Docker containers
+docker run -e DOPPLER_TOKEN="$DOPPLER_TOKEN" \
+  your-app doppler run --fallback=/opt/codecave/doppler/doppler.encrypted.json -- your-command
+```
+
+### **Deployment Scripts Integration**
+
+All deployment scripts include Doppler integration:
+
+- `./scripts/setup-doppler.sh` - Initial Doppler configuration
+- `./scripts/deploy-production.sh` - Full deployment with Doppler
+- `./scripts/health-check.sh` - Health checks including Doppler connectivity
+
+### **Firewall Configuration**
+
+Ensure the droplet can access Doppler API:
+
+```bash
+# Allow HTTPS outbound (should be default)
+ufw allow out 443
+
+# Verify connectivity
+curl -I https://api.doppler.com
+```
+
+### **Monitoring Doppler Health**
+
+Regular health checks include Doppler connectivity:
+
+```bash
+# Run health check
+./scripts/health-check.sh
+
+# Check Doppler specifically
+doppler configure get
+doppler secrets --only-names
+```
+
+### **Troubleshooting on Droplet**
+
+**Issue**: Doppler CLI not found after installation
+
+```bash
+# Verify installation
+which doppler
+/usr/local/bin/doppler --version
+
+# Add to PATH if needed
+export PATH="/usr/local/bin:$PATH"
+```
+
+**Issue**: Permission denied accessing Doppler config
+
+```bash
+# Fix permissions
+chmod 700 /root/.doppler
+chown -R root:root /root/.doppler
+```
+
+**Issue**: Cannot connect to Doppler API
+
+```bash
+# Check network connectivity
+curl -I https://api.doppler.com
+
+# Check firewall
+ufw status
+```
+
+**Issue**: Service token not working
+
+```bash
+# Verify token format (should start with dp.st.prd.)
+echo $DOPPLER_TOKEN
+
+# Test token directly
+curl -H "Authorization: Bearer $DOPPLER_TOKEN" https://api.doppler.com/v3/me
+```
+
+## 🔧 **Environment-Specific Commands**
+
+### **Switch Between Environments**
+
+```bash
+# Development
+doppler configure set config dev
+
+# Production
 doppler configure set config prd_all
 
 # Check current configuration
@@ -348,5 +510,5 @@ These should be stored securely in a separate system for emergency use only.
 
 ---
 
-**Last Updated**: July 20, 2025  
-**Version**: 1.0 (Better Auth Migration)
+**Last Updated**: July 21, 2025  
+**Version**: 2.0 (Digital Ocean Droplet Integration)

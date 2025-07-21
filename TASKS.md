@@ -1,51 +1,99 @@
-** BEFORE YOU BEGIN **
+# Development Tasks and Requirements
 
--> For every tasks, look through the context7 mcp server for documentation to accurately build files. While you go through the file, check if it matches the documentations from context7.
+## BEFORE YOU BEGIN
 
--> Look through the documentation folder to get any necessary documentation. Use context7 to get the documentation or request me the needed documentation. I will provide you link or texts.
+1. **Use Context7 MCP Server**: For every task, look through the context7 mcp server for documentation to accurately build files. While you go through the file, check if it matches the documentations from context7.
 
--> Create a todo for each task.
+2. **Documentation Check**: Look through the documentation folder to get any necessary documentation. Use context7 to get the documentation or request me the needed documentation. I will provide you link or texts.
 
--> Do frontend checks for frontend and backend for backend and inlcude both if needd.
+3. **Create TODO**: Create a todo for each task.
 
--> read through .cursor/rules
+4. **Read Rules**: Read through `.cursor/rules`
 
-\*\* TASKS
+## MAIN TASKS
 
--> Lets setup and run terraform.
+### Task 1: Doppler Configuration
 
-\*\* CHECKS
+- **Objective**: Set up Doppler in the Digital Ocean droplet (not in workflow)
+- **Requirements**: Configure the droplet to run Docker with Doppler environment variables
 
-** FRONTEND **
+### Task 2: Digital Ocean Droplet Setup
 
--> Go through all the files you created. Optimize them if you can. If the component can be split more into server side and client side, do it. dont have unnecessary client side components.
+- **Objective**: Set up Digital Ocean droplet
+- **Requirements**: Go through existing documentation for configuration details
 
--> Don't use useEffect, at all. There are always better alternatives. Go through the files to see if there is useEffect being used. If they are really necessary, keey them.
+## CONDITIONAL CHECKS
 
--> Check through all your files and make sure they are compliant with my request. Go through them to look for runtime errors. ALWAYS DOUBLE CHECK THE FILES AFTER YOU CREATE THEM FOR ERRORS.
+_(Only perform these checks if you edit the respective file types)_
 
--> Remove any unused components and imports.
+### FRONTEND CHECKS
 
-** BACKEND **
+**Do these checks ONLY IF you edited frontend files:**
 
--> Test locally to see if it works in development.
+- **Component Optimization**: Go through all files created and optimize them
+- **Server/Client Side Split**: If components can be split more into server side and client side, do it. Don't have unnecessary client side components
+- **useEffect Prohibition**: Don't use useEffect at all. There are always better alternatives. Go through files to check for useEffect usage. Keep only if really necessary
+- **Compliance Check**: Check through all files to ensure compliance with requests
+- **Error Detection**: Look for runtime errors. **ALWAYS DOUBLE CHECK FILES AFTER CREATION**
+- **Cleanup**: Remove unused components and imports
 
--> Check if the thing you implemented is configured for production.
+### BACKEND CHECKS
 
--> Go through all the files you created and see if there are any errors. Do a comprehensive review.
+**Do these checks ONLY IF you edited backend files:**
 
--> Remove any files that are unnecessay, redundant and unused.
+- **Local Testing**: Test locally to see if it works in development
+- **Production Configuration**: Check if implementation is configured for production
+- **Comprehensive Review**: Go through all created files for errors
+- **File Cleanup**: Remove unnecessary, redundant, and unused files
+- **Code Structure**: Clean up code structure if possible
+- **Codescence Compliance**: Check if code written is compliant with codescence checks
+- **Git Configuration**: Update `.gitignore` if necessary
+- **Environment Security**: Check if any env files are exposed
+- **Problem Resolution**: Look through problems tab for existing issues
 
--> Clean up the code structure if you can.
+## DOCUMENTATION (BOTH FRONTEND & BACKEND)
 
--> Check the codescence checks and if the code you wrote are compliant.
+### Documentation Requirements:
 
--> Update the gitignore if necessary.
+- Create comprehensive documentation for implemented features in the `documentation` folder
+- Update existing documentation as needed
+- Remove unnecessary documentation or simplify/merge existing ones where it makes sense
+- Focus on **library implementations** - document HOW you implemented them
+- Create complete implementation summaries in markdown files (like `docker.md`)
+- Use all documentation in root folder combined with your knowledge
+- **Goal**: Complete technical documentation, not chat summaries
 
--> Check if any env files are exposed.
+### Documentation Structure:
 
--> Look through the problems tab to see if there are existing problems.
+```
+documentation/
+├── [feature-name].md
+├── docker.md
+└── [other-implementation-docs].md
+```
 
-\*\* BOTH
+## QUALITY ASSURANCE CHECKLIST
 
--> Create a comphensive documentation for what you just wrote in the documentation folder. Update the other documentation if needed. Remove unnecessary ones or simplify/merge existing documentations if they make sense. I mean documentation as in document for the libraries that are implemented here. I want to know how you implemented them. I want them all in documentation. I dont want what you did in the chat. I want a complete summary of your implementation everything about that in a md file like docker.md in documentation folder. Use all the documentation in the root folder and with the knowledge you have create the necesssary documentation in the documentation folder.
+### Pre-Implementation
+
+- [ ] Read context7 documentation
+- [ ] Review existing documentation folder
+- [ ] Create task todos
+- [ ] Read `.cursor/rules`
+
+### Post-Implementation
+
+- [ ] Run appropriate checks (Frontend/Backend)
+- [ ] Test functionality
+- [ ] Review for errors and compliance
+- [ ] Clean up code and files
+- [ ] Create/update documentation
+- [ ] Verify security (env files, etc.)
+
+## PRIORITY ORDER
+
+1. Documentation review and setup
+2. Main task implementation
+3. Quality checks and testing
+4. Documentation creation/updates
+5. Final cleanup and optimization

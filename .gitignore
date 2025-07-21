@@ -179,6 +179,19 @@ storybook-static/
 
 # Doppler
 .doppler
+doppler.encrypted.json
+secrets-snapshot.json
+
+# Digital Ocean & Infrastructure
+*.tfstate
+*.tfstate.*
+terraform.tfvars
+.terraform/
+
+# Service tokens and API keys (additional security)
+**/service-token*
+**/api-key*
+**/secret-*
 
 # Local development overrides
 docker-compose.override.yml

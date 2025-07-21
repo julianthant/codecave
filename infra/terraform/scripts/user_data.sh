@@ -1,59 +1,12 @@
 #!/bin/bash
 
-# User data script for CodeCave production droplet initialization
-# This script runs when the drop# Install Doppler CLI with retries
-log "# Clone the codecave repository with retries
-log "Cloning CodeCave repository..."
-cd /root
-if [ ! -d "codecave" ]; then
-    for attempt in {1..3}; do
-        log "Git clone attempt $attempt..."
-        if git clone https://github.com/julianthant/codecave.git; then
-            log "Repository cloned successfully"
-            break
-        else
-            log "Git clone failed, attempt $attempt/3"
-            if [ $attempt -eq 3 ]; then
-                log "Git clone failed after 3 attempts, continuing without repository"
-            else
-                sleep 5
-                rm -rf codecave 2>/dev/null || true
-            fi
-        fi
-    done
-fi
-cd codecave 2>/dev/null || cd /root
+# User data script for CodeCave production droplet initialization with Doppler
+# This script runs when the droplet is first created
 
-# Create swap space for builds
-log "Creating swap space..."
-if fallocate -l 2G /swapfile; then
-    chmod 600 /swapfile
-    mkswap /swapfile
-    swapon /swapfile
-    echo '/swapfile none swap sw 0 0' >> /etc/fstab
-    log "Swap space created successfully"
-else
-    log "Failed to create swap space"
-fiLI..."
-for attempt in {1..3}; do
-    log "Doppler installation attempt $attempt..."
-    if curl -Ls https://cli.doppler.com/install.sh | sh; then
-        log "Doppler CLI installed successfully"
-        break
-    else
-        log "Doppler installation failed, attempt $attempt/3"
-        if [ $attempt -eq 3 ]; then
-            log "Doppler installation failed after 3 attempts, continuing without it"
-        else
-            sleep 5
-        fi
-    fi
-done
+# Exit on any error for critical operations
+set -e
 
-# Add Doppler to PATH for all users
-echo 'export PATH="/usr/local/bin:$PATH"' >> /etc/profile
-echo 'export PATH="/usr/local/bin:$PATH"' >> /root/.bashrc
-log "Doppler PATH configuration added"on't exit on errors for non-critical operations
+# Don't exit on errors for non-critical operations
 set +e
 
 PROJECT_NAME="${project_name}"
@@ -61,7 +14,7 @@ ENVIRONMENT="${environment}"
 
 # Function to log with timestamp
 log() {
-    echo "[$(date '+%Y-%m-%d %H:%M:%S')] $1"
+    echo "[$(date '+%Y-%m-%d %H:%M:%S')] $1" | tee -a /var/log/codecave-setup.log
 }
 
 # Function to wait for network connectivity
@@ -95,7 +48,7 @@ retry_command() {
     return 1
 }
 
-log "Starting CodeCave $ENVIRONMENT setup"
+log "Starting CodeCave $ENVIRONMENT setup with Doppler integration"
 
 # Wait for network before proceeding
 wait_for_network
@@ -126,7 +79,9 @@ if retry_command apt-get install -y \
   certbot \
   python3-certbot-nginx \
   fail2ban \
-  ufw; then
+  ufw \
+  bc \
+  jq; then
     log "Essential packages installed successfully"
 else
     log "Failed to install some packages, continuing anyway"
@@ -146,26 +101,104 @@ else
     log "Failed to install Docker Compose"
 fi
 
+# Install Doppler CLI with enhanced retries and verification
+log "Installing Doppler CLI with enhanced setup..."
+for attempt in {1..3}; do
+    log "Doppler installation attempt $attempt..."
+    
+    # Clear any previous failed installation
+    rm -f /tmp/doppler-install.sh
+    
+    # Download and install Doppler
+    if curl -Ls --retry 3 --retry-delay 5 https://cli.doppler.com/install.sh -o /tmp/doppler-install.sh && \
+       chmod +x /tmp/doppler-install.sh && \
+       /tmp/doppler-install.sh; then
+        
+        # Verify installation
+        if command -v doppler >/dev/null 2>&1; then
+            log "Doppler CLI installed and verified successfully"
+            
+            # Create Doppler configuration directory
+            mkdir -p /root/.doppler
+            chmod 700 /root/.doppler
+            
+            # Add Doppler to PATH for all users
+            echo 'export PATH="/usr/local/bin:$PATH"' >> /etc/profile
+            echo 'export PATH="/usr/local/bin:$PATH"' >> /root/.bashrc
+            
+            # Set up Doppler config directory environment variable
+            echo 'export DOPPLER_CONFIG_DIR="/root/.doppler"' >> /etc/profile
+            echo 'export DOPPLER_CONFIG_DIR="/root/.doppler"' >> /root/.bashrc
+            
+            log "Doppler CLI configuration completed"
+            break
+        else
+            log "Doppler installation verification failed"
+        fi
+    else
+        log "Doppler installation failed, attempt $attempt/3"
+        if [ $attempt -eq 3 ]; then
+            log "Doppler installation failed after 3 attempts, continuing without it"
+        else
+            sleep 5
+        fi
+    fi
+done
+
 # Create application directory structure
 log "Setting up application directories..."
 mkdir -p /root/codecave  # Main application directory
 mkdir -p /opt/codecave/data
 mkdir -p /opt/codecave/logs  
 mkdir -p /opt/codecave/backups
+mkdir -p /opt/codecave/doppler # Doppler configuration and secrets
 mkdir -p /mnt/volume_nyc3_01/app-logs
 mkdir -p /mnt/volume_nyc3_01/meilisearch
 mkdir -p /mnt/volume_nyc3_01/rabbitmq
 mkdir -p /mnt/volume_nyc3_01/redis
 mkdir -p /mnt/volume_nyc3_01/kong-ssl
-log "Application directories created"
 
-# Install Doppler CLI with retries
-echo "Installing Doppler CLI..."
+# Set proper permissions for application directories
+chown -R root:root /opt/codecave
+chmod -R 755 /opt/codecave
+chmod 700 /opt/codecave/doppler # Secure Doppler directory
+
+log "Application directories created with proper permissions"
+
+# Install Doppler CLI with enhanced retries and verification
+echo "Installing Doppler CLI with enhanced setup..."
 for attempt in {1..3}; do
     echo "Doppler installation attempt $attempt..."
-    if curl -Ls https://cli.doppler.com/install.sh | sh; then
-        echo "Doppler CLI installed successfully"
-        break
+    
+    # Clear any previous failed installation
+    rm -f /tmp/doppler-install.sh
+    
+    # Download and install Doppler
+    if curl -Ls --retry 3 --retry-delay 5 https://cli.doppler.com/install.sh -o /tmp/doppler-install.sh && \
+       chmod +x /tmp/doppler-install.sh && \
+       /tmp/doppler-install.sh; then
+        
+        # Verify installation
+        if command -v doppler >/dev/null 2>&1; then
+            echo "Doppler CLI installed and verified successfully"
+            
+            # Create Doppler configuration directory
+            mkdir -p /root/.doppler
+            chmod 700 /root/.doppler
+            
+            # Add Doppler to PATH for all users
+            echo 'export PATH="/usr/local/bin:$PATH"' >> /etc/profile
+            echo 'export PATH="/usr/local/bin:$PATH"' >> /root/.bashrc
+            
+            # Set up Doppler config directory environment variable
+            echo 'export DOPPLER_CONFIG_DIR="/root/.doppler"' >> /etc/profile
+            echo 'export DOPPLER_CONFIG_DIR="/root/.doppler"' >> /root/.bashrc
+            
+            echo "Doppler CLI configuration completed"
+            break
+        else
+            echo "Doppler installation verification failed"
+        fi
     else
         echo "Doppler installation failed, attempt $attempt/3"
         if [ $attempt -eq 3 ]; then
@@ -181,18 +214,18 @@ echo 'export PATH="/usr/local/bin:$PATH"' >> /etc/profile
 echo 'export PATH="/usr/local/bin:$PATH"' >> /root/.bashrc
 
 # Clone the codecave repository with retries
-echo "Cloning CodeCave repository..."
+log "Cloning CodeCave repository..."
 cd /root
 if [ ! -d "codecave" ]; then
     for attempt in {1..3}; do
-        echo "Git clone attempt $attempt..."
+        log "Git clone attempt $attempt..."
         if git clone https://github.com/julianthant/codecave.git; then
-            echo "Repository cloned successfully"
+            log "Repository cloned successfully"
             break
         else
-            echo "Git clone failed, attempt $attempt/3"
+            log "Git clone failed, attempt $attempt/3"
             if [ $attempt -eq 3 ]; then
-                echo "Git clone failed after 3 attempts, continuing without repository"
+                log "Git clone failed after 3 attempts, continuing without repository"
             else
                 sleep 5
                 rm -rf codecave 2>/dev/null || true
@@ -203,18 +236,25 @@ fi
 cd codecave 2>/dev/null || cd /root
 
 # Create swap space for builds
-echo "Creating swap space..."
-fallocate -l 2G /swapfile
-chmod 600 /swapfile
-mkswap /swapfile
-swapon /swapfile
-echo '/swapfile none swap sw 0 0' >> /etc/fstab
+log "Creating swap space..."
+if fallocate -l 2G /swapfile; then
+    chmod 600 /swapfile
+    mkswap /swapfile
+    swapon /swapfile
+    echo '/swapfile none swap sw 0 0' >> /etc/fstab
+    log "Swap space created successfully"
+else
+    log "Failed to create swap space"
+fi
 
-# Set up basic firewall
+# Set up basic firewall with Doppler API access
+log "Configuring firewall..."
 ufw --force enable
 ufw allow ssh
 ufw allow http
 ufw allow https
+# Allow Doppler API access (HTTPS outbound is typically allowed by default)
+ufw allow out 443 comment 'Doppler API access'
 
 # Configure fail2ban for SSH protection
 systemctl enable fail2ban
@@ -327,26 +367,106 @@ chmod +x /opt/codecave/backup.sh
 # Set up daily backup
 (crontab -l 2>/dev/null; echo "0 2 * * * /opt/codecave/backup.sh") | crontab -
 
-# Create deployment helper script
+# Create deployment helper script with Doppler integration
 cat > /root/codecave/quick-deploy.sh << 'EOF'
 #!/bin/bash
+
+# CodeCave Production Deployment Script with Doppler
+# This script handles deployment with environment variable injection from Doppler
+
+set -e
+
+log() {
+    echo "[$(date '+%Y-%m-%d %H:%M:%S')] $1"
+}
+
+log "Starting CodeCave production deployment..."
+
+# Change to codecave directory
 cd /root/codecave
+
+# Pull latest changes
+log "Pulling latest changes from repository..."
 git pull origin main
-chmod +x scripts/cleanup-production.sh
-./scripts/cleanup-production.sh
-doppler run --config=prd_all --project=codecave -- docker-compose -f docker-compose.prod.yml down --remove-orphans
-docker system prune -f
-doppler run --config=prd_all --project=codecave -- docker-compose -f docker-compose.prod.yml up -d --build
+
+# Make cleanup script executable
+chmod +x scripts/cleanup-production.sh 2>/dev/null || log "cleanup-production.sh not found, skipping"
+
+# Check if Doppler is configured
+if command -v doppler >/dev/null 2>&1; then
+    log "Doppler CLI detected"
+    
+    # Check if we have a valid configuration
+    if doppler configure get 2>/dev/null | grep -q "project\|config"; then
+        log "Using Doppler for environment variable injection"
+        
+        # Stop services with Doppler
+        log "Stopping existing services..."
+        doppler run -- docker-compose -f docker-compose.prod.yml down --remove-orphans || log "Services were not running"
+        
+        # Clean up Docker resources
+        log "Cleaning up Docker resources..."
+        docker system prune -f
+        
+        # Start services with Doppler
+        log "Starting services with Doppler environment injection..."
+        doppler run -- docker-compose -f docker-compose.prod.yml up -d --build
+        
+        log "Deployment completed with Doppler integration"
+    else
+        log "Doppler not configured - falling back to standard deployment"
+        log "To configure Doppler run: doppler setup"
+        
+        # Fallback deployment without Doppler
+        docker-compose -f docker-compose.prod.yml down --remove-orphans || log "Services were not running"
+        docker system prune -f
+        docker-compose -f docker-compose.prod.yml up -d --build
+        
+        log "Deployment completed (without Doppler)"
+    fi
+else
+    log "Doppler CLI not found - using standard deployment"
+    
+    # Standard deployment without Doppler
+    docker-compose -f docker-compose.prod.yml down --remove-orphans || log "Services were not running"
+    docker system prune -f
+    docker-compose -f docker-compose.prod.yml up -d --build
+    
+    log "Deployment completed (standard mode)"
+fi
+
+# Wait for services to be healthy
+log "Waiting for services to be ready..."
+sleep 30
+
+# Check service health
+log "Checking service health..."
+docker-compose -f docker-compose.prod.yml ps
+
+log "Deployment script completed"
 EOF
 
 chmod +x /root/codecave/quick-deploy.sh
 
 log "CodeCave $ENVIRONMENT droplet initialization completed"
-log "Next steps:"
+log "============================================"
+log "Next steps for production deployment:"
 log "1. SSH to server: ssh root@$(curl -s http://checkip.amazonaws.com 2>/dev/null || echo 'IP_NOT_AVAILABLE')"
-log "2. Configure Doppler: doppler configure set token <your-token>"
-log "3. Configure Doppler project: cd /root/codecave && doppler configure set project codecave config prd_all"
-log "4. Run deployment: ./quick-deploy.sh"
+log "2. Configure Doppler (REQUIRED):"
+log "   a. Set up project and config: cd /root/codecave && doppler setup"
+log "   b. Choose project: codecave"
+log "   c. Choose config: prd_all (or your production config)"
+log "3. Run deployment: cd /root/codecave && ./quick-deploy.sh"
+log "============================================"
+log "Optional: Test Doppler configuration:"
+log "   doppler secrets --only-names  # List available secrets"
+log "   doppler run -- env | grep DOPPLER  # Test environment injection"
+log "============================================"
+log "For debugging:"
+log "   Check logs: tail -f /var/log/codecave-setup.log"
+log "   Check Docker: docker ps"
+log "   Check services: docker-compose -f docker-compose.prod.yml ps"
+log "============================================"
 
 # Create completion marker for Terraform (always create this)
 touch /tmp/user_data_complete

@@ -1,7 +1,7 @@
 #!/bin/bash
 
-# CodeCave Development Environment Health Check
-# Comprehensive service health verification following Context7 best practices
+# CodeCave Production Health Check with Doppler Integration
+# Comprehensive service health verification for Digital Ocean deployment
 
 set -e
 
@@ -33,6 +33,45 @@ print_error() {
 OVERALL_HEALTH=0
 SERVICE_COUNT=0
 HEALTHY_COUNT=0
+
+# Function to check Doppler health
+check_doppler_health() {
+    print_status "Checking Doppler CLI installation..."
+    
+    if ! command -v doppler >/dev/null 2>&1; then
+        print_error "Doppler CLI is not installed"
+        return 1
+    fi
+    
+    print_success "Doppler CLI is installed"
+    
+    # Check Doppler configuration
+    print_status "Checking Doppler configuration..."
+    
+    local project=$(doppler configure get project 2>/dev/null || echo "not-configured")
+    local config=$(doppler configure get config 2>/dev/null || echo "not-configured")
+    
+    if [[ "$project" != "codecave" ]]; then
+        print_error "Doppler project not configured correctly: $project (expected: codecave)"
+        return 1
+    fi
+    
+    if [[ "$config" != "prd_all" && "$config" != "dev" ]]; then
+        print_warning "Doppler config: $config (expected: prd_all for production or dev for development)"
+    fi
+    
+    # Test Doppler connectivity
+    print_status "Testing Doppler API connectivity..."
+    
+    if doppler secrets --only-names >/dev/null 2>&1; then
+        local secret_count=$(doppler secrets --only-names 2>/dev/null | wc -l)
+        print_success "Doppler API connectivity OK ($secret_count secrets available)"
+        return 0
+    else
+        print_error "Cannot connect to Doppler API or access secrets"
+        return 1
+    fi
+}
 
 # Function to check service health
 check_service_health() {
@@ -95,8 +134,21 @@ check_http_endpoint() {
 
 # Main health check function
 main() {
-    echo "🏥 CodeCave Development Environment Health Check"
+    echo "🏥 CodeCave Production Health Check with Doppler"
     echo "================================================"
+    echo "Timestamp: $(date)"
+    echo "Environment: Production (Digital Ocean)"
+    echo
+    
+    # 1. Check Doppler integration first
+    echo "🔐 Doppler Integration Health"
+    echo "----------------------------"
+    if check_doppler_health; then
+        print_success "Doppler integration is healthy"
+    else
+        print_error "Doppler integration has issues"
+        OVERALL_HEALTH=1
+    fi
     echo
     
     # Check if Docker is running

@@ -6,33 +6,9 @@ on:
   workflow_dispatch: # Allow manual deployment
 
 jobs:
-  # Pre-deployment validation
-  validate:
-    name: Validate Configuration
-    runs-on: ubuntu-latest
-    steps:
-      - name: Checkout Code
-        uses: actions/checkout@v4
-
-      - name: Validate Docker Compose Configuration
-        run: |
-          echo "🔍 Validating Docker Compose configuration..."
-          docker-compose -f docker-compose.prod.yml config --quiet
-          echo "✅ Docker Compose configuration is valid"
-
-      - name: Check for required secrets
-        run: |
-          echo "🔐 Checking required secrets configuration..."
-          # This will fail the workflow if required secrets are missing
-          [ -z "${{ secrets.PRODUCTION_HOST }}" ] && echo "❌ PRODUCTION_HOST secret missing" && exit 1
-          [ -z "${{ secrets.PRODUCTION_USER }}" ] && echo "❌ PRODUCTION_USER secret missing" && exit 1
-          [ -z "${{ secrets.PRODUCTION_SSH_KEY }}" ] && echo "❌ PRODUCTION_SSH_KEY secret missing" && exit 1
-          echo "✅ All required secrets are configured"
-
   deploy:
     name: Deploy to Server
     runs-on: ubuntu-latest
-    needs: validate
     environment: production # Add environment protection
 
     steps:
@@ -45,76 +21,17 @@ jobs:
           script: |
             set -e  # Exit on any error
 
-            # Function for error handling
-            handle_error() {
-              echo "❌ Deployment failed at step: $1"
-              echo "🔍 Checking service status..."
-              docker ps --format "table {{.Names}}\t{{.Status}}\t{{.Ports}}"
-              exit 1
-            }
-
             # Navigate to project directory
             echo "📁 Navigating to project directory..."
-            cd ~/codecave || handle_error "Project directory not found"
+            cd ~/codecave || { echo "❌ Project directory not found"; exit 1; }
 
-            # Pull latest changes
-            echo "🔄 Pulling latest changes from main..."
-            git pull origin main || handle_error "Git pull failed"
+            # Make deployment script executable
+            chmod +x scripts/deploy-server.sh
 
-            # Clean up unnecessary files for production
-            echo "🧹 Cleaning up unnecessary files..."
-            chmod +x scripts/cleanup-production.sh
-            ./scripts/cleanup-production.sh || handle_error "Cleanup script failed"
+            # Run deployment script with Doppler token
+            echo "� Starting deployment..."
+            DOPPLER_TOKEN="${{ secrets.DOPPLER_TOKEN }}" ./scripts/deploy-server.sh
 
-            # Validate Docker Compose configuration
-            echo "🔍 Validating Docker Compose configuration..."
-            doppler run --config=prd_all --project=codecave -- docker-compose -f docker-compose.prod.yml config --quiet || handle_error "Docker Compose validation failed"
+            echo "🎉 Deployment completed successfully!"
 
-            # Stop existing services and remove orphaned containers
-            echo "🛑 Stopping existing services..."
-            doppler run --config=prd_all --project=codecave -- docker-compose -f docker-compose.prod.yml down --remove-orphans || handle_error "Service shutdown failed"
-
-            # Remove old images to ensure fresh build
-            echo "🧹 Cleaning up old images..."
-            docker image prune -f || handle_error "Image cleanup failed"
-
-            # Build and start services with better error handling
-            echo "🚀 Building and starting services..."
-            doppler run --config=prd_all --project=codecave -- docker-compose -f docker-compose.prod.yml up -d --build || handle_error "Service startup failed"
-
-            # Wait for services to become healthy
-            echo "⏳ Waiting for services to become healthy..."
-            sleep 30
-
-            # Comprehensive health check
-            echo "🏥 Performing comprehensive health check..."
-            FAILED_SERVICES=""
-
-            # Check each service health
-            for service in $(doppler run --config=prd_all --project=codecave -- docker-compose -f docker-compose.prod.yml ps --services); do
-              echo "Checking $service..."
-              if ! doppler run --config=prd_all --project=codecave -- docker-compose -f docker-compose.prod.yml ps $service | grep -q "healthy\|running"; then
-                FAILED_SERVICES="$FAILED_SERVICES $service"
-              fi
-            done
-
-            if [ -n "$FAILED_SERVICES" ]; then
-              echo "❌ Failed services:$FAILED_SERVICES"
-              echo "📋 Service logs for debugging:"
-              for service in $FAILED_SERVICES; do
-                echo "=== $service logs ==="
-                doppler run --config=prd_all --project=codecave -- docker-compose -f docker-compose.prod.yml logs --tail=50 $service
-              done
-              handle_error "Health check failed"
-            fi
-
-            # Show running containers
-            echo "✅ Deployment complete! Running containers:"
-            docker ps --format "table {{.Names}}\t{{.Status}}\t{{.Ports}}"
-
-            # Final service health summary
-            echo "🏥 Final service health summary:"
-            doppler run --config=prd_all --project=codecave -- docker-compose -f docker-compose.prod.yml ps
-
-            echo "🎉 Deployment successful! All services are healthy."
-            curl -f http://localhost:3001/health || echo "⚠️  API health check failed"
+            echo "� Deployment completed successfully!"

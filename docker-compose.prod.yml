@@ -1,5 +1,8 @@
-# Production Docker Compose configuration for CodeCave
-# Uses managed database and production-optimized settings
+# Production Docker Compose configuration for CodeCave with Doppler Integration
+# Uses managed database, Doppler for secrets, and production-optimized settings
+
+# Dynamic environment injection from Doppler
+# Run with: doppler run -- docker-compose -f docker-compose.prod.yml up -d
 
 services:
   # Meilisearch - Search engine
@@ -101,37 +104,65 @@ services:
       timeout: 10s
       retries: 3
 
-  # NestJS API - Main application
+  # NestJS API - Main application with Doppler integration
   api:
     build:
       context: .
       dockerfile: apps/api/Dockerfile.prod
     container_name: codecave-api-prod
     environment:
+      # Core application configuration
       NODE_ENV: production
       PORT: 3001
 
-      # Database configuration
+      # Database configuration (from Doppler)
       DATABASE_URL: ${DATABASE_URL}
 
-      # Supabase configuration
-      SUPABASE_URL: ${SUPABASE_URL}
-      SUPABASE_ANON_KEY: ${SUPABASE_ANON_KEY}
-      SUPABASE_SERVICE_ROLE_KEY: ${SUPABASE_SERVICE_ROLE_KEY}
-      SUPABASE_JWT_SECRET: ${SUPABASE_JWT_SECRET}
+      # Better Auth configuration (replaces Supabase)
+      BETTER_AUTH_SECRET: ${BETTER_AUTH_SECRET}
+      BETTER_AUTH_URL: ${BETTER_AUTH_URL}
 
-      # JWT secrets for your app tokens
+      # OAuth Provider Credentials
+      GITHUB_CLIENT_ID: ${GITHUB_CLIENT_ID}
+      GITHUB_CLIENT_SECRET: ${GITHUB_CLIENT_SECRET}
+      GOOGLE_CLIENT_ID: ${GOOGLE_CLIENT_ID}
+      GOOGLE_CLIENT_SECRET: ${GOOGLE_CLIENT_SECRET}
+      LINKEDIN_CLIENT_ID: ${LINKEDIN_CLIENT_ID}
+      LINKEDIN_CLIENT_SECRET: ${LINKEDIN_CLIENT_SECRET}
+
+      # JWT secrets for app tokens
       JWT_SECRET: ${JWT_SECRET}
       JWT_REFRESH_SECRET: ${JWT_REFRESH_SECRET}
       JWT_EXPIRES_IN: ${JWT_EXPIRES_IN}
 
       # Internal service URLs (Docker network)
       MEILI_HOST: http://search:7700
+      MEILI_MASTER_KEY: ${MEILI_MASTER_KEY}
       RABBITMQ_URL: amqp://${RABBITMQ_USER}:${RABBITMQ_PASS}@mq:5672/codecave
+      RABBITMQ_USER: ${RABBITMQ_USER}
+      RABBITMQ_PASS: ${RABBITMQ_PASS}
       REDIS_URL: redis://:${REDIS_PASSWORD}@redis:6379
+      REDIS_PASSWORD: ${REDIS_PASSWORD}
 
-      # Frontend URL for CORS
+      # Frontend URL for CORS and redirects
       FRONTEND_URL: ${FRONTEND_URL}
+
+      # Digital Ocean Spaces (File Storage)
+      DO_SPACES_KEY: ${DO_SPACES_KEY}
+      DO_SPACES_SECRET: ${DO_SPACES_SECRET}
+      DO_SPACES_BUCKET: ${DO_SPACES_BUCKET}
+      DO_SPACES_REGION: ${DO_SPACES_REGION}
+
+      # Monitoring and analytics
+      SENTRY_DSN: ${SENTRY_DSN_API}
+      SENTRY_AUTH_TOKEN: ${SENTRY_AUTH_TOKEN}
+      SENTRY_ORG: ${SENTRY_ORG}
+      SENTRY_PROJECT: ${SENTRY_PROJECT}
+
+      # External services
+      STRIPE_PUBLISHABLE_KEY: ${STRIPE_PUBLISHABLE_KEY}
+      STRIPE_SECRET_KEY: ${STRIPE_SECRET_KEY}
+      STRIPE_WEBHOOK_SECRET: ${STRIPE_WEBHOOK_SECRET}
 
     ports:
       - "3001:3001"
