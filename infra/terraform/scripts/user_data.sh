@@ -1,25 +1,81 @@
 #!/bin/bash
 
 # User data script for CodeCave production droplet initialization
-# This script runs when the droplet first boots
+# This script runs when the drop# Install Doppler CLI with retries
+log "# Clone the codecave repository with retries
+log "Cloning CodeCave repository..."
+cd /root
+if [ ! -d "codecave" ]; then
+    for attempt in {1..3}; do
+        log "Git clone attempt $attempt..."
+        if git clone https://github.com/julianthant/codecave.git; then
+            log "Repository cloned successfully"
+            break
+        else
+            log "Git clone failed, attempt $attempt/3"
+            if [ $attempt -eq 3 ]; then
+                log "Git clone failed after 3 attempts, continuing without repository"
+            else
+                sleep 5
+                rm -rf codecave 2>/dev/null || true
+            fi
+        fi
+    done
+fi
+cd codecave 2>/dev/null || cd /root
 
-set -e
+# Create swap space for builds
+log "Creating swap space..."
+if fallocate -l 2G /swapfile; then
+    chmod 600 /swapfile
+    mkswap /swapfile
+    swapon /swapfile
+    echo '/swapfile none swap sw 0 0' >> /etc/fstab
+    log "Swap space created successfully"
+else
+    log "Failed to create swap space"
+fiLI..."
+for attempt in {1..3}; do
+    log "Doppler installation attempt $attempt..."
+    if curl -Ls https://cli.doppler.com/install.sh | sh; then
+        log "Doppler CLI installed successfully"
+        break
+    else
+        log "Doppler installation failed, attempt $attempt/3"
+        if [ $attempt -eq 3 ]; then
+            log "Doppler installation failed after 3 attempts, continuing without it"
+        else
+            sleep 5
+        fi
+    fi
+done
+
+# Add Doppler to PATH for all users
+echo 'export PATH="/usr/local/bin:$PATH"' >> /etc/profile
+echo 'export PATH="/usr/local/bin:$PATH"' >> /root/.bashrc
+log "Doppler PATH configuration added"on't exit on errors for non-critical operations
+set +e
 
 PROJECT_NAME="${project_name}"
 ENVIRONMENT="${environment}"
 
+# Function to log with timestamp
+log() {
+    echo "[$(date '+%Y-%m-%d %H:%M:%S')] $1"
+}
+
 # Function to wait for network connectivity
 wait_for_network() {
-    echo "Waiting for network connectivity..."
+    log "Waiting for network connectivity..."
     for i in {1..30}; do
         if curl -s --connect-timeout 5 http://checkip.amazonaws.com > /dev/null 2>&1; then
-            echo "Network connectivity established"
+            log "Network connectivity established"
             return 0
         fi
-        echo "Attempt $i: Waiting for network..."
+        log "Attempt $i: Waiting for network..."
         sleep 10
     done
-    echo "Network connectivity timeout"
+    log "Network connectivity timeout"
     return 1
 }
 
@@ -32,26 +88,35 @@ retry_command() {
             return 0
         fi
         count=$((count + 1))
-        echo "Command failed. Retry $count/$retries..."
+        log "Command failed. Retry $count/$retries..."
         sleep 5
     done
-    echo "Command failed after $retries attempts"
+    log "Command failed after $retries attempts"
     return 1
 }
 
-echo "Starting CodeCave $ENVIRONMENT setup on $(date)"
+log "Starting CodeCave $ENVIRONMENT setup"
 
 # Wait for network before proceeding
 wait_for_network
 
 # Update system with retries
-echo "Updating system packages..."
-retry_command apt-get update -y
-retry_command apt-get upgrade -y
+log "Updating system packages..."
+if retry_command apt-get update -y; then
+    log "Package index updated successfully"
+else
+    log "Failed to update package index, continuing anyway"
+fi
+
+if retry_command apt-get upgrade -y; then
+    log "System packages upgraded successfully"
+else
+    log "Failed to upgrade system packages, continuing anyway"
+fi
 
 # Install essential packages with retries
-echo "Installing essential packages..."
-retry_command apt-get install -y \
+log "Installing essential packages..."
+if retry_command apt-get install -y \
   curl \
   wget \
   git \
@@ -61,19 +126,28 @@ retry_command apt-get install -y \
   certbot \
   python3-certbot-nginx \
   fail2ban \
-  ufw
+  ufw; then
+    log "Essential packages installed successfully"
+else
+    log "Failed to install some packages, continuing anyway"
+fi
 
 # Docker should already be installed in the image, but ensure it's running
-systemctl enable docker
-systemctl start docker
+log "Setting up Docker..."
+systemctl enable docker || log "Failed to enable Docker service"
+systemctl start docker || log "Failed to start Docker service"
 
 # Install Docker Compose v2 with retries
-echo "Installing Docker Compose..."
-retry_command curl -L "https://github.com/docker/compose/releases/latest/download/docker-compose-$(uname -s)-$(uname -m)" -o /usr/local/bin/docker-compose
-chmod +x /usr/local/bin/docker-compose
+log "Installing Docker Compose..."
+if retry_command curl -L "https://github.com/docker/compose/releases/latest/download/docker-compose-$(uname -s)-$(uname -m)" -o /usr/local/bin/docker-compose; then
+    chmod +x /usr/local/bin/docker-compose
+    log "Docker Compose installed successfully"
+else
+    log "Failed to install Docker Compose"
+fi
 
 # Create application directory structure
-echo "Setting up application directories..."
+log "Setting up application directories..."
 mkdir -p /root/codecave  # Main application directory
 mkdir -p /opt/codecave/data
 mkdir -p /opt/codecave/logs  
@@ -83,10 +157,24 @@ mkdir -p /mnt/volume_nyc3_01/meilisearch
 mkdir -p /mnt/volume_nyc3_01/rabbitmq
 mkdir -p /mnt/volume_nyc3_01/redis
 mkdir -p /mnt/volume_nyc3_01/kong-ssl
+log "Application directories created"
 
 # Install Doppler CLI with retries
 echo "Installing Doppler CLI..."
-retry_command curl -Ls https://cli.doppler.com/install.sh | sh
+for attempt in {1..3}; do
+    echo "Doppler installation attempt $attempt..."
+    if curl -Ls https://cli.doppler.com/install.sh | sh; then
+        echo "Doppler CLI installed successfully"
+        break
+    else
+        echo "Doppler installation failed, attempt $attempt/3"
+        if [ $attempt -eq 3 ]; then
+            echo "Doppler installation failed after 3 attempts, continuing without it"
+        else
+            sleep 5
+        fi
+    fi
+done
 
 # Add Doppler to PATH for all users
 echo 'export PATH="/usr/local/bin:$PATH"' >> /etc/profile
@@ -96,9 +184,23 @@ echo 'export PATH="/usr/local/bin:$PATH"' >> /root/.bashrc
 echo "Cloning CodeCave repository..."
 cd /root
 if [ ! -d "codecave" ]; then
-    retry_command git clone https://github.com/julianthant/codecave.git
+    for attempt in {1..3}; do
+        echo "Git clone attempt $attempt..."
+        if git clone https://github.com/julianthant/codecave.git; then
+            echo "Repository cloned successfully"
+            break
+        else
+            echo "Git clone failed, attempt $attempt/3"
+            if [ $attempt -eq 3 ]; then
+                echo "Git clone failed after 3 attempts, continuing without repository"
+            else
+                sleep 5
+                rm -rf codecave 2>/dev/null || true
+            fi
+        fi
+    done
 fi
-cd codecave
+cd codecave 2>/dev/null || cd /root
 
 # Create swap space for builds
 echo "Creating swap space..."
@@ -239,12 +341,13 @@ EOF
 
 chmod +x /root/codecave/quick-deploy.sh
 
-echo "CodeCave $ENVIRONMENT droplet initialization completed on $(date)"
-echo "Next steps:"
-echo "1. SSH to server: ssh root@$(curl -s http://checkip.amazonaws.com)"
-echo "2. Configure Doppler: doppler configure set token <your-token>"
-echo "3. Configure Doppler project: cd /root/codecave && doppler configure set project codecave config prd_all"
-echo "4. Run deployment: ./quick-deploy.sh"
+log "CodeCave $ENVIRONMENT droplet initialization completed"
+log "Next steps:"
+log "1. SSH to server: ssh root@$(curl -s http://checkip.amazonaws.com 2>/dev/null || echo 'IP_NOT_AVAILABLE')"
+log "2. Configure Doppler: doppler configure set token <your-token>"
+log "3. Configure Doppler project: cd /root/codecave && doppler configure set project codecave config prd_all"
+log "4. Run deployment: ./quick-deploy.sh"
 
-# Create completion marker for Terraform
-touch /tmp/user_data_complete 
+# Create completion marker for Terraform (always create this)
+touch /tmp/user_data_complete
+log "User data script completed successfully - marker file created" 
