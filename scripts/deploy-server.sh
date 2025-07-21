@@ -1,7 +1,151 @@
 #!/bin/bash
 
-# Production deployment script for CodeCave
-# Handles Doppler configuration and deployment
+# Production deployment script for CodeCa# Configure Doppler if DOPPLER_TOKEN is provided
+if [ # Configure Doppler if DOPPLER_TOKEN is provided
+if [ -n "$DOPPLER_TOKEN" ]; then
+    log "🔐 Configuring Doppler with provided token..."
+    echo "$DOPPLER_TOKEN" | doppler configure set token --scope / || handle_error "Doppler token configuration"
+    success "Doppler token configured"
+    
+    # Check authentication
+    log "🔍 Verifying Doppler authentication..."
+    if ! doppler me >/dev/null 2>&1; then
+        error "Doppler authentication failed. Token may be invalid."
+        exit 1
+    fi
+    success "Doppler authentication verified"
+    
+    # List available projects for debugging
+    log "📋 Available Doppler projects:"
+    doppler projects 2>/dev/null || warning "Could not list projects"
+    
+    # Try to setup the project and config
+    log "🔧 Setting up Doppler project and config..."
+    
+    # Check if project exists, create if not
+    if ! doppler projects get codecave >/dev/null 2>&1; then
+        log "📁 Creating Doppler project 'codecave'..."
+        if doppler projects create codecave --description "CodeCave production environment" >/dev/null 2>&1; then
+            success "Created project 'codecave'"
+        else
+            error "Could not create project 'codecave'. You may need to create it manually in Doppler dashboard."
+            log "💡 Go to https://dashboard.doppler.com and create a project named 'codecave'"
+            exit 1
+        fi
+    else
+        success "Project 'codecave' exists"
+    fi
+    
+    # Try to setup config - try different common names
+    CONFIG_SET=false
+    for config in prd_all prod production; do
+        log "� Trying to setup config: $config"
+        if doppler setup --project codecave --config $config --no-interactive >/dev/null 2>&1; then
+            success "Successfully configured with project: codecave, config: $config"
+            CONFIG_SET=true
+            break
+        fi
+    done
+    
+    if [ "$CONFIG_SET" = false ]; then
+        warning "Could not setup any config automatically"
+        log "� Available configs for codecave:"
+        doppler configs --project codecave 2>/dev/null || echo "No configs found"
+        
+        # Try to create the prd_all config
+        log "📁 Creating config 'prd_all'..."
+        if doppler configs create prd_all --project codecave >/dev/null 2>&1; then
+            success "Created config 'prd_all'"
+            if doppler setup --project codecave --config prd_all --no-interactive >/dev/null 2>&1; then
+                success "Successfully setup project: codecave, config: prd_all"
+                CONFIG_SET=true
+            fi
+        fi
+    fi
+    
+    if [ "$CONFIG_SET" = false ]; then
+        error "Could not setup Doppler configuration"
+        error "Please manually run: doppler setup"
+        error "And select project: codecave, config: prd_all"
+        exit 1
+    fi
+    
+else
+    log "🔐 Checking existing Doppler configuration..."
+fi
+
+# Verify Doppler configuration
+log "🔍 Verifying Doppler configuration..."
+if ! doppler secrets --only-names >/dev/null 2>&1; then
+    error "Doppler not configured properly."
+    error "Solutions:"
+    error "1. Set DOPPLER_TOKEN environment variable"
+    error "2. Run 'doppler login' and 'doppler setup'"
+    error "3. Ensure project 'codecave' exists in your Doppler account"
+    error "4. Ensure you have access to the project"
+    
+    log "📋 Debugging info:"
+    doppler auth status 2>/dev/null || echo "Not authenticated"
+    doppler projects 2>/dev/null || echo "Could not list projects"
+    
+    exit 1
+fi
+
+success "Doppler configuration verified" ]; then
+    log "🔐 Configuring Doppler with provided token..."
+    echo "$DOPPLER_TOKEN" | doppler configure set token --scope / || handle_error "Doppler token configuration"
+    success "Doppler token configured"
+    
+    # Check what projects are available
+    log "🔍 Checking available Doppler projects..."
+    if doppler projects 2>/dev/null; then
+        log "✅ Successfully connected to Doppler"
+    else
+        warning "Could not list Doppler projects"
+    fi
+    
+    # Try to setup the project and config if they don't exist
+    log "🔧 Setting up Doppler project and config..."
+    if ! doppler projects get codecave 2>/dev/null; then
+        log "📁 Creating Doppler project 'codecave'..."
+        if ! doppler projects create codecave 2>/dev/null; then
+            warning "Could not create Doppler project. It may already exist or you may need permissions."
+        fi
+    fi
+    
+    # Setup config
+    log "🔧 Setting up Doppler config..."
+    if ! doppler setup --project codecave --config prd_all --no-interactive 2>/dev/null; then
+        warning "Could not setup Doppler project/config automatically"
+        log "💡 Available projects and configs:"
+        doppler projects 2>/dev/null || echo "Could not list projects"
+        
+        # Try alternative common config names
+        for config in prod production prd dev; do
+            log "🔍 Trying config: $config"
+            if doppler setup --project codecave --config $config --no-interactive 2>/dev/null; then
+                log "✅ Successfully configured with project: codecave, config: $config"
+                break
+            fi
+        done
+    fi
+else
+    log "🔐 Checking existing Doppler configuration..."
+fi
+
+# Verify Doppler configuration
+log "🔍 Verifying Doppler configuration..."
+if ! doppler secrets --only-names >/dev/null 2>&1; then
+    error "Doppler not configured properly. Available options:"
+    error "1. Set DOPPLER_TOKEN environment variable, or"
+    error "2. Run 'doppler setup' manually"
+    error "3. Check if the project 'codecave' and config 'prd_all' exist in your Doppler account"
+    
+    log "📋 Attempting to show available projects..."
+    doppler projects 2>/dev/null || echo "Could not list projects"
+    
+    exit 1
+filer configuration and deployment
 # Pass DOPPLER_TOKEN as environment variable for automated deployment
 
 set -e  # Exit on any error
@@ -85,11 +229,11 @@ fi
 
 # Validate Docker Compose configuration with Doppler
 log "🔍 Validating Docker Compose configuration..."
-doppler run --config=prd_all --project=codecave -- docker compose -f docker-compose.prod.yml config --quiet || handle_error "Docker Compose validation"
+doppler run -- docker compose -f docker-compose.prod.yml config --quiet || handle_error "Docker Compose validation"
 
 # Stop existing services and remove orphaned containers
 log "🛑 Stopping existing services..."
-doppler run --config=prd_all --project=codecave -- docker compose -f docker-compose.prod.yml down --remove-orphans || warning "Services were not running"
+doppler run -- docker compose -f docker-compose.prod.yml down --remove-orphans || warning "Services were not running"
 
 # Clean up old images and containers
 log "🧹 Cleaning up Docker resources..."
@@ -98,7 +242,7 @@ docker container prune -f
 
 # Build and start services with Doppler environment injection
 log "🚀 Building and starting services..."
-doppler run --config=prd_all --project=codecave -- docker compose -f docker-compose.prod.yml up -d --build || handle_error "Service startup"
+doppler run -- docker compose -f docker-compose.prod.yml up -d --build || handle_error "Service startup"
 
 # Wait for services to start
 log "⏳ Waiting for services to start..."
@@ -109,9 +253,9 @@ log "🏥 Performing comprehensive health check..."
 FAILED_SERVICES=""
 
 # Check each service health
-for service in $(doppler run --config=prd_all --project=codecave -- docker compose -f docker-compose.prod.yml ps --services); do
+for service in $(doppler run -- docker compose -f docker-compose.prod.yml ps --services); do
     log "Checking $service..."
-    if ! doppler run --config=prd_all --project=codecave -- docker compose -f docker-compose.prod.yml ps $service | grep -q "healthy\|running"; then
+    if ! doppler run -- docker compose -f docker-compose.prod.yml ps $service | grep -q "healthy\|running"; then
         FAILED_SERVICES="$FAILED_SERVICES $service"
     fi
 done
@@ -121,7 +265,7 @@ if [ -n "$FAILED_SERVICES" ]; then
     log "📋 Service logs for debugging:"
     for service in $FAILED_SERVICES; do
         log "=== $service logs ==="
-        doppler run --config=prd_all --project=codecave -- docker compose -f docker-compose.prod.yml logs --tail=50 $service
+        doppler run -- docker compose -f docker-compose.prod.yml logs --tail=50 $service
     done
     handle_error "Health check failed"
 fi
@@ -132,7 +276,7 @@ docker ps --format "table {{.Names}}\t{{.Status}}\t{{.Ports}}"
 
 # Final service health summary
 log "🏥 Final service health summary:"
-doppler run --config=prd_all --project=codecave -- docker compose -f docker-compose.prod.yml ps
+doppler run -- docker compose -f docker-compose.prod.yml ps
 
 # Test API health endpoint
 log "🏥 Testing API health..."
