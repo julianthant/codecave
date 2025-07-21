@@ -25,9 +25,32 @@ jobs:
             echo "📁 Navigating to project directory..."
             cd ~/codecave || { echo "❌ Project directory not found"; exit 1; }
 
-            # Pull latest changes first
-            echo "🔄 Pulling latest changes..."
-            git pull origin main || { echo "❌ Failed to pull latest changes"; exit 1; }
+            # Check if this is a git repository
+            echo "🔍 Checking git repository status..."
+            if [ ! -d ".git" ]; then
+              echo "❌ Not a git repository. Cloning fresh copy..."
+              cd ~
+              rm -rf codecave
+              git clone https://github.com/julianthant/codecave.git
+              cd codecave
+            else
+              # Reset any local changes and pull latest
+              echo "🔄 Resetting local changes and pulling latest..."
+              git reset --hard HEAD
+              git clean -fd
+              git pull origin main || { echo "❌ Failed to pull latest changes"; exit 1; }
+            fi
+
+            # Verify the script exists
+            echo "🔍 Verifying deployment script exists..."
+            if [ ! -f "scripts/deploy-server.sh" ]; then
+              echo "❌ Deploy script not found even after git pull"
+              echo "📂 Current directory contents:"
+              ls -la
+              echo "📂 Scripts directory contents:"
+              ls -la scripts/ || echo "Scripts directory doesn't exist"
+              exit 1
+            fi
 
             # Make deployment script executable
             echo "🔧 Making deployment script executable..."
