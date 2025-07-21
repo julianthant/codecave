@@ -44,36 +44,13 @@ https://api.codecave.tech/auth/google/callback
 
 7. Copy your Client ID and Client Secret to your .env file
 
-### 3. LinkedIn OAuth App Setup
-
-1. Go to [LinkedIn Developer Portal](https://www.linkedin.com/developers/apps)
-2. Create a new app or edit existing app
-3. In the "Auth" tab, set the following:
-
-**Authorized Redirect URLs:**
-
-```
-http://localhost:3001/auth/linkedin/callback
-https://api.codecave.tech/auth/linkedin/callback
-```
-
-**OAuth 2.0 scopes:** Request access to:
-
-- `openid` (Sign In with LinkedIn using OpenID Connect)
-- `profile` (Retrieve authenticated member's basic profile)
-- `email` (Retrieve authenticated member's email address)
-
-4. Copy your Client ID and Client Secret to your .env file
-
 ## 🚨 Important Notes
 
-1. **LinkedIn API Changes**: LinkedIn deprecated the old `r_emailaddress` and `r_liteprofile` scopes. The new scopes are `openid`, `profile`, and `email`.
+1. **Multiple Callback URLs**: You need both localhost (development) and production callback URLs in each OAuth provider.
 
-2. **Multiple Callback URLs**: You need both localhost (development) and production callback URLs in each OAuth provider.
+2. **HTTPS Required**: Production callback URLs must use HTTPS.
 
-3. **HTTPS Required**: Production callback URLs must use HTTPS.
-
-4. **Domain Verification**: Make sure your domains are properly configured:
+3. **Domain Verification**: Make sure your domains are properly configured:
    - `www.codecave.tech` → Frontend
    - `api.codecave.tech` → Backend API
 
@@ -98,7 +75,6 @@ https://api.codecave.tech/auth/linkedin/callback
 1. **"redirect_uri_mismatch"**: The callback URL in your OAuth provider doesn't match the one being used
 2. **"invalid_client"**: Client ID or Secret is incorrect
 3. **"access_denied"**: User declined authorization or scope issues
-4. **LinkedIn network error**: Usually indicates incorrect scopes or expired app credentials
 
 ### Debugging Steps:
 

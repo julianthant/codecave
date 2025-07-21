@@ -129,7 +129,7 @@ const Card = {
 
 ## 🏠 **Updated Hero Section Design**
 
-### **Pinterest/LinkedIn Style Layout**
+### **Pinterest-Style Layout**
 ```tsx
 // Hero Section Structure (60/40 split)
 <section className="min-h-screen flex items-center bg-background relative overflow-hidden">
@@ -478,7 +478,7 @@ const Hero = () => (
 
 ### **Phase 1: Foundation** (Week 1)
 - [ ] Set up design system with Tailwind config
-- [ ] Build hero section (Pinterest/LinkedIn style)
+- [ ] Build hero section (Pinterest style)
 - [ ] Create auth card component (OAuth style)
 - [ ] Implement simplified navigation
 

@@ -167,7 +167,7 @@ async getProfile(@CurrentUser() user: any) {
 ```sql
 -- Users (main table)
 users: id, email, name, image, email_verified, created_at, updated_at
-       bio, website, location, company, github_username, linkedin_profile
+       bio, website, location, company, github_username
        is_active, is_pro
 
 -- OAuth accounts
@@ -199,7 +199,6 @@ interface User {
   location?: string;
   company?: string;
   githubUsername?: string;
-  linkedinProfile?: string;
   isActive: boolean;
   isPro: boolean;
 }

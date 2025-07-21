@@ -2,7 +2,7 @@
 
 ## 🎯 **Overview**
 
-This document outlines the comprehensive OAuth authentication system implemented for CodeCave.tech, supporting GitHub, Google, and LinkedIn authentication providers using NestJS backend with Prisma ORM and Next.js frontend.
+This document outlines the comprehensive OAuth authentication system implemented for CodeCave.tech, supporting GitHub and Google authentication providers using NestJS backend with Prisma ORM and Next.js frontend.
 
 ## 📋 **Table of Contents**
 
@@ -23,7 +23,7 @@ This document outlines the comprehensive OAuth authentication system implemented
 - **Backend**: NestJS with TypeScript
 - **Database**: PostgreSQL with Prisma ORM
 - **Authentication**: JWT tokens with refresh token support
-- **OAuth Providers**: GitHub, Google, LinkedIn
+- **OAuth Providers**: GitHub, Google
 - **Frontend**: Next.js 15 with TypeScript
 - **State Management**: Custom auth service with localStorage
 
@@ -78,7 +78,6 @@ sequenceDiagram
 - `apps/api/src/auth/strategies/jwt.strategy.ts` - JWT token validation
 - `apps/api/src/auth/strategies/github.strategy.ts` - GitHub OAuth strategy
 - `apps/api/src/auth/strategies/google.strategy.ts` - Google OAuth strategy
-- `apps/api/src/auth/strategies/linkedin.strategy.ts` - LinkedIn OAuth strategy
 
 #### **5. Guards & Security**
 
@@ -125,7 +124,6 @@ model User {
   provider         AuthProvider
   providerId       String
   githubUsername   String?
-  linkedinProfile  String?
   projectsCount    Int         @default(0)
   followersCount   Int         @default(0)
   followingCount   Int         @default(0)
@@ -174,7 +172,7 @@ pnpm exec prisma generate
 
 #### **🔄 OAuth Buttons**
 
-- GitHub, Google, LinkedIn providers
+- GitHub, Google providers
 - Automatic API URL detection
 - Responsive design with hover effects
 - Server-side redirect to OAuth endpoints
@@ -225,10 +223,6 @@ GOOGLE_CLIENT_ID=your_google_client_id
 GOOGLE_CLIENT_SECRET=your_google_client_secret
 GOOGLE_CALLBACK_URL=http://localhost:3001/auth/google/callback
 
-# LinkedIn OAuth
-LINKEDIN_CLIENT_ID=your_linkedin_client_id
-LINKEDIN_CLIENT_SECRET=your_linkedin_client_secret
-LINKEDIN_CALLBACK_URL=http://localhost:3001/auth/linkedin/callback
 ```
 
 #### **Frontend (.env.local)**

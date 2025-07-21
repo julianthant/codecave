@@ -17,7 +17,6 @@ CREATE TABLE IF NOT EXISTS "user" (
     "location" text,
     "company" text,
     "githubUsername" text,
-    "linkedinProfile" text,
     "isActive" boolean NOT NULL DEFAULT true,
     "isPro" boolean NOT NULL DEFAULT false
 );

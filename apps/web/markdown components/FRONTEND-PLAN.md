@@ -94,7 +94,7 @@
 └─────────────────────────────────────────────────────────────┘
 ```
 
-### **2. Main Feed (Authenticated) - LinkedIn-Style**
+### **2. Main Feed (Authenticated) - Professional Style**
 ```
 ┌─────────────────────────────────────────────────────────────┐
 │ NavBar: [🏠 Feed] [🔍 Search] [🤝 Collabs] [👥 Groups] [👤 You] │
@@ -460,7 +460,7 @@ Code: JetBrains Mono (developer-friendly)
 - ❌ Traditional advertising (replaced with project promotions)
 
 ### **Enhanced Features:**
-- ✅ LinkedIn-style professional feed
+- ✅ Professional-style feed
 - ✅ Collaboration request system
 - ✅ Advanced group management
 - ✅ Project-based promotions instead of ads

@@ -1,5 +1,5 @@
--- CreateEnum
-CREATE TYPE "AuthProvider" AS ENUM ('GITHUB', 'GOOGLE', 'LINKEDIN');
+-- CreateEnum for authentication providers
+CREATE TYPE "AuthProvider" AS ENUM ('GITHUB', 'GOOGLE');
 
 -- CreateTable
 CREATE TABLE "users" (
@@ -15,7 +15,6 @@ CREATE TABLE "users" (
     "provider" "AuthProvider" NOT NULL,
     "providerId" TEXT NOT NULL,
     "githubUsername" TEXT,
-    "linkedinProfile" TEXT,
     "projectsCount" INTEGER NOT NULL DEFAULT 0,
     "followersCount" INTEGER NOT NULL DEFAULT 0,
     "followingCount" INTEGER NOT NULL DEFAULT 0,

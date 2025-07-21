@@ -92,7 +92,7 @@ src/
 │   │   ├── jwt.strategy.ts      # JWT validation
 │   │   ├── github.strategy.ts   # GitHub OAuth
 │   │   ├── google.strategy.ts   # Google OAuth
-│   │   └── linkedin.strategy.ts # LinkedIn OAuth
+│   │   └── google.strategy.ts    # Google OAuth
 │   └── interfaces/
 │       └── auth.interface.ts    # Type definitions
 ├── users/
@@ -136,10 +136,6 @@ GITHUB_CLIENT_SECRET=your_github_client_secret
 # OAuth Google
 GOOGLE_CLIENT_ID=your_google_client_id
 GOOGLE_CLIENT_SECRET=your_google_client_secret
-
-# OAuth LinkedIn
-LINKEDIN_CLIENT_ID=your_linkedin_client_id
-LINKEDIN_CLIENT_SECRET=your_linkedin_client_secret
 
 # Frontend URL
 FRONTEND_URL=http://localhost:3000
