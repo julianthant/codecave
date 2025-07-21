@@ -206,7 +206,6 @@ const AuthCard = () => (
     <div className="space-y-3">
       <OAuthButton provider="github" />
       <OAuthButton provider="google" />
-      <OAuthButton provider="linkedin" />
     </div>
     
     {/* Footer */}

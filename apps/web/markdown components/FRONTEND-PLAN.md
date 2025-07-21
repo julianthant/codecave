@@ -28,7 +28,6 @@
 - **📧 Magic Link Email**: Passwordless, secure alternative
 
 **Additional OAuth Considerations:**
-- **🔷 LinkedIn**: Professional networking (future feature)
 - **🦋 Twitter/X**: Developer community presence
 - **🎨 Discord**: Developer community integration
 
