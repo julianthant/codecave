@@ -18,7 +18,6 @@ export class UsersController {
         location: user.location,
         company: user.company,
         githubUsername: user.githubUsername,
-        linkedinProfile: user.linkedinProfile,
         twitterHandle: user.twitterHandle,
         skills: user.skills,
         experience: user.experience,

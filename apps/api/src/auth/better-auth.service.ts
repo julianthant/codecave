@@ -48,10 +48,6 @@ export class BetterAuthService {
             type: "string",
             required: false,
           },
-          linkedinProfile: {
-            type: "string",
-            required: false,
-          },
           twitterHandle: {
             type: "string",
             required: false,

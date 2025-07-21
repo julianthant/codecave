@@ -9,7 +9,6 @@ export interface OAuthProfile {
   location?: string;
   company?: string;
   githubUsername?: string;
-  linkedinProfile?: string;
 }
 
 // User session interface for Better Auth integration

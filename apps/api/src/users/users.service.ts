@@ -47,7 +47,6 @@ export class UsersService {
       provider,
       providerId: profile.id,
       githubUsername: profile.githubUsername,
-      linkedinProfile: profile.linkedinProfile,
     };
 
     return this.prisma.user.create({

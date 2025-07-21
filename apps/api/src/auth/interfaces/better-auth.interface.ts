@@ -12,7 +12,6 @@ export interface BetterAuthUser {
   location?: string;
   company?: string;
   githubUsername?: string;
-  linkedinProfile?: string;
   twitterHandle?: string;
   skills?: string;
   experience?: string;

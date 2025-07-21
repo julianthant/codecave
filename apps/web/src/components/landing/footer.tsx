@@ -1,4 +1,4 @@
-import { Github, Twitter, Linkedin, Mail } from "lucide-react";
+import { Github, Twitter, Mail } from "lucide-react";
 import CodecaveLogo from "../ui/codecave-logo";
 
 interface FooterLink {
@@ -103,11 +103,6 @@ const socialLinks: SocialLink[] = [
     name: "Twitter",
     href: "https://twitter.com/codecave_dev",
     icon: <Twitter className="w-5 h-5" />,
-  },
-  {
-    name: "LinkedIn",
-    href: "https://linkedin.com/company/codecave",
-    icon: <Linkedin className="w-5 h-5" />,
   },
   {
     name: "Email",
