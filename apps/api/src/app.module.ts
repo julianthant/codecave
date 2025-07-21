@@ -25,6 +25,11 @@ import { UsersModule } from "./users/users.module";
       provide: APP_FILTER,
       useClass: SentryGlobalFilter,
     },
+    // Temporarily remove global auth guard to test basic functionality
+    // {
+    //   provide: APP_GUARD,
+    //   useClass: AuthGuard,
+    // },
   ],
 })
 export class AppModule {}

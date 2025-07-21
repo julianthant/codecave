@@ -1,24 +1,16 @@
 import { Module } from "@nestjs/common";
-import { ConfigModule } from "@nestjs/config";
-import { APP_GUARD } from "@nestjs/core";
-
 import { AuthController } from "./auth.controller";
-import { AuthService } from "./auth.service";
-import { BetterAuthGuard } from "./guards/auth.guard";
-import { UsersModule } from "../users/users.module";
-import { PrismaModule } from "../prisma/prisma.module";
+import { APP_GUARD } from "@nestjs/core";
+import { AuthGuard } from "./guards/auth.guard";
 
 @Module({
-  imports: [ConfigModule, UsersModule, PrismaModule],
   controllers: [AuthController],
   providers: [
-    AuthService,
-    BetterAuthGuard,
+    // Register auth guard as global guard
     {
       provide: APP_GUARD,
-      useClass: BetterAuthGuard,
+      useClass: AuthGuard,
     },
   ],
-  exports: [AuthService, BetterAuthGuard],
 })
 export class AuthModule {}

@@ -90,44 +90,18 @@ const OAuthButtons: React.FC = () => {
     console.error(`OAuth ${provider} error:`, error);
   };
 
-  // Extract OAuth execution logic
-  const executeOAuthSignIn = async (provider: OAuthProvider) => {
-    const callbackURL = `${window.location.origin}/auth/callback`;
-
-    return await Sentry.startSpan(
-      {
-        op: "auth.oauth",
-        name: `OAuth Sign In - ${provider}`,
-      },
-      async (span) => {
-        span.setAttribute("provider", provider);
-        span.setAttribute("callbackURL", callbackURL);
-
-        const data = await signIn.social({ provider, callbackURL });
-
-        if (data.error) {
-          span.setAttribute("error", true);
-          span.setAttribute(
-            "errorMessage",
-            data.error.message || "Unknown error"
-          );
-          throw new Error(data.error.message || "Authentication failed");
-        }
-
-        span.setAttribute("success", true);
-        return data;
-      }
-    );
-  };
-
-  // Simplified main handler
+  // Use Better Auth to handle OAuth sign-in
   const handleOAuthClick = async (provider: OAuthProvider) => {
     setError(null);
     setLoadingProvider(provider);
 
     try {
-      await executeOAuthSignIn(provider);
-      // Success - user will be redirected, no need to clear loading state
+      // Use Better Auth's social provider signin
+      await signIn.social({
+        provider,
+        callbackURL: "/home",
+      });
+      // Success - user will be redirected
     } catch (error) {
       handleAuthError(error, provider);
     }

@@ -1,7 +1,7 @@
 import { Controller, Get } from "@nestjs/common";
-import { AppService } from "./app.service";
-import { Public } from "./auth/decorators/public.decorator";
+import { Public } from "@thallesp/nestjs-better-auth";
 import * as Sentry from "@sentry/nestjs";
+import { AppService } from "./app.service";
 
 @Controller()
 export class AppController {

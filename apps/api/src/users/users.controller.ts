@@ -1,32 +1,13 @@
-import { Controller, Get } from "@nestjs/common";
-import { CurrentUser } from "../auth/decorators/current-user.decorator";
-import { BetterAuthUser } from "../auth/interfaces/auth.interface";
+import { Controller, Get, Request, UseGuards } from '@nestjs/common';
+import { AuthGuard } from '@thallesp/nestjs-better-auth';
+import type { Request as ExpressRequest } from 'express';
 
 @Controller("users")
+@UseGuards(AuthGuard)
 export class UsersController {
   @Get("profile")
-  async getCurrentUserProfile(@CurrentUser() user: BetterAuthUser) {
-    return {
-      success: true,
-      user: {
-        id: user.id,
-        name: user.name,
-        email: user.email,
-        emailVerified: user.emailVerified,
-        image: user.image,
-        avatar: user.avatar,
-        bio: user.bio,
-        website: user.website,
-        location: user.location,
-        company: user.company,
-        githubUsername: user.githubUsername,
-        skills: user.skills,
-        projectsCount: user.projectsCount,
-        followersCount: user.followersCount,
-        followingCount: user.followingCount,
-        isActive: user.isActive,
-        isPro: user.isPro,
-      },
-    };
+  async getCurrentUserProfile(@Request() req: ExpressRequest) {
+    return { user: req.user };
   }
 }
+
