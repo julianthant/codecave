@@ -9,7 +9,6 @@ import { Public } from "./decorators/public.decorator";
  */
 @Controller("auth")
 export class AuthController {
-  
   /**
    * Better Auth main handler - handles all auth routes using toNodeHandler
    * This is the recommended way per Better Auth documentation

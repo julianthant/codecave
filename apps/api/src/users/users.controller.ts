@@ -1,6 +1,6 @@
 import { Controller, Get } from "@nestjs/common";
 import { CurrentUser } from "../auth/decorators/current-user.decorator";
-import { BetterAuthUser } from "../auth/interfaces/better-auth.interface";
+import { BetterAuthUser } from "../auth/interfaces/auth.interface";
 
 @Controller("users")
 export class UsersController {
@@ -10,18 +10,22 @@ export class UsersController {
       success: true,
       user: {
         id: user.id,
-        email: user.email,
         name: user.name,
+        email: user.email,
+        emailVerified: user.emailVerified,
         image: user.image,
+        avatar: user.avatar,
         bio: user.bio,
         website: user.website,
         location: user.location,
         company: user.company,
         githubUsername: user.githubUsername,
-        twitterHandle: user.twitterHandle,
         skills: user.skills,
-        experience: user.experience,
-        portfolioUrl: user.portfolioUrl,
+        projectsCount: user.projectsCount,
+        followersCount: user.followersCount,
+        followingCount: user.followingCount,
+        isActive: user.isActive,
+        isPro: user.isPro,
       },
     };
   }

@@ -1,39 +1,31 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import { Injectable, UnauthorizedException } from "@nestjs/common";
-import { ConfigService } from "@nestjs/config";
-import { UsersService } from "../users/users.service";
-import { User } from "../users/entities/user.entity";
+import { Injectable } from "@nestjs/common";
+import { auth } from "./auth.config";
+import { SessionResponse } from "./interfaces/auth.interface";
 
-/**
- * Legacy AuthService - Minimal implementation for backward compatibility
- * Better Auth handles most authentication logic now
- */
 @Injectable()
 export class AuthService {
-  constructor(
-    private usersService: UsersService,
-    private configService: ConfigService
-  ) {}
-
-  /**
-   * Validate user by ID - used for legacy endpoints
-   * @param id User ID
-   * @returns User entity
-   */
-  async validateUser(id: string): Promise<User> {
-    const user = await this.usersService.findById(id);
-    if (!user || !user.isActive) {
-      throw new UnauthorizedException("User not found or inactive");
-    }
-    return user;
+  getAuth(): any {
+    return auth;
   }
 
-  /**
-   * @deprecated Use Better Auth for token refresh
-   */
-  async refreshToken(): Promise<any> {
-    throw new Error(
-      "JWT refresh token functionality is deprecated. Please use Better Auth for authentication."
-    );
+  async verifySession(token: string): Promise<SessionResponse> {
+    try {
+      const session = await auth.api.getSession({
+        headers: new Headers({
+          Authorization: `Bearer ${token}`,
+        }),
+      });
+
+      return {
+        data: session,
+        error: undefined,
+      };
+    } catch (error) {
+      return {
+        data: null,
+        error: error instanceof Error ? error.message : "Unknown error",
+      };
+    }
   }
 }

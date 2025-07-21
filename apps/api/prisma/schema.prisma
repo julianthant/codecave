@@ -19,35 +19,91 @@ enum AuthProvider {
   GOOGLE
 }
 
+// Better Auth User Model with extended fields
 model User {
-  id              String       @id @default(uuid())
-  email           String       @unique
-  name            String
-  avatar          String?
-  bio             String?
-  website         String?
-  location        String?
-  company         String?
-  skills          String[]     @default([])
-  provider        AuthProvider
-  providerId      String
-  githubUsername  String?
-  projectsCount   Int          @default(0)
-  followersCount  Int          @default(0)
-  followingCount  Int          @default(0)
-  isActive        Boolean      @default(true)
-  isPro           Boolean      @default(false)
-  createdAt       DateTime     @default(now())
-  updatedAt       DateTime     @updatedAt
+  id            String   @id @default(uuid())
+  name          String
+  email         String   @unique
+  emailVerified Boolean  @default(false)
+  image         String?
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
 
-  // Relations for future features
+  // Extended fields for codecave
+  avatar         String?
+  bio            String?
+  website        String?
+  location       String?
+  company        String?
+  skills         String[]     @default([])
+  provider       AuthProvider @default(GITHUB)
+  providerId     String?
+  githubUsername String?
+  projectsCount  Int          @default(0)
+  followersCount Int          @default(0)
+  followingCount Int          @default(0)
+  isActive       Boolean      @default(true)
+  isPro          Boolean      @default(false)
+
+  // Better Auth relations
+  sessions Session[]
+  accounts Account[]
+
+  // Codecave relations
   projects  Project[]
   comments  Comment[]
   likes     Like[]
   followers Follow[]  @relation("UserFollowers")
   following Follow[]  @relation("UserFollowing")
 
-  @@map("users")
+  @@map("user")
+}
+
+// Better Auth Session Model
+model Session {
+  id        String   @id @default(uuid())
+  expiresAt DateTime
+  token     String   @unique
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  ipAddress String?
+  userAgent String?
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("session")
+}
+
+// Better Auth Account Model  
+model Account {
+  id                    String    @id @default(uuid())
+  accountId             String
+  providerId            String
+  userId                String
+  user                  User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  accessToken           String?
+  refreshToken          String?
+  idToken               String?
+  accessTokenExpiresAt  DateTime?
+  refreshTokenExpiresAt DateTime?
+  scope                 String?
+  password              String?
+  createdAt             DateTime  @default(now())
+  updatedAt             DateTime  @updatedAt
+
+  @@map("account")
+}
+
+// Better Auth Verification Model
+model Verification {
+  id         String    @id @default(uuid())
+  identifier String
+  value      String
+  expiresAt  DateTime
+  createdAt  DateTime? @default(now())
+  updatedAt  DateTime? @updatedAt
+
+  @@map("verification")
 }
 
 model Project {

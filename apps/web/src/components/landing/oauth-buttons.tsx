@@ -49,65 +49,87 @@ const OAuthButtons: React.FC = () => {
   );
   const [error, setError] = useState<string | null>(null);
 
+  // Extract error handling logic
+  const handleAuthError = (error: unknown, provider: OAuthProvider) => {
+    logErrorToSentry(error, provider);
+    const errorMessage = formatErrorMessage(error, provider);
+    setError(errorMessage);
+    setLoadingProvider(null);
+  };
+
+  // Extract error formatting logic
+  const formatErrorMessage = (
+    error: unknown,
+    provider: OAuthProvider
+  ): string => {
+    if (!(error instanceof Error)) return "Authentication failed";
+
+    const message = error.message;
+    if (message.includes("client")) {
+      return `${provider} OAuth client not configured. Please check environment variables.`;
+    }
+    if (message.includes("redirect")) {
+      return `${provider} redirect URI mismatch. Please check OAuth app configuration.`;
+    }
+    return message || "Authentication failed";
+  };
+
+  // Extract Sentry logging logic
+  const logErrorToSentry = (error: unknown, provider: OAuthProvider) => {
+    Sentry.captureException(error, {
+      tags: { section: "oauth", provider },
+      contexts: {
+        oauth: {
+          provider,
+          callbackURL: `${window.location.origin}/auth/callback`,
+          userAgent: navigator.userAgent,
+          currentURL: window.location.href,
+        },
+      },
+    });
+    console.error(`OAuth ${provider} error:`, error);
+  };
+
+  // Extract OAuth execution logic
+  const executeOAuthSignIn = async (provider: OAuthProvider) => {
+    const callbackURL = `${window.location.origin}/auth/callback`;
+
+    return await Sentry.startSpan(
+      {
+        op: "auth.oauth",
+        name: `OAuth Sign In - ${provider}`,
+      },
+      async (span) => {
+        span.setAttribute("provider", provider);
+        span.setAttribute("callbackURL", callbackURL);
+
+        const data = await signIn.social({ provider, callbackURL });
+
+        if (data.error) {
+          span.setAttribute("error", true);
+          span.setAttribute(
+            "errorMessage",
+            data.error.message || "Unknown error"
+          );
+          throw new Error(data.error.message || "Authentication failed");
+        }
+
+        span.setAttribute("success", true);
+        return data;
+      }
+    );
+  };
+
+  // Simplified main handler
   const handleOAuthClick = async (provider: OAuthProvider) => {
-    // Reset any previous errors
     setError(null);
     setLoadingProvider(provider);
 
     try {
-      // Create a span for performance monitoring
-      await Sentry.startSpan(
-        {
-          op: "auth.oauth",
-          name: `OAuth Sign In - ${provider}`,
-        },
-        async (span) => {
-          // Add attributes for monitoring
-          span.setAttribute("provider", provider);
-          span.setAttribute(
-            "callbackURL",
-            `${window.location.origin}/auth/callback`
-          );
-
-          const data = await signIn.social({
-            provider,
-            callbackURL: `${window.location.origin}/auth/callback`,
-          });
-
-          if (data.error) {
-            span.setAttribute("error", true);
-            span.setAttribute(
-              "errorMessage",
-              data.error.message || "Unknown error"
-            );
-            throw new Error(data.error.message || "Authentication failed");
-          }
-
-          span.setAttribute("success", true);
-          return data;
-        }
-      );
-
-      // If we reach here, authentication started successfully
-      // The user will be redirected, so we don't need to clear loading state
+      await executeOAuthSignIn(provider);
+      // Success - user will be redirected, no need to clear loading state
     } catch (error) {
-      // Log error to Sentry
-      Sentry.captureException(error, {
-        tags: {
-          section: "oauth",
-          provider,
-        },
-        contexts: {
-          oauth: {
-            provider,
-            callbackURL: `${window.location.origin}/auth/callback`,
-          },
-        },
-      });
-
-      console.error(`OAuth ${provider} error:`, error);
-      setError(`Authentication with ${provider} failed. Please try again.`);
-      setLoadingProvider(null);
+      handleAuthError(error, provider);
     }
   };
 

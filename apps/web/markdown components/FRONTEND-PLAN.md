@@ -5,6 +5,7 @@
 ## 🎯 **Design Philosophy**
 
 ### **Core Principles**
+
 - **Developer-First**: Clean, intuitive interface that developers love
 - **Mobile-First**: Designed for mobile app development with responsive web
 - **Community-Focused**: Emphasizing collaboration and project sharing
@@ -12,6 +13,7 @@
 - **Performance-Driven**: Fast loading, smooth interactions
 
 ### **User Experience Goals**
+
 - **Zero-Friction Sign-in**: OAuth-based authentication (Google, GitHub, Guest)
 - **Instant Value**: Users see great content immediately
 - **Easy Collaboration**: Simple project sharing and collaboration requests
@@ -21,17 +23,21 @@
 ## 🔐 **Authentication & Onboarding**
 
 ### **Sign-In Strategy: OAuth + Guest Access**
+
 **Primary Options:**
+
 - **🐙 GitHub OAuth**: Perfect for developers, auto-imports repos
 - **🎯 Google OAuth**: Broader reach, easy sign-up
 - **🔍 Guest Browse**: No friction exploration
 - **📧 Magic Link Email**: Passwordless, secure alternative
 
 **Additional OAuth Considerations:**
+
 - **🦋 Twitter/X**: Developer community presence
 - **🎨 Discord**: Developer community integration
 
 **Two-Column Hero Section in Landing Page Layout:**
+
 ```
 ┌─────────────────────────────────────────────────────────────┐
 │                     CodeCave.tech                           │
@@ -65,6 +71,7 @@
 ## 📱 **Page Layouts & Structure**
 
 ### **1. Landing Page (Unauthenticated) - Updated**
+
 ```
 ┌─────────────────────────────────────────────────────────────┐
 │ NavBar: [🏠 CodeCave] [🔍 Explore] [📈 Trending] [🚀 Join Us] │
@@ -95,6 +102,7 @@
 ```
 
 ### **2. Main Feed (Authenticated) - Professional Style**
+
 ```
 ┌─────────────────────────────────────────────────────────────┐
 │ NavBar: [🏠 Feed] [🔍 Search] [🤝 Collabs] [👥 Groups] [👤 You] │
@@ -122,6 +130,7 @@
 ```
 
 ### **3. Collaboration Requests Tab**
+
 ```
 ┌─────────────────────────────────────────────────────────────┐
 │ NavBar: [🏠 Feed] [🔍 Search] [🤝 Collabs] [👥 Groups] [👤 You] │
@@ -159,6 +168,7 @@
 ```
 
 ### **4. Groups Tab**
+
 ```
 ┌─────────────────────────────────────────────────────────────┐
 │ NavBar: [🏠 Feed] [🔍 Search] [🤝 Collabs] [👥 Groups] [👤 You] │
@@ -195,6 +205,7 @@
 ```
 
 ### **5. Search & Discovery Page**
+
 ```
 ┌─────────────────────────────────────────────────────────────┐
 │ NavBar: [🏠 Feed] [🔍 Search] [🔔 Notifications] [👤 Profile] │
@@ -231,6 +242,7 @@
 ```
 
 ### **6. Create/Edit Project Page**
+
 ```
 ┌─────────────────────────────────────────────────────────────┐
 │ NavBar: [🏠 Feed] [🔍 Search] [🔔 Notifications] [👤 Profile] │
@@ -264,6 +276,7 @@
 ```
 
 ### **7. Notifications Page**
+
 ```
 ┌─────────────────────────────────────────────────────────────┐
 │ NavBar: [🏠 Feed] [🔍 Search] [🔔 Notifications] [👤 Profile] │
@@ -299,6 +312,7 @@
 ## 🎨 **Design System**
 
 ### **Color Palette**
+
 ```
 Primary Colors:
 - 🟣 Purple: #7C3AED (brand primary)
@@ -315,6 +329,7 @@ Neutral Colors:
 ```
 
 ### **Typography**
+
 ```
 Headings: Inter (bold, clean)
 Body: Inter (readable, modern)
@@ -322,6 +337,7 @@ Code: JetBrains Mono (developer-friendly)
 ```
 
 ### **Component Library**
+
 - **Buttons**: Primary, Secondary, Ghost, Icon
 - **Cards**: Project Card, Profile Card, Notification Card
 - **Forms**: Input, Textarea, Select, Tags Input
@@ -332,11 +348,13 @@ Code: JetBrains Mono (developer-friendly)
 ## 📱 **Responsive Design**
 
 ### **Breakpoints**
+
 - **Mobile**: 320px - 768px (single column)
 - **Tablet**: 768px - 1024px (two columns)
 - **Desktop**: 1024px+ (three columns)
 
 ### **Mobile-First Approach**
+
 - Stack sidebar content vertically
 - Simplified navigation (hamburger menu)
 - Touch-friendly interaction zones
@@ -346,6 +364,7 @@ Code: JetBrains Mono (developer-friendly)
 ## 🚀 **Performance Optimizations**
 
 ### **Loading Strategy**
+
 - **Critical CSS**: Inline above-the-fold styles
 - **Progressive Loading**: Skeleton screens while loading
 - **Image Optimization**: WebP format, lazy loading
@@ -353,6 +372,7 @@ Code: JetBrains Mono (developer-friendly)
 - **CDN Integration**: Static assets via CDN
 
 ### **User Experience**
+
 - **Instant Navigation**: Prefetch on hover
 - **Optimistic Updates**: Update UI immediately
 - **Offline Support**: Cache key content
@@ -362,6 +382,7 @@ Code: JetBrains Mono (developer-friendly)
 ## 📊 **Analytics & Monitoring**
 
 ### **User Analytics**
+
 - **Page Views**: Track popular content
 - **Engagement**: Time spent, interactions
 - **Conversion**: Sign-ups, project posts
@@ -369,6 +390,7 @@ Code: JetBrains Mono (developer-friendly)
 - **Error Tracking**: Real-time error monitoring
 
 ### **A/B Testing**
+
 - **Sign-up Flow**: Test different approaches
 - **Content Layout**: Optimize for engagement
 - **Call-to-Actions**: Improve conversion rates
@@ -377,6 +399,7 @@ Code: JetBrains Mono (developer-friendly)
 ## 🔧 **Development Workflow**
 
 ### **Phase 1: MVP Foundation**
+
 1. **Setup**: Next.js app with Tailwind CSS
 2. **Authentication**: GitHub OAuth integration
 3. **Basic Layouts**: Landing page, feed, profile
@@ -384,6 +407,7 @@ Code: JetBrains Mono (developer-friendly)
 5. **Responsive Design**: Mobile-first implementation
 
 ### **Phase 2: Core Features**
+
 1. **Project Creation**: Rich text editor, image uploads
 2. **Social Features**: Like, comment, follow
 3. **Search**: Basic search functionality
@@ -391,6 +415,7 @@ Code: JetBrains Mono (developer-friendly)
 5. **Profile Enhancement**: Stats, achievements
 
 ### **Phase 3: Advanced Features**
+
 1. **Analytics Dashboard**: User insights
 2. **Advanced Search**: Filters, sorting
 3. **Pro Features**: Enhanced profiles, analytics
@@ -400,6 +425,7 @@ Code: JetBrains Mono (developer-friendly)
 ## 🎯 **Success Metrics**
 
 ### **User Engagement**
+
 - **Daily Active Users**: Target 70% retention
 - **Projects Posted**: Average 2 per user per month
 - **Comments/Likes**: High engagement rates
@@ -407,6 +433,7 @@ Code: JetBrains Mono (developer-friendly)
 - **Return Visits**: 3+ times per week
 
 ### **Platform Growth**
+
 - **User Sign-ups**: 1000+ users by month 3
 - **Content Creation**: 500+ projects by month 3
 - **Community Building**: Active discussions, collaborations
@@ -414,7 +441,7 @@ Code: JetBrains Mono (developer-friendly)
 
 ---
 
-**This frontend plan provides a comprehensive roadmap for building CodeCave.tech with a focus on developer experience, easy sign-in, and engaging community features.** 🚀 
+**This frontend plan provides a comprehensive roadmap for building CodeCave.tech with a focus on developer experience, easy sign-in, and engaging community features.** 🚀
 
 ### **What Makes CodeCave Different from Reddit & Others:**
 
@@ -422,47 +449,49 @@ Code: JetBrains Mono (developer-friendly)
 
 2. **🤝 Collaboration-First**: Built specifically for finding project partners and collaborators, not just discussion. Direct collaboration request system.
 
-3. **🎯 Developer-Specific Features**: 
+3. **🎯 Developer-Specific Features**:
    - GitHub integration for automatic portfolio building
    - Code syntax highlighting in posts
    - Project analytics and tracking
    - Skills-based matching for collaborations
 
-4. **💡 Constructive Feedback Culture**: 
+4. **💡 Constructive Feedback Culture**:
    - No downvoting system to prevent toxicity
    - Feedback-focused rather than criticism-focused
    - Built-in project improvement suggestions
 
-5. **📈 Growth-Oriented**: 
+5. **📈 Growth-Oriented**:
    - Track your development journey
    - Portfolio building integrated into the platform
    - Achievement system for learning milestones
 
-6. **🌟 Quality Over Quantity**: 
+6. **🌟 Quality Over Quantity**:
    - Curated content over viral posts
    - Project-based communities rather than general discussion
    - Focus on actual building and creating
 
-7. **🎮 Project-Based Groups**: 
+7. **🎮 Project-Based Groups**:
    - Groups form around specific projects and technologies
    - Temporary groups for hackathons and challenges
    - Skill-level appropriate groupings
 
-8. **🔍 No Algorithm Manipulation**: 
+8. **🔍 No Algorithm Manipulation**:
    - Chronological feeds option
    - Transparent discovery mechanisms
    - User-controlled content filtering
 
 ### **Removed Features (Based on User Feedback):**
+
 - ❌ Traditional job postings (feature flag for later)
 - ❌ Following tab (replaced with Groups focus)
 - ❌ New Project button in sidebar (integrated into main flow)
 - ❌ Traditional advertising (replaced with project promotions)
 
 ### **Enhanced Features:**
+
 - ✅ Professional-style feed
 - ✅ Collaboration request system
 - ✅ Advanced group management
 - ✅ Project-based promotions instead of ads
 - ✅ Integrated feedback system
-- ✅ Mobile-first responsive design 
+- ✅ Mobile-first responsive design

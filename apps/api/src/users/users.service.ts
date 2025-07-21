@@ -38,7 +38,9 @@ export class UsersService {
     const userData: CreateUserInput = {
       email: profile.email,
       name: profile.name,
-      avatar: profile.avatar,
+      emailVerified: true, // OAuth users are email verified
+      image: profile.avatar, // Use 'image' field (Better Auth standard)
+      avatar: profile.avatar, // Keep avatar for codecave compatibility
       bio: profile.bio,
       website: profile.website,
       location: profile.location,
