@@ -25,13 +25,16 @@ jobs:
             echo "📁 Navigating to project directory..."
             cd ~/codecave || { echo "❌ Project directory not found"; exit 1; }
 
+            # Pull latest changes first
+            echo "🔄 Pulling latest changes..."
+            git pull origin main || { echo "❌ Failed to pull latest changes"; exit 1; }
+
             # Make deployment script executable
+            echo "🔧 Making deployment script executable..."
             chmod +x scripts/deploy-server.sh
 
             # Run deployment script with Doppler token
-            echo "� Starting deployment..."
+            echo "🚀 Starting deployment..."
             DOPPLER_TOKEN="${{ secrets.DOPPLER_TOKEN }}" ./scripts/deploy-server.sh
 
             echo "🎉 Deployment completed successfully!"
-
-            echo "� Deployment completed successfully!"
