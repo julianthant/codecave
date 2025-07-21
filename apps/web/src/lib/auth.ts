@@ -54,10 +54,6 @@ function createUserFieldsConfig() {
       type: "string",
       required: false,
     },
-    linkedinProfile: {
-      type: "string",
-      required: false,
-    },
     isActive: {
       type: "boolean",
       required: false,

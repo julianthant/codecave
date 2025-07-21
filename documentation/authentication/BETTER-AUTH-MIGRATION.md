@@ -70,7 +70,6 @@ CREATE TABLE users (
   location VARCHAR(255),
   company VARCHAR(255),
   github_username VARCHAR(255),
-  linkedin_profile VARCHAR(255),
   is_active BOOLEAN DEFAULT TRUE,
   is_pro BOOLEAN DEFAULT FALSE
 );
