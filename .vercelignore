@@ -1,0 +1,26 @@
+# Ignore API and other apps - only deploy web app
+
+apps/api
+config
+documentation
+infra
+kong
+scripts
+
+# Ignore development files
+
+.env*
+!.env.example
+*.log
+.DS_Store
+
+# Ignore non-essential directories
+
+node_modules
+.git
+.vscode
+.idea
+
+# Turbo cache
+
+.turbo
