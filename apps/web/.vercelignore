@@ -1,0 +1,28 @@
+# Ignore development files
+
+.env*
+!.env.example
+*.log
+.DS_Store
+
+# Ignore build artifacts that shouldn't be in source
+
+.next
+.turbo
+node_modules
+
+# Ignore test files
+
+tests/
+playwright-report/
+test-results/
+
+# Ignore documentation and config files not needed for build
+
+\*.md
+!README.md
+
+# Ignore development tools
+
+.vscode/
+.idea/
