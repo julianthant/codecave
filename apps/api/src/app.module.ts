@@ -5,7 +5,6 @@ import { SentryModule, SentryGlobalFilter } from "@sentry/nestjs/setup";
 import { AppController } from "./app.controller";
 import { AppService } from "./app.service";
 import { PrismaModule } from "./prisma/prisma.module";
-import { AuthController } from "./auth.controller";
 import { AuthModule } from "@thallesp/nestjs-better-auth";
 import { UsersModule } from "./users/users.module";
 import { auth } from "./lib/auth";
