@@ -56,7 +56,7 @@ export default function Dashboard() {
               {session.user.image && (
                 <Image
                   src={session.user.image}
-                  alt={session.user.name}
+                  alt="User Avatar"
                   width={48}
                   height={48}
                   className="rounded-full"
@@ -88,7 +88,7 @@ export default function Dashboard() {
               <button
                 onClick={handleSignOut}
                 disabled={isSigningOut}
-                className="bg-red-600 hover:bg-red-700 disabled:opacity-50 disabled:cursor-not-allowed px-4 py-2 rounded-lg text-white transition-colors"
+                className="bg-red-600 hover:bg-red-700 disabled:opacity-50 px-4 py-2 rounded-lg text-white transition-colors disabled:cursor-not-allowed"
               >
                 {isSigningOut ? "Signing Out..." : "Sign Out"}
               </button>
