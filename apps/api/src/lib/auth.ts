@@ -13,12 +13,18 @@ export const auth = betterAuth({
   }),
 
   // Configure base URL for redirects
-  baseURL: process.env.BETTER_AUTH_URL || "http://localhost:3001",
+  baseURL: process.env.BETTER_AUTH_URL || 
+    (process.env.NODE_ENV === "production" 
+      ? "https://api.codecave.tech" 
+      : "http://localhost:3001"),
 
   // Configure trusted origins for CORS
   trustedOrigins: [
     "http://localhost:3000", // Frontend development
     "http://localhost:3001", // API development
+    "https://codecave.tech", // Production frontend
+    "https://www.codecave.tech", // Production frontend with www
+    "https://api.codecave.tech", // Production API
   ],
 
   // Disable email/password authentication
