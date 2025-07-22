@@ -13,9 +13,10 @@ export const auth = betterAuth({
   }),
 
   // Configure base URL for redirects
-  baseURL: process.env.BETTER_AUTH_URL || 
-    (process.env.NODE_ENV === "production" 
-      ? "https://api.codecave.tech" 
+  baseURL:
+    process.env.BETTER_AUTH_URL ||
+    (process.env.NODE_ENV === "production"
+      ? "https://api.codecave.tech"
       : "http://localhost:3001"),
 
   // Configure trusted origins for CORS
