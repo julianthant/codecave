@@ -4,6 +4,15 @@ import type { NextConfig } from "next";
 const nextConfig: NextConfig = {
   /* config options here */
   serverExternalPackages: ["import-in-the-middle"],
+  
+  // Configure image domains for OAuth profile pictures
+  images: {
+    domains: [
+      "lh3.googleusercontent.com", // Google profile pictures
+      "avatars.githubusercontent.com", // GitHub profile pictures
+      "github.com", // GitHub profile pictures
+    ],
+  },
 };
 
 export default withSentryConfig(nextConfig, {

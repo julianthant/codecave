@@ -11,12 +11,21 @@ export const auth = betterAuth({
   database: prismaAdapter(prisma, {
     provider: "postgresql",
   }),
-  
+
+  // Configure base URL for redirects
+  baseURL: process.env.BETTER_AUTH_URL || "http://localhost:3001",
+
+  // Configure trusted origins for CORS
+  trustedOrigins: [
+    "http://localhost:3000", // Frontend development
+    "http://localhost:3001", // API development
+  ],
+
   // Disable email/password authentication
   emailAndPassword: {
     enabled: false,
   },
-  
+
   // Configure social providers - GitHub and Google only
   socialProviders: {
     github: {
@@ -28,4 +37,5 @@ export const auth = betterAuth({
       clientSecret: process.env.GOOGLE_CLIENT_SECRET as string,
     },
   },
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
 }) as any;

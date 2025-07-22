@@ -1,19 +1,32 @@
 "use client";
 
-import { useSession } from "@/lib/auth-client";
+import { useSession, signOut } from "@/lib/auth-client";
 import { useRouter } from "next/navigation";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import Image from "next/image";
 
 export default function Dashboard() {
   const { data: session, isPending } = useSession();
   const router = useRouter();
+  const [isSigningOut, setIsSigningOut] = useState(false);
 
   useEffect(() => {
     if (!isPending && !session) {
       router.push("/");
     }
   }, [session, isPending, router]);
+
+  const handleSignOut = async () => {
+    try {
+      setIsSigningOut(true);
+      await signOut();
+      // Redirect to landing page after successful sign out
+      router.push("/");
+    } catch (error) {
+      console.error("Sign out error:", error);
+      setIsSigningOut(false);
+    }
+  };
 
   if (isPending) {
     return (
@@ -73,10 +86,11 @@ export default function Dashboard() {
 
             <div className="mt-6">
               <button
-                onClick={() => (window.location.href = "/api/auth/sign-out")}
-                className="bg-red-600 hover:bg-red-700 px-4 py-2 rounded-lg text-white transition-colors"
+                onClick={handleSignOut}
+                disabled={isSigningOut}
+                className="bg-red-600 hover:bg-red-700 disabled:opacity-50 disabled:cursor-not-allowed px-4 py-2 rounded-lg text-white transition-colors"
               >
-                Sign Out
+                {isSigningOut ? "Signing Out..." : "Sign Out"}
               </button>
             </div>
           </div>

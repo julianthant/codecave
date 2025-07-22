@@ -9,18 +9,12 @@ const getBaseURL = () => {
     );
   }
 
-  // For development, use localhost
-  return process.env.NEXT_PUBLIC_BETTER_AUTH_URL || "http://localhost:3000";
+  // For development, use the API server localhost
+  return process.env.NEXT_PUBLIC_BETTER_AUTH_URL || "http://localhost:3001";
 };
 
 export const authClient = createAuthClient({
   baseURL: getBaseURL(),
-  trustedOrigins: [
-    "http://localhost:3000",
-    "https://codecave.tech",
-    "https://www.codecave.tech",
-    "https://api.codecave.tech",
-  ],
 });
 
 export const { signIn, signOut, signUp, useSession } = authClient;

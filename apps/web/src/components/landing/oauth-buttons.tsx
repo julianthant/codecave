@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { Code2, Loader2 } from "lucide-react";
-import { signIn } from "../../lib/auth-client";
+import { signIn } from "@/lib/auth-client";
 import * as Sentry from "@sentry/nextjs";
 
 type OAuthProvider = "github" | "google";
@@ -98,8 +98,8 @@ const OAuthButtons: React.FC = () => {
     try {
       // Use Better Auth's social provider signin
       await signIn.social({
-        provider,
-        callbackURL: "/home",
+        provider: provider,
+        callbackURL: `${window.location.origin}/auth/callback`,
       });
       // Success - user will be redirected
     } catch (error) {
