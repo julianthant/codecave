@@ -3,7 +3,7 @@
   "version": 2,
   "buildCommand": "pnpm build",
   "devCommand": "pnpm dev",
-  "installCommand": "cd ../.. && pnpm install",
+  "installCommand": "cd ../.. && pnpm install --filter @codecave/web",
   "outputDirectory": ".next",
   "framework": "nextjs",
   "functions": {
