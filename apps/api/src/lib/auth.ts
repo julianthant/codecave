@@ -49,6 +49,7 @@ export const auth = betterAuth({
     "http://localhost:3001", // API development
     "https://codecave.tech", // Production frontend
     "https://www.codecave.tech", // Production frontend with www
+    "https://app.codecave.tech", // Production frontend subdomain
     "https://api.codecave.tech", // Production API
   ],
 

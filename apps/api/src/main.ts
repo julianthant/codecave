@@ -13,7 +13,12 @@ async function bootstrap() {
 
   // Configure CORS for both development and production
   app.enableCors({
-    origin: process.env.FRONTEND_URL || "http://localhost:3000",
+    origin: [
+      "http://localhost:3000", // Development
+      "https://codecave.tech", // Production
+      "https://www.codecave.tech", // Production with www
+      "https://app.codecave.tech", // Production subdomain
+    ],
     credentials: true, // Required for cookies/session
     methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
     allowedHeaders: ["Content-Type", "Authorization"],
