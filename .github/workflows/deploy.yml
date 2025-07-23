@@ -1,78 +1,17 @@
-name: Build and Deploy to Production
+name: Deploy to Production
 
 on:
   push:
     branches: [main]
   workflow_dispatch: # Allow manual deployment
 
-env:
-  REGISTRY: ghcr.io
-  API_IMAGE_NAME: ghcr.io/${{ github.repository }}/api
-
 jobs:
-  build:
-    name: Build Docker Images
-    runs-on: ubuntu-latest
-    permissions:
-      contents: read
-      packages: write
-
-    outputs:
-      api-image: ${{ steps.image.outputs.api-image }}
-      api-digest: ${{ steps.build.outputs.digest }}
-
-    steps:
-      - name: Checkout repository
-        uses: actions/checkout@v4
-
-      - name: Log in to Container Registry
-        uses: docker/login-action@v3
-        with:
-          registry: ${{ env.REGISTRY }}
-          username: ${{ github.actor }}
-          password: ${{ secrets.GITHUB_TOKEN }}
-
-      - name: Set up Docker Buildx
-        uses: docker/setup-buildx-action@v3
-
-      - name: Extract metadata
-        id: meta
-        uses: docker/metadata-action@v5
-        with:
-          images: ${{ env.API_IMAGE_NAME }}
-          tags: |
-            type=ref,event=branch
-            type=ref,event=pr
-            type=sha,prefix={{branch}}-
-            type=raw,value=latest,enable={{is_default_branch}}
-
-      - name: Build and push API image
-        id: build
-        uses: docker/build-push-action@v5
-        with:
-          context: ./apps/api
-          file: ./apps/api/Dockerfile.prod
-          push: true
-          tags: ${{ steps.meta.outputs.tags }}
-          labels: ${{ steps.meta.outputs.labels }}
-          cache-from: type=gha
-          cache-to: type=gha,mode=max
-          platforms: linux/amd64
-
-      - name: Output image name
-        id: image
-        run: echo "api-image=${{ env.API_IMAGE_NAME }}:latest" >> $GITHUB_OUTPUT
-
   deploy:
-    name: Deploy to Production Server
+    name: Deploy to Server
     runs-on: ubuntu-latest
-    needs: build
-    environment: production
+    environment: production # Add environment protection
 
     steps:
-      - name: Checkout repository
-        uses: actions/checkout@v4
-
       - name: Deploy to server
         uses: appleboy/ssh-action@v1.0.3
         with:
@@ -82,60 +21,43 @@ jobs:
           script: |
             set -e  # Exit on any error
 
-            echo "🚀 Starting CodeCave deployment with pre-built image..."
-
             # Navigate to project directory
             echo "📁 Navigating to project directory..."
             cd /root/codecave || { echo "❌ Project directory not found"; exit 1; }
 
-            # Pull latest code for docker-compose and configs
-            echo "🔄 Pulling latest configuration..."
-            git reset --hard HEAD
-            git clean -fd
-            git pull origin main || { echo "❌ Failed to pull latest changes"; exit 1; }
-
-            # Login to GitHub Container Registry
-            echo "🔐 Logging into GitHub Container Registry..."
-            echo "${{ secrets.GITHUB_TOKEN }}" | docker login ghcr.io -u ${{ github.actor }} --password-stdin
-
-            # Pull the pre-built image
-            echo "📥 Pulling pre-built Docker image..."
-            docker pull ${{ needs.build.outputs.api-image }}
-
-            # Tag the image for local use
-            docker tag ${{ needs.build.outputs.api-image }} codecave-api:latest
-
-            # Stop existing services
-            echo "🛑 Stopping existing services..."
-            DOPPLER_TOKEN="${{ secrets.DOPPLER_TOKEN }}" doppler run -- docker compose -f docker-compose.prod.yml down --remove-orphans || true
-
-            # Clean up old images (but keep the new one we just pulled)
-            echo "🧹 Cleaning up old images..."
-            docker image prune -f
-
-            # Start services with pre-built image
-            echo "🚀 Starting services with pre-built image..."
-            DOPPLER_TOKEN="${{ secrets.DOPPLER_TOKEN }}" doppler run -- docker compose -f docker-compose.prod.yml up -d
-
-            # Wait for services to start
-            echo "⏳ Waiting for services to start..."
-            sleep 30
-
-            # Health checks
-            echo "🏥 Running health checks..."
-            sleep 5
-
-            # Check API health
-            if curl -f http://localhost:3001/health/live >/dev/null 2>&1; then
-                echo "✅ API health check passed"
+            # Check if this is a git repository
+            echo "🔍 Checking git repository status..."
+            if [ ! -d ".git" ]; then
+              echo "❌ Not a git repository. Cloning fresh copy..."
+              cd /root
+              rm -rf codecave
+              git clone https://github.com/julianthant/codecave.git
+              cd codecave
             else
-                echo "⚠️  API health check failed"
-                docker logs codecave-api-prod || true
+              # Reset any local changes and pull latest
+              echo "🔄 Resetting local changes and pulling latest..."
+              git reset --hard HEAD
+              git clean -fd
+              git pull origin main || { echo "❌ Failed to pull latest changes"; exit 1; }
             fi
 
-            # Show running containers
-            echo "✅ Deployment complete! Running containers:"
-            docker ps --format "table {{.Names}}\t{{.Status}}\t{{.Ports}}"
+            # Verify the script exists
+            echo "🔍 Verifying deployment script exists..."
+            if [ ! -f "scripts/deploy-server.sh" ]; then
+              echo "❌ Deploy script not found even after git pull"
+              echo "📂 Current directory contents:"
+              ls -la
+              echo "📂 Scripts directory contents:"
+              ls -la scripts/ || echo "Scripts directory doesn't exist"
+              exit 1
+            fi
 
-            echo "🎉 Deployment completed!"
-            echo "📍 API available at: https://api.codecave.tech"
+            # Make deployment script executable
+            echo "🔧 Making deployment script executable..."
+            chmod +x scripts/deploy-server.sh
+
+            # Run deployment script with Doppler token
+            echo "🚀 Starting deployment..."
+            DOPPLER_TOKEN="${{ secrets.DOPPLER_TOKEN }}" ./scripts/deploy-server.sh
+
+            echo "🎉 Deployment completed successfully!"

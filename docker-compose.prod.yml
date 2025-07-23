@@ -127,7 +127,9 @@ services:
 
   # NestJS API - Main application with production optimizations
   api:
-    image: codecave-api:latest
+    build:
+      context: .
+      dockerfile: apps/api/Dockerfile.prod
     container_name: codecave-api-prod
     environment:
       # Core application configuration
