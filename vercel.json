@@ -4,7 +4,7 @@
   "buildCommand": "pnpm --filter @codecave/web build",
   "devCommand": "pnpm --filter @codecave/web dev",
   "installCommand": "pnpm install",
-  "outputDirectory": "apps/web/.next",
+  "outputDirectory": ".next",
   "framework": "nextjs",
   "regions": ["iad1"]
 }
