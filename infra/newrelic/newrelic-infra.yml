@@ -1,1 +1,27 @@
+# New Relic Infrastructure Agent Configuration
 license_key: 997ac2c1092758946616c3070b82dda9FFFFNRAL
+
+# Enable infrastructure monitoring
+enable_process_metrics: true
+enable_docker_containers: true
+
+# Custom attributes for this host
+custom_attributes:
+  environment: production
+  service: codecave
+  team: platform
+  region: sfo3
+
+# Log forwarding
+log_forwarder:
+  enabled: true
+  sources:
+    - name: docker-logs
+      pattern: "/var/log/docker/containers/*/*.log"
+      attributes:
+        service: docker
+        environment: production
+
+# Process monitoring
+process_monitoring:
+  enabled: true

@@ -8,6 +8,7 @@ import { PrismaModule } from "./prisma/prisma.module";
 import { AuthModule, AuthGuard } from "@thallesp/nestjs-better-auth";
 import { UsersModule } from "./users/users.module";
 import { auth } from "./lib/auth";
+import { DatabaseRouterModule } from "./lib/database-router.module";
 
 @Module({
   imports: [
@@ -16,6 +17,7 @@ import { auth } from "./lib/auth";
     }),
     SentryModule.forRoot(),
     PrismaModule,
+    DatabaseRouterModule,
     AuthModule.forRoot(auth, {
       disableExceptionFilter: false,
       disableTrustedOriginsCors: false,

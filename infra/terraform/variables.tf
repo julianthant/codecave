@@ -91,6 +91,12 @@ variable "db_size" {
   default     = "db-s-1vcpu-1gb" # 1 vCPU, 1GB RAM, 10GB storage
 }
 
+variable "db_replica_size" {
+  description = "Size of the database read replicas"
+  type        = string
+  default     = "db-s-1vcpu-1gb" # Same size as primary for consistency
+}
+
 variable "db_node_count" {
   description = "Number of database nodes"
   type        = number

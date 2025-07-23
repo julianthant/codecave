@@ -1,85 +1,94 @@
-# Multi-stage production Dockerfile for NestJS API
-# ===================================================
+# Production-Optimized Multi-stage Dockerfile for NestJS API
+# ========================================================
+# Target: <400MB image size, <30s startup time, production security
+# ========================================================
 
-# Stage 1: Build Stage
-# This stage includes all dependencies (dev + prod) needed for building
-FROM node:22-alpine AS builder
+# Stage 1: Dependencies Stage (Cached layer optimization)
+FROM node:22-alpine AS dependencies
 
-# Set working directory
+# Install system dependencies and pnpm in single layer
+RUN apk add --no-cache \
+    curl \
+    dumb-init \
+    && npm install -g pnpm@8.15.0 \
+    && rm -rf /var/cache/apk/*
+
 WORKDIR /app
 
-# Install pnpm globally with specific version for consistency
-RUN npm install -g pnpm@8.15.0
-
-# Copy package files for dependency resolution
-COPY package*.json ./
-COPY pnpm-lock.yaml ./
-COPY pnpm-workspace.yaml ./
-
-# Copy package.json files for API workspace
+# Copy package files (layer cached unless dependencies change)
+COPY package*.json pnpm-lock.yaml pnpm-workspace.yaml ./
 COPY apps/api/package*.json ./apps/api/
 
-# Install ALL dependencies (including dev dependencies needed for build)
-RUN pnpm install --filter @codecave/api --no-frozen-lockfile
+# Install dependencies with frozen lockfile for reproducible builds
+RUN pnpm install --filter @codecave/api --frozen-lockfile
+
+# ========================================================
+
+# Stage 2: Build Stage
+FROM dependencies AS builder
 
 # Copy source code
 COPY . .
 
-# Generate Prisma client before building
-RUN cd apps/api && npx prisma generate --schema=./prisma/schema.prisma
+# Generate Prisma client and build the application
+RUN cd apps/api && \
+    npx prisma generate --schema=./prisma/schema.prisma && \
+    cd ../.. && \
+    pnpm --filter @codecave/api build
 
-# Build the API (this needs @nestjs/cli and other dev dependencies)
-RUN pnpm --filter @codecave/api build
+# ========================================================
 
-# ===================================================
-
-# Stage 2: Production Stage with Doppler Integration
-# This stage only includes production dependencies and built files
+# Stage 3: Production Runtime Stage
 FROM node:22-alpine AS production
 
-# Set working directory
+# Create app user for security (non-root)
+RUN addgroup -g 1001 -S nodejs && \
+    adduser -S nestjs -u 1001
+
+# Install runtime dependencies only
+RUN apk add --no-cache \
+    curl \
+    dumb-init \
+    && npm install -g pnpm@8.15.0 \
+    && rm -rf /var/cache/apk/* \
+    && rm -rf /tmp/*
+
 WORKDIR /app
 
-# Install system dependencies
-RUN apk add --no-cache curl && \
-    # Install pnpm globally
-    npm install -g pnpm@8.15.0
+# Copy package files for production install
+COPY --from=dependencies /app/package*.json ./
+COPY --from=dependencies /app/pnpm-lock.yaml ./
+COPY --from=dependencies /app/pnpm-workspace.yaml ./
+COPY --from=dependencies /app/apps/api/package*.json ./apps/api/
 
-# Copy package files for dependency resolution
-COPY package*.json ./
-COPY pnpm-lock.yaml ./
-COPY pnpm-workspace.yaml ./
+# Install ONLY production dependencies (smaller image)
+RUN pnpm install --filter @codecave/api --prod --frozen-lockfile && \
+    pnpm store prune && \
+    rm -rf ~/.pnpm-store && \
+    rm -rf /tmp/* && \
+    rm -rf /root/.cache
 
-# Copy package.json files for API workspace
-COPY apps/api/package*.json ./apps/api/
+# Copy built application and generated files from builder stage
+COPY --from=builder --chown=nestjs:nodejs /app/apps/api/dist ./apps/api/dist
+COPY --from=builder --chown=nestjs:nodejs /app/apps/api/generated ./apps/api/generated
 
-# Install ONLY production dependencies (smaller image, faster startup)
-RUN pnpm install --filter @codecave/api --prod --no-frozen-lockfile
+# Set proper permissions and switch to non-root user
+RUN chown -R nestjs:nodejs /app
+USER nestjs
 
-# Copy built application from builder stage
-COPY --from=builder /app/apps/api/dist ./apps/api/dist
-
-# Copy generated Prisma client
-COPY --from=builder /app/apps/api/generated ./apps/api/generated
-
-# Copy any additional files needed at runtime
-COPY --from=builder /app/apps/api/package*.json ./apps/api/
-
-# Create non-root user for security
-RUN addgroup -g 1001 -S nodejs && \
-    adduser -S nextjs -u 1001
-
-# Change ownership of app directory
-RUN chown -R nextjs:nodejs /app
-USER nextjs
+# Set production environment variables
+ENV NODE_ENV=production
+ENV PORT=3001
 
 # Expose the port
 EXPOSE 3001
 
-# Health check for container monitoring
+# Enhanced health check with multiple endpoints
 HEALTHCHECK --interval=30s --timeout=10s --start-period=30s --retries=3 \
-  CMD curl -f http://localhost:3001/health || exit 1
+  CMD curl -f http://localhost:3001/health/ready || exit 1
+
+# Use dumb-init for proper signal handling in containers
+ENTRYPOINT ["dumb-init", "--"]
 
 # Start the production server
-# Environment variables will be injected by doppler run from the host
 CMD ["pnpm", "--filter", "@codecave/api", "start:prod"] 

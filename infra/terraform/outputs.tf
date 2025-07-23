@@ -19,21 +19,21 @@ output "droplet_ipv6" {
   value       = digitalocean_droplet.app_server.ipv6_address
 }
 
-# Database Information
+# Database outputs
 output "database_cluster_id" {
-  description = "Database cluster ID"
+  description = "ID of the main database cluster"
   value       = digitalocean_database_cluster.codecave_postgres.id
   sensitive   = true
 }
 
 output "database_host" {
-  description = "Database cluster host"
+  description = "Database host"
   value       = digitalocean_database_cluster.codecave_postgres.host
   sensitive   = true
 }
 
 output "database_port" {
-  description = "Database cluster port"
+  description = "Database port"
   value       = digitalocean_database_cluster.codecave_postgres.port
 }
 
@@ -55,15 +55,54 @@ output "database_password" {
 }
 
 output "database_connection_string" {
-  description = "Database connection string"
-  value       = "postgresql://${digitalocean_database_user.codecave_app_user.name}:${digitalocean_database_user.codecave_app_user.password}@${digitalocean_database_cluster.codecave_postgres.host}:${digitalocean_database_cluster.codecave_postgres.port}/${digitalocean_database_db.codecave_main.name}?sslmode=require"
+  description = "Main database connection string"
+  value       = digitalocean_database_cluster.codecave_postgres.uri
   sensitive   = true
 }
 
-output "database_pool_connection_string" {
-  description = "Database connection pool string"
-  value       = "postgresql://${digitalocean_database_user.codecave_app_user.name}:${digitalocean_database_user.codecave_app_user.password}@${digitalocean_database_connection_pool.codecave_pool.host}:${digitalocean_database_connection_pool.codecave_pool.port}/${digitalocean_database_connection_pool.codecave_pool.name}?sslmode=require"
+# Write Pool Connection (Main Database)
+output "database_write_pool_connection_string" {
+  description = "Write pool connection string for the main database"
+  value       = digitalocean_database_connection_pool.codecave_write_pool.uri
   sensitive   = true
+}
+
+# Read Replica Connection Strings (Direct Connection)
+output "database_read_replica_primary_host" {
+  description = "Read replica primary host"
+  value       = digitalocean_database_replica.codecave_read_replica_primary.host
+  sensitive   = true
+}
+
+output "database_read_replica_primary_connection_string" {
+  description = "Read replica primary connection string"
+  value       = digitalocean_database_replica.codecave_read_replica_primary.uri
+  sensitive   = true
+}
+
+output "database_read_replica_east_host" {
+  description = "Read replica east host"
+  value       = digitalocean_database_replica.codecave_read_replica_east.host
+  sensitive   = true
+}
+
+output "database_read_replica_east_connection_string" {
+  description = "Read replica east connection string"
+  value       = digitalocean_database_replica.codecave_read_replica_east.uri
+  sensitive   = true
+}
+
+# Database Configuration Summary
+output "database_replica_info" {
+  description = "Database replica configuration summary"
+  value = {
+    primary_region = var.region
+    replica_regions = ["sfo3", "nyc1"]
+    write_pool_size = 20
+    read_replicas_count = 2
+    connection_method = "direct" # Read replicas use direct connections
+    total_databases = 3 # 1 main + 2 replicas
+  }
 }
 
 # Network Information
