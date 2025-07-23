@@ -1,114 +1,281 @@
 # Infrastructure Documentation
 
-This directory contains documentation related to the infrastructure and deployment of the CodeCave application.
+This directory contains comprehensive infrastructure and deployment documentation for CodeCave.
 
-## 📚 Contents
+## 📚 **Contents**
 
-- [Docker Infrastructure](DOCKER-INFRASTRUCTURE.md) - Docker infrastructure guide
-- [Terraform Guide](TERRAFORM-GUIDE.md) - Setting up infrastructure with Terraform
-- [Docker](DOCKER.md) - Docker setup and usage
-- [Doppler Configuration](DOPPLER-CONFIGURATION.md) - Setting up Doppler for environment variables
-- [Third-Party Tools Setup](THIRD-PARTY-TOOLS-SETUP.md) - Setting up third-party tools
+- [**Docker Infrastructure Guide**](DOCKER-GUIDE.md) - **Complete Docker setup guide**
+  - Development and production Docker configurations
+  - Multi-stage builds and optimization
+  - Container orchestration with Docker Compose
+  - Service management and monitoring
+  - Performance optimization
+  - Troubleshooting and debugging
 
-## 🏗️ Infrastructure Overview
+- [**Terraform Deployment Guide**](TERRAFORM-DEPLOYMENT-GUIDE.md) - **Complete infrastructure deployment**
+  - Digital Ocean infrastructure setup
+  - Terraform configuration and best practices
+  - Production deployment procedures
+  - Security configuration
+  - Monitoring and maintenance
 
-CodeCave uses a modern infrastructure stack:
+- [**Environment & Third-Party Setup**](DOPPLER-AND-THIRD-PARTY-SETUP.md) - **Complete environment management**
+  - Doppler secrets management
+  - Third-party tool integrations
+  - ConfigCat, Blackfire, ImgBot setup
+  - Environment-specific configurations
 
-- **Docker**: For containerization and local development
-- **Terraform**: For infrastructure as code
-- **DigitalOcean**: For cloud hosting
-- **Doppler**: For environment variable management
-- **Kong API Gateway**: For API management
+## 🏗️ **Infrastructure Overview**
 
-### Production Architecture
+CodeCave uses a modern, cloud-native infrastructure stack:
+
+### **Core Technologies**
+
+- **Containerization**: Docker with multi-stage builds
+- **Orchestration**: Docker Compose
+- **Infrastructure as Code**: Terraform
+- **Cloud Provider**: Digital Ocean
+- **Environment Management**: Doppler
+- **API Gateway**: Kong
+
+### **Production Architecture**
 
 ```
-┌──────────────────┐     ┌──────────────────┐     ┌──────────────────┐
-│                  │     │                  │     │                  │
-│  Client Browser  │────▶│  Vercel (Next.js)│────▶│  Kong API Gateway│
-│                  │     │                  │     │                  │
-└──────────────────┘     └──────────────────┘     └────────┬─────────┘
-                                                           │
-                                                           ▼
-┌──────────────────┐     ┌──────────────────┐     ┌──────────────────┐
-│                  │     │                  │     │                  │
-│  PostgreSQL DB   │◀───▶│  NestJS API      │◀───▶│  Redis Cache     │
-│                  │     │                  │     │                  │
-└──────────────────┘     └────────┬─────────┘     └──────────────────┘
-                                  │
-                         ┌────────┼─────────┐
-                         │        │         │
-                         ▼        ▼         ▼
-                ┌──────────┐ ┌───────┐ ┌─────────────┐
-                │          │ │       │ │             │
-                │Meilisearch│ │RabbitMQ│ │DO Spaces   │
-                │          │ │       │ │             │
-                └──────────┘ └───────┘ └─────────────┘
+Production Infrastructure:
+├── Vercel (Frontend Hosting)
+├── Digital Ocean Droplet (Backend Services)
+│   ├── Kong Gateway (80, 443)
+│   ├── NestJS API (3001)
+│   ├── Meilisearch (7700)
+│   ├── RabbitMQ (5672, 15672)
+│   └── Redis Cache (6379)
+├── Digital Ocean Managed PostgreSQL
+├── Digital Ocean Spaces (File Storage)
+└── CDN Distribution
 ```
 
-## 🚀 Getting Started with Infrastructure
+## 🚀 **Quick Start Guides**
 
-### Local Development
+### **For Local Development**
+
+1. **Start here**: [Docker Infrastructure Guide](DOCKER-GUIDE.md)
+2. **Automated setup**: Run `./scripts/setup-dev.sh`
+3. **Services only**: `docker-compose up -d db redis search mq`
+
+### **For Production Deployment**
+
+1. **Infrastructure setup**: [Terraform Deployment Guide](TERRAFORM-DEPLOYMENT-GUIDE.md)
+2. **Environment configuration**: [Environment & Third-Party Setup](DOPPLER-AND-THIRD-PARTY-SETUP.md)
+3. **Deploy**: `doppler run -- make apply` (from `infra/terraform/`)
+
+## 🛠️ **Common Infrastructure Tasks**
+
+### **Development Environment**
 
 ```bash
-# Start infrastructure services
+# Start all development services
+docker-compose up -d
+
+# Start only infrastructure services
 docker-compose up -d db redis search mq
 
-# Verify services are running
-docker-compose ps
+# View service logs
+docker-compose logs -f
+
+# Check service health
+./scripts/health-check.sh
+
+# Clean slate reset
+docker-compose down -v && docker-compose up -d
 ```
 
-### Deploying to Production
-
-1. Set up Terraform:
-   ```bash
-   cd infra/terraform
-   terraform init
-   ```
-
-2. Configure Doppler:
-   ```bash
-   doppler configure set project codecave config prd_all
-   ```
-
-3. Deploy infrastructure:
-   ```bash
-   doppler run -- make apply
-   ```
-
-4. Deploy applications:
-   ```bash
-   doppler run -- docker-compose -f docker-compose.prod.yml up -d
-   ```
-
-## 💰 Infrastructure Cost Estimates
-
-- **Droplet** (s-2vcpu-4gb): ~$24/month
-- **Database** (db-s-1vcpu-1gb): ~$15/month
-- **Volume** (50GB): ~$5/month
-- **Total**: ~$44/month
-
-## 🔧 Maintenance Tasks
-
-### Database Backups
+### **Production Deployment**
 
 ```bash
-# Create a backup
-make db-backup
+# Configure Doppler
+doppler configure set project codecave config prd_all
 
-# Restore a backup
-make db-restore BACKUP_FILE=backup-2025-07-30.sql
+# Deploy infrastructure with Terraform
+cd infra/terraform
+doppler run -- make apply
+
+# Deploy application containers
+doppler run -- docker-compose -f docker-compose.prod.yml up -d --build
+
+# Check deployment status
+./scripts/health-check.sh
 ```
 
-### SSL Certificate Renewal
+### **Environment Management**
 
-SSL certificates are automatically renewed through Let's Encrypt.
+```bash
+# Switch environments
+doppler configure set config dev        # Development
+doppler configure set config prd_all    # Production
 
-### Monitoring
+# View environment variables
+doppler secrets list
 
-- Access Digital Ocean monitoring dashboard for metrics
-- Logs are available through the Digital Ocean console
+# Run commands with secrets
+doppler run -- your-command
+```
+
+## 🔧 **Infrastructure Features**
+
+### **Development Environment**
+
+- ✅ **Full Docker Stack**: PostgreSQL, Redis, Meilisearch, RabbitMQ, Kong
+- ✅ **Hot Reload**: Development containers with live code reloading
+- ✅ **Health Monitoring**: Automated health checks for all services
+- ✅ **Resource Management**: Optimized resource allocation
+- ✅ **Network Isolation**: Custom Docker networks for security
+
+### **Production Environment**
+
+- ✅ **Multi-stage Builds**: Optimized container images (60% smaller)
+- ✅ **Auto-scaling**: Service scaling based on load
+- ✅ **High Availability**: Redundant services and health checks
+- ✅ **Security**: Non-root containers, firewall rules, SSL/TLS
+- ✅ **Monitoring**: Comprehensive logging and metrics
+
+### **Infrastructure as Code**
+
+- ✅ **Terraform**: Complete infrastructure defined as code
+- ✅ **Version Control**: All infrastructure changes tracked
+- ✅ **Reproducible**: Identical environments across stages
+- ✅ **Automated**: Deployment scripts and CI/CD integration
+
+## 💰 **Cost Management**
+
+### **Estimated Monthly Costs**
+
+| Component                 | Development | Production |
+| ------------------------- | ----------- | ---------- |
+| **Local Development**     | $0          | -          |
+| **Digital Ocean Droplet** | -           | ~$24       |
+| **Managed PostgreSQL**    | -           | ~$15       |
+| **Volume Storage (50GB)** | -           | ~$5        |
+| **Spaces + CDN**          | -           | ~$5        |
+| **Total**                 | **$0**      | **~$49**   |
+
+### **Cost Optimization**
+
+- **Development**: Free local Docker environment
+- **Production**: Right-sized resources with auto-scaling
+- **Monitoring**: Built-in Digital Ocean monitoring (no extra cost)
+- **Storage**: Lifecycle policies for automatic cleanup
+
+## 🔐 **Security Features**
+
+### **Container Security**
+
+- **Non-root users** in all production containers
+- **Minimal base images** (Alpine Linux)
+- **Security scanning** for vulnerabilities
+- **Resource limits** to prevent DoS attacks
+
+### **Network Security**
+
+- **VPC isolation** for all cloud resources
+- **Firewall rules** with least-privilege access
+- **Private networking** for internal services
+- **SSL/TLS encryption** for all external traffic
+
+### **Secrets Management**
+
+- **Doppler integration** for secure environment variables
+- **No secrets in code** or configuration files
+- **Environment-specific** secret management
+- **Audit logging** for secret access
+
+## 📊 **Monitoring & Observability**
+
+### **Health Monitoring**
+
+- **Docker health checks** for all containers
+- **Service dependency** management
+- **Automated recovery** for failed services
+- **Real-time logging** with structured output
+
+### **Performance Monitoring**
+
+- **Resource usage** tracking (CPU, memory, disk)
+- **Service response times** monitoring
+- **Error rate** tracking and alerting
+- **Infrastructure metrics** via Digital Ocean monitoring
+
+## 🚨 **Troubleshooting**
+
+### **Common Issues**
+
+#### **Docker Development Issues**
+
+```bash
+# Check Docker status
+docker info
+docker-compose ps
+
+# View service logs
+docker-compose logs [service-name]
+
+# Reset environment
+docker-compose down -v
+docker system prune -f
+```
+
+#### **Production Deployment Issues**
+
+```bash
+# Check Terraform state
+terraform state list
+terraform plan
+
+# Check service health
+curl http://your-server-ip:3001/health
+
+# View container logs
+docker-compose -f docker-compose.prod.yml logs -f
+```
+
+#### **Environment Variable Issues**
+
+```bash
+# Check Doppler configuration
+doppler configure get
+
+# Test variable access
+doppler secrets get DATABASE_URL
+
+# Verify injection
+doppler run -- env | grep DATABASE_URL
+```
+
+## 🔗 **Related Documentation**
+
+- [Local Development Guide](../development/LOCAL-DEVELOPMENT-GUIDE.md) - Development environment setup
+- [Authentication Guide](../authentication/AUTHENTICATION-GUIDE.md) - Authentication infrastructure
+- [Backend Implementation Guide](../backend/BACKEND-IMPLEMENTATION-GUIDE.md) - API infrastructure details
+
+## 🤝 **Contributing to Infrastructure**
+
+When making infrastructure changes:
+
+1. **Test locally first** with Docker Compose
+2. **Use Terraform** for all cloud resource changes
+3. **Update documentation** for any new services or procedures
+4. **Test deployment** in a staging environment
+5. **Monitor resources** after deployment
+
+### **Infrastructure Standards**
+
+- **All services must have health checks**
+- **Use environment variables** for configuration
+- **Implement proper logging** and monitoring
+- **Follow security best practices**
+- **Document all infrastructure changes**
 
 ---
 
-**Last Updated**: July 30, 2025 
+**💡 Pro Tip**: Each infrastructure guide is comprehensive and self-contained. Start with the Docker guide for local development, then move to Terraform for production deployment.
+
+**Last Updated**: January 2025
