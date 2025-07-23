@@ -2,42 +2,40 @@
 
 ## 🎯 **Overview**
 
-This comprehensive guide covers infrastructure deployment for CodeCave using Terraform on Digital Ocean, including droplet setup, managed services, and complete production deployment.
+This comprehensive guide covers deploying CodeCave's production infrastructure to Digital Ocean using Terraform. The infrastructure includes a load-balanced API architecture with managed services for scalability and reliability.
 
 ## 🏗️ **Infrastructure Architecture**
 
-### **Production Infrastructure Components**
+### **Production Architecture**
 
 ```
-┌─────────────────────────────────────────────────────────────────┐
-│                    Digital Ocean Infrastructure                  │
-├─────────────────────────────────────────────────────────────────┤
-│                                                                │
-│  ┌─────────────┐  ┌─────────────┐  ┌─────────────┐            │
-│  │   Droplet   │  │ Managed DB  │  │  DO Spaces  │            │
-│  │ (App Server)│  │(PostgreSQL) │  │(File Storage│            │
-│  │ 2vCPU/4GB   │  │   15 GB     │  │   50 GB     │            │
-│  └─────────────┘  └─────────────┘  └─────────────┘            │
-│                                                                │
-│  ┌─────────────┐  ┌─────────────┐  ┌─────────────┐            │
-│  │  Volume     │  │     VPC     │  │  Firewall   │            │
-│  │(Persistent) │  │  Network    │  │    Rules    │            │
-│  │   50 GB     │  │ 10.0.0.0/16 │  │   Security  │            │
-│  └─────────────┘  └─────────────┘  └─────────────┘            │
-│                                                                │
-│  External: SSL Certificates (Let's Encrypt)                   │
-│  External: Domain DNS (managed separately)                    │
-└─────────────────────────────────────────────────────────────────┘
+📱 Client Request
+    ↓
+🌐 Cloudflare (SSL/CDN)
+    ↓
+⚖️ DO Load Balancer (HTTPS → HTTP)
+    ↓
+🐳 Docker Application Server
+│   ├── 🚀 NestJS API (port 3001)
+│   ├── 🔍 Meilisearch (port 7700)
+│   ├── 📨 RabbitMQ (port 5672)
+│   └── 📊 New Relic Monitoring
+    ↓
+🗄️ Digital Ocean Managed Services
+│   ├── PostgreSQL Cluster (with read replicas)
+│   ├── Redis Cache
+│   └── Spaces Object Storage
 ```
 
-### **Deployed Services on Droplet**
+### **Core Infrastructure Components**
 
-- **Kong Gateway** - API gateway and load balancer (ports 80, 443)
-- **NestJS API** - Main application backend (port 3001)
-- **Meilisearch** - Search engine service (port 7700)
-- **RabbitMQ** - Message queue for async processing (ports 5672, 15672)
-- **Redis** - Caching and session storage (port 6379)
-- **Docker** - Container orchestration
+- **Application Server**: Ubuntu 20.04 Droplet with Docker
+- **Load Balancer**: Digital Ocean Load Balancer with SSL termination
+- **Database**: Managed PostgreSQL with read replicas
+- **Cache**: Managed Redis cluster
+- **Storage**: Digital Ocean Spaces for file uploads
+- **CDN**: Cloudflare for global content delivery
+- **Monitoring**: New Relic APM + Sentry error tracking
 
 ## 📁 **Infrastructure Code Structure**
 
@@ -601,7 +599,7 @@ echo "${VOLUME_DEVICE} ${MOUNT_POINT} ext4 defaults,nofail,discard 0 0" >> /etc/
 
 # Create application directories
 echo "Creating application directories..."
-mkdir -p ${MOUNT_POINT}/{meilisearch,rabbitmq,redis,app-logs,kong-ssl}
+mkdir -p ${MOUNT_POINT}/{meilisearch,rabbitmq,redis,app-logs,ssl-certs}
 chown -R root:root ${MOUNT_POINT}
 chmod -R 755 ${MOUNT_POINT}
 

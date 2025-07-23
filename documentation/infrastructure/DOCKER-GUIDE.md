@@ -12,7 +12,6 @@ This comprehensive guide covers Docker infrastructure for CodeCave, including lo
 - **Redis 7** (port 6379) - Caching and sessions (development optimized)
 - **Meilisearch v1.10** (port 7700) - Search engine with debug logging
 - **RabbitMQ 3** (ports 5672, 15672) - Message queue with management UI
-- **Kong Gateway** (ports 8000, 8001, 8002) - API Gateway with admin interface
 - **NestJS API** (port 3001) - Backend application
 - **Next.js Web** (port 3000) - Frontend application
 
@@ -22,7 +21,6 @@ This comprehensive guide covers Docker infrastructure for CodeCave, including lo
 - **Redis 7** - Managed Redis on Digital Ocean
 - **Meilisearch v1.10** - Self-hosted on Digital Ocean Droplet
 - **RabbitMQ 3** - Self-hosted on Digital Ocean Droplet
-- **Kong Gateway** - API Gateway for routing and security
 - **NestJS API** - Containerized backend application
 - **Next.js Web** - Deployed to Vercel
 
@@ -203,170 +201,13 @@ networks:
     name: codecave-dev-network
 ```
 
-### **Production Setup** (`docker-compose.prod.yml`)
+### **Production Docker Configuration**
 
-```yaml
-version: "3.8"
-
-services:
-  # Kong API Gateway (Production)
-  gateway:
-    image: kong:latest
-    container_name: codecave-gateway-prod
-    environment:
-      KONG_DATABASE: "off"
-      KONG_DECLARATIVE_CONFIG: /opt/kong/kong.yml
-      KONG_SSL_CERT: /etc/kong/ssl/fullchain.pem
-      KONG_SSL_CERT_KEY: /etc/kong/ssl/privkey.pem
-    ports:
-      - "80:8000" # HTTP
-      - "443:8443" # HTTPS
-      - "8001:8001" # Admin API
-    volumes:
-      - ./kong/kong.yml:/opt/kong/kong.yml:ro
-      - /etc/letsencrypt:/etc/letsencrypt
-      - /mnt/volume_nyc3_01/kong-ssl:/etc/kong/ssl
-    healthcheck:
-      test: ["CMD", "kong", "health"]
-      interval: 30s
-      timeout: 10s
-      retries: 3
-    restart: always
-
-  # NestJS API (Production)
-  api:
-    build:
-      context: ./apps/api
-      dockerfile: Dockerfile.prod
-    container_name: codecave-api-prod
-    environment:
-      NODE_ENV: production
-      DATABASE_URL: ${DATABASE_URL}
-      REDIS_URL: ${REDIS_URL}
-      MEILI_HOST: http://search:7700
-      RABBITMQ_URL: amqp://${RABBITMQ_USER}:${RABBITMQ_PASS}@mq:5672/codecave
-    deploy:
-      replicas: 2
-      resources:
-        limits:
-          cpus: "1.0"
-          memory: 1G
-        reservations:
-          cpus: "0.5"
-          memory: 512M
-    healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:3001/health"]
-      interval: 30s
-      timeout: 10s
-      retries: 3
-    restart: always
-
-  # Meilisearch Search Engine (Production)
-  search:
-    image: getmeili/meilisearch:v1.10
-    container_name: codecave-search-prod
-    environment:
-      MEILI_MASTER_KEY: ${MEILI_MASTER_KEY}
-      MEILI_ENV: production
-      MEILI_NO_ANALYTICS: true
-      MEILI_HTTP_ADDR: 0.0.0.0:7700
-    ports:
-      - "7700:7700"
-    volumes:
-      - /mnt/volume_nyc3_01/meilisearch:/meili_data
-    healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:7700/health"]
-      interval: 30s
-      timeout: 10s
-      retries: 3
-      start_period: 30s
-    restart: always
-
-  # RabbitMQ Message Queue (Production)
-  mq:
-    image: rabbitmq:3-management-alpine
-    container_name: codecave-mq-prod
-    environment:
-      RABBITMQ_DEFAULT_USER: ${RABBITMQ_USER}
-      RABBITMQ_DEFAULT_PASS: ${RABBITMQ_PASS}
-      RABBITMQ_DEFAULT_VHOST: codecave
-    ports:
-      - "5672:5672" # AMQP
-      - "15672:15672" # Management UI
-    volumes:
-      - /mnt/volume_nyc3_01/rabbitmq:/var/lib/rabbitmq
-    healthcheck:
-      test: rabbitmq-diagnostics -q ping
-      interval: 30s
-      timeout: 30s
-      retries: 3
-      start_period: 60s
-    restart: always
-
-  # Redis Cache (Production)
-  redis:
-    image: redis:7-alpine
-    container_name: codecave-redis-prod
-    command: redis-server --requirepass ${REDIS_PASSWORD} --appendonly yes
-    ports:
-      - "6379:6379"
-    volumes:
-      - /mnt/volume_nyc3_01/redis:/data
-    healthcheck:
-      test: ["CMD", "redis-cli", "--raw", "incr", "ping"]
-      interval: 30s
-      timeout: 10s
-      retries: 3
-    restart: always
-
-networks:
-  default:
-    name: codecave-prod-network
-    driver: bridge
-```
-
-## 🏭 **Multi-Stage Docker Builds**
-
-### **NestJS API Production Dockerfile**
-
-#### **Development Dockerfile** (`apps/api/Dockerfile.dev`)
+#### **Multi-Stage Dockerfile for Production**
 
 ```dockerfile
-# Development Dockerfile for NestJS API
-FROM node:22-alpine
-
-# Set working directory
-WORKDIR /app
-
-# Install pnpm globally
-RUN npm install -g pnpm
-
-# Copy package files
-COPY package*.json ./
-COPY pnpm-lock.yaml* ./
-
-# Install dependencies
-RUN pnpm install
-
-# Copy source code
-COPY . .
-
-# Expose the port
-EXPOSE 3001
-
-# Start the development server with hot reloading
-CMD ["pnpm", "run", "dev"]
-```
-
-#### **Production Dockerfile** (`apps/api/Dockerfile.prod`)
-
-```dockerfile
-# Multi-stage production Dockerfile for NestJS API
-# ===================================================
-
 # Stage 1: Build Stage
-# This stage includes all dependencies (dev + prod) needed for building
-FROM node:22-alpine AS builder
+FROM node:20-alpine AS builder
 
 # Set working directory
 WORKDIR /app
@@ -440,12 +281,119 @@ USER nextjs
 EXPOSE 3001
 
 # Health check for container monitoring
-HEALTHCHECK --interval=30s --timeout=10s --start-period=30s --retries=3 \
-  CMD curl -f http://localhost:3001/health || exit 1
+HEALTHCHECK --interval=30s --timeout=3s --start-period=5s --retries=3 \
+  CMD curl -f http://localhost:3001/health/live || exit 1
 
-# Start the production server
-# Environment variables will be injected by doppler run from the host
-CMD ["pnpm", "--filter", "@codecave/api", "start:prod"]
+# Start the application
+CMD ["node", "apps/api/dist/main.js"]
+```
+
+### **Production Services** (`docker-compose.prod.yml`)
+
+```yaml
+# Production Docker Compose configuration for CodeCave with Doppler Integration
+# Uses managed database, Doppler for secrets, and production-optimized settings
+
+# Dynamic environment injection from Doppler
+# Run with: doppler run -- docker-compose -f docker-compose.prod.yml up -d
+
+services:
+  # Meilisearch - Search engine
+  search:
+    image: getmeili/meilisearch:v1.10
+    container_name: codecave-search-prod
+    environment:
+      MEILI_MASTER_KEY: ${MEILI_MASTER_KEY}
+      MEILI_ENV: production
+      MEILI_HTTP_ADDR: 0.0.0.0:7700
+    ports:
+      - "7700:7700"
+    volumes:
+      - /mnt/volume_nyc3_01/meilisearch:/meili_data
+    restart: unless-stopped
+    deploy:
+      resources:
+        limits:
+          memory: 512M
+          cpus: "0.5"
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:7700/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  # RabbitMQ - Message queue
+  queue:
+    image: rabbitmq:3-management-alpine
+    container_name: codecave-queue-prod
+    environment:
+      RABBITMQ_DEFAULT_USER: ${RABBITMQ_USER}
+      RABBITMQ_DEFAULT_PASS: ${RABBITMQ_PASSWORD}
+      RABBITMQ_DEFAULT_VHOST: codecave
+    ports:
+      - "5672:5672"
+      - "15672:15672"
+    volumes:
+      - /mnt/volume_nyc3_01/rabbitmq:/var/lib/rabbitmq
+    restart: unless-stopped
+    deploy:
+      resources:
+        limits:
+          memory: 512M
+          cpus: "0.5"
+    healthcheck:
+      test: ["CMD", "rabbitmq-diagnostics", "ping"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  # NestJS API - Main application with production optimizations
+  api:
+    build:
+      context: .
+      dockerfile: apps/api/Dockerfile.prod
+    container_name: codecave-api-prod
+    environment:
+      NODE_ENV: production
+      DATABASE_URL: ${DATABASE_URL}
+      REDIS_URL: ${REDIS_URL}
+      BETTER_AUTH_SECRET: ${BETTER_AUTH_SECRET}
+      BETTER_AUTH_URL: ${BETTER_AUTH_URL}
+      GITHUB_CLIENT_ID: ${GITHUB_CLIENT_ID}
+      GITHUB_CLIENT_SECRET: ${GITHUB_CLIENT_SECRET}
+      GOOGLE_CLIENT_ID: ${GOOGLE_CLIENT_ID}
+      GOOGLE_CLIENT_SECRET: ${GOOGLE_CLIENT_SECRET}
+      SENTRY_DSN: ${SENTRY_DSN}
+      MEILI_HOST: ${MEILI_HOST}
+      MEILI_MASTER_KEY: ${MEILI_MASTER_KEY}
+      RABBITMQ_URL: ${RABBITMQ_URL}
+      NEW_RELIC_LICENSE_KEY: ${NEW_RELIC_LICENSE_KEY}
+      NEW_RELIC_APP_NAME: ${NEW_RELIC_APP_NAME}
+      NEW_RELIC_LOG_LEVEL: ${NEW_RELIC_LOG_LEVEL}
+    ports:
+      - "3001:3001"
+    depends_on:
+      - search
+      - queue
+    restart: unless-stopped
+    deploy:
+      resources:
+        limits:
+          memory: 1G
+          cpus: "1.0"
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:3001/health/live"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+    volumes:
+      - /mnt/volume_nyc3_01/app-logs:/app/logs
+
+# External networks for inter-service communication
+networks:
+  default:
+    driver: bridge
 ```
 
 ### **Build Optimization Features**
@@ -887,105 +835,6 @@ docker stats --format "table {{.Container}}\t{{.CPUPerc}}\t{{.MemUsage}}"
 # Scale services based on load
 docker-compose -f docker-compose.prod.yml up -d --scale api=3
 ```
-
-## 🔄 **Kong API Gateway Configuration**
-
-### **Development Kong Config** (`kong/kong.yml`)
-
-```yaml
-_format_version: "2.1"
-
-services:
-  - name: api-service
-    url: http://api:3001
-    routes:
-      - name: api-route
-        paths:
-          - /api
-    plugins:
-      - name: cors
-        config:
-          origins:
-            - "http://localhost:3000"
-          credentials: true
-      - name: rate-limiting
-        config:
-          minute: 60
-          policy: local
-
-  - name: auth-service
-    url: http://api:3001/api/auth
-    routes:
-      - name: auth-route
-        paths:
-          - /auth
-    plugins:
-      - name: cors
-        config:
-          origins:
-            - "http://localhost:3000"
-          credentials: true
-```
-
-### **Production Kong Config**
-
-```yaml
-_format_version: "2.1"
-
-services:
-  - name: api-service
-    url: http://api:3001
-    routes:
-      - name: api-route
-        hosts:
-          - api.codecave.tech
-        paths:
-          - /
-    plugins:
-      - name: cors
-        config:
-          origins:
-            - "https://codecave.tech"
-            - "https://www.codecave.tech"
-          credentials: true
-      - name: rate-limiting
-        config:
-          minute: 100
-          hour: 1000
-          policy: redis
-          redis_host: redis
-          redis_port: 6379
-      - name: request-size-limiting
-        config:
-          allowed_payload_size: 10
-```
-
-## 📊 **Resource Requirements**
-
-### **Development Environment**
-
-- **CPU**: 2-4 cores recommended
-- **RAM**: 4-8GB recommended
-- **Disk**: 10-20GB for volumes
-- **Network**: Local Docker network
-
-### **Production Environment**
-
-- **CPU**: 4-8 cores recommended
-- **RAM**: 8-16GB recommended
-- **Disk**: 100GB+ for persistent storage
-- **Network**: VPC with firewall rules
-
-### **Service Resource Allocation**
-
-| Service     | Development | Production |
-| ----------- | ----------- | ---------- |
-| PostgreSQL  | ~200MB RAM  | External   |
-| Redis       | ~100MB RAM  | ~200MB RAM |
-| Meilisearch | ~200MB RAM  | ~400MB RAM |
-| RabbitMQ    | ~150MB RAM  | ~300MB RAM |
-| Kong        | ~100MB RAM  | ~200MB RAM |
-| NestJS API  | ~300MB RAM  | ~800MB RAM |
 
 ## 📚 **Additional Resources**
 

@@ -71,24 +71,24 @@ sleep 30
 echo "✅ Deployment complete! Running containers:"
 docker ps --format "table {{.Names}}\t{{.Status}}\t{{.Ports}}"
 
-# Health checks
-echo "🏥 Running health checks..."
-sleep 5
+# Basic health check to verify deployment
+echo "🏥 Running basic health check..."
+sleep 15
 
 # Check API health
-if curl -f http://localhost:3001/health >/dev/null 2>&1; then
+if curl -s -f http://localhost:3001/health/live >/dev/null 2>&1; then
     echo "✅ API health check passed"
 else
     echo "⚠️  API health check failed"
 fi
 
-# Check Kong gateway
-if curl -f http://localhost:8000/health >/dev/null 2>&1; then
-    echo "✅ Kong gateway health check passed"
-else
-    echo "⚠️  Kong gateway health check failed"
-fi
-
+# Display deployment summary
+echo
 echo "🎉 Deployment completed!"
-echo "📍 API available at: https://api.codecave.tech"
-echo "🔧 Kong admin at: http://localhost:8001"
+echo "📊 Service Status:"
+DOPPLER_TOKEN="$DOPPLER_TOKEN" doppler run -- docker compose -f docker-compose.prod.yml ps
+
+echo
+echo "🌐 Service Access:"
+echo "🔧 API Health: http://localhost:3001/health"
+echo "🔧 API Endpoints: http://localhost:3001"

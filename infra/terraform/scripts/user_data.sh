@@ -156,7 +156,7 @@ mkdir -p /mnt/volume_nyc3_01/app-logs
 mkdir -p /mnt/volume_nyc3_01/meilisearch
 mkdir -p /mnt/volume_nyc3_01/rabbitmq
 mkdir -p /mnt/volume_nyc3_01/redis
-mkdir -p /mnt/volume_nyc3_01/kong-ssl
+mkdir -p /mnt/volume_nyc3_01/ssl-certs
 
 # Set proper permissions for application directories
 chown -R root:root /opt/codecave
@@ -280,7 +280,7 @@ server {
     server_name ${project_name}.tech api.${project_name}.tech;
     
     location / {
-        proxy_pass http://localhost:8000;  # Kong gateway
+        proxy_pass http://localhost:3001;  # NestJS API
         proxy_set_header Host \$host;
         proxy_set_header X-Real-IP \$remote_addr;
         proxy_set_header X-Forwarded-For \$proxy_add_x_forwarded_for;

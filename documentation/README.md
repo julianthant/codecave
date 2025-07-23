@@ -79,7 +79,7 @@ This documentation has been completely reorganized to eliminate duplication and 
 - **Infrastructure as Code**: Terraform
 - **Container Orchestration**: Docker Compose
 - **Environment Management**: Doppler
-- **API Gateway**: Kong
+- **Load Balancer**: Digital Ocean Load Balancer with SSL termination
 
 ### **Development Tools**
 

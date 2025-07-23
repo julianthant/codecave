@@ -33,7 +33,6 @@ codecave/
 │   └── infrastructure/       # Infrastructure docs
 ├── infra/                    # Infrastructure as code
 │   └── terraform/            # Terraform configurations
-├── kong/                     # API Gateway configuration
 ├── scripts/                  # Utility scripts
 ├── docker-compose.yml        # Local development services
 └── pnpm-workspace.yaml       # Workspace configuration
@@ -62,50 +61,95 @@ pnpm install
 cp env.example .env
 
 # Start infrastructure services
-docker-compose up -d db redis search mq
+docker-compose up -d
 
 # Start development servers
 pnpm dev
 ```
 
-The application will be available at:
+## 🏗️ Architecture
+
+### Production Setup
+
+- **Load Balancer**: Digital Ocean Load Balancer with SSL termination
+- **API**: NestJS backend with Docker containers
+- **Database**: PostgreSQL with read replicas
+- **Cache**: Redis for sessions and caching
+- **Search**: Meilisearch for full-text search
+- **Queue**: RabbitMQ for background jobs
+- **Monitoring**: New Relic APM + Sentry error tracking
+
+### Development Services
+
+Access your local services:
+
 - **Frontend**: http://localhost:3000
-- **Backend API**: http://localhost:3001
+- **API**: http://localhost:3001
+- **PostgreSQL**: localhost:5432
+- **Redis**: localhost:6379
+- **Meilisearch**: http://localhost:7700
+- **RabbitMQ Admin**: http://localhost:15672
 
 ## 📚 Documentation
 
-Comprehensive documentation is available in the `documentation` directory:
+Comprehensive guides are available in the `documentation/` directory:
 
 - [Project Overview](documentation/PROJECT-OVERVIEW.md)
-- [Local Development Guide](documentation/development/LOCAL-DEVELOPMENT.md)
-- [Authentication Overview](documentation/authentication/AUTHENTICATION-OVERVIEW.md)
-- [Infrastructure Guide](documentation/infrastructure/DOCKER-INFRASTRUCTURE.md)
-- [Frontend Architecture](documentation/frontend/FRONTEND-PLAN.md)
+- [Local Development Guide](documentation/development/LOCAL-DEVELOPMENT-GUIDE.md)
+- [Authentication Guide](documentation/authentication/AUTHENTICATION-GUIDE.md)
+- [Infrastructure Guide](documentation/infrastructure/DOCKER-GUIDE.md)
 
-## 🧪 Testing
+## 🔧 Development Commands
 
 ```bash
-# Run all tests
-pnpm test
+# Install dependencies
+pnpm install
 
-# Run frontend tests
-pnpm web:test
+# Start all services
+docker-compose up -d
 
-# Run API tests
-pnpm api:test
+# Start development (frontend + backend)
+pnpm dev
 
-# Run E2E tests
-pnpm test:e2e
+# Database operations
+cd apps/api
+pnpm prisma:migrate:dev     # Create migration
+pnpm prisma:migrate:deploy  # Apply migrations
+pnpm prisma studio          # Open database browser
+
+# Testing
+pnpm test                   # Run tests
+pnpm test:e2e              # Run E2E tests
+
+# Build for production
+pnpm build
 ```
 
-## 📝 License
+## 🚀 Deployment
 
-This project is licensed under the MIT License - see the LICENSE file for details.
+The project uses automated deployment via GitHub Actions:
 
-## 📧 Contact
+1. **Push to main** triggers deployment
+2. **SSH to server** and pulls latest code
+3. **Docker build** and container restart
+4. **Health checks** verify deployment
 
-For questions or feedback, please reach out to [your-email@example.com](mailto:your-email@example.com).
+Production API: https://api.codecave.tech
 
----
+## 🤝 Contributing
 
-**CodeCave** - Where Developers Share Their Journey and Build Amazing Projects Together.
+1. Fork the repository
+2. Create a feature branch
+3. Make your changes
+4. Add tests if applicable
+5. Submit a pull request
+
+## 📄 License
+
+This project is licensed under the MIT License.
+
+## 🔗 Links
+
+- **Production API**: https://api.codecave.tech
+- **Documentation**: [./documentation/](./documentation/)
+- **Issue Tracker**: [GitHub Issues](https://github.com/your-username/codecave/issues)

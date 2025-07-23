@@ -32,18 +32,7 @@ resource "digitalocean_firewall" "web" {
     source_addresses = ["0.0.0.0/0", "::/0"]
   }
 
-  # Kong API Gateway ports
-  inbound_rule {
-    protocol         = "tcp"
-    port_range       = "8000"
-    source_addresses = ["0.0.0.0/0", "::/0"]
-  }
-
-  inbound_rule {
-    protocol         = "tcp"
-    port_range       = "8001"
-    source_addresses = ["0.0.0.0/0", "::/0"]
-  }
+  # Remove Kong Gateway ports - using direct API access through load balancer
 
   # Database access (PostgreSQL) - only from VPC
   inbound_rule {

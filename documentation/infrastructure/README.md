@@ -1,58 +1,57 @@
 # Infrastructure Documentation
 
-This directory contains comprehensive infrastructure and deployment documentation for CodeCave.
+## 🎯 **Current Infrastructure Overview**
 
-## 📚 **Contents**
-
-- [**Docker Infrastructure Guide**](DOCKER-GUIDE.md) - **Complete Docker setup guide**
-  - Development and production Docker configurations
-  - Multi-stage builds and optimization
-  - Container orchestration with Docker Compose
-  - Service management and monitoring
-  - Performance optimization
-  - Troubleshooting and debugging
-
-- [**Terraform Deployment Guide**](TERRAFORM-DEPLOYMENT-GUIDE.md) - **Complete infrastructure deployment**
-  - Digital Ocean infrastructure setup
-  - Terraform configuration and best practices
-  - Production deployment procedures
-  - Security configuration
-  - Monitoring and maintenance
-
-- [**Environment & Third-Party Setup**](DOPPLER-AND-THIRD-PARTY-SETUP.md) - **Complete environment management**
-  - Doppler secrets management
-  - Third-party tool integrations
-  - ConfigCat, Blackfire, ImgBot setup
-  - Environment-specific configurations
-
-## 🏗️ **Infrastructure Overview**
-
-CodeCave uses a modern, cloud-native infrastructure stack:
-
-### **Core Technologies**
-
-- **Containerization**: Docker with multi-stage builds
-- **Orchestration**: Docker Compose
-- **Infrastructure as Code**: Terraform
-- **Cloud Provider**: Digital Ocean
-- **Environment Management**: Doppler
-- **API Gateway**: Kong
+CodeCave's production infrastructure is deployed on Digital Ocean with a focus on scalability, reliability, and maintainability.
 
 ### **Production Architecture**
 
 ```
-Production Infrastructure:
-├── Vercel (Frontend Hosting)
-├── Digital Ocean Droplet (Backend Services)
-│   ├── Kong Gateway (80, 443)
-│   ├── NestJS API (3001)
-│   ├── Meilisearch (7700)
-│   ├── RabbitMQ (5672, 15672)
-│   └── Redis Cache (6379)
-├── Digital Ocean Managed PostgreSQL
-├── Digital Ocean Spaces (File Storage)
-└── CDN Distribution
+📱 Client
+    ↓
+🌐 Cloudflare (SSL/CDN)
+    ↓
+⚖️ DO Load Balancer
+    ↓
+🐳 Docker Containers
+│   ├── 🚀 NestJS API (port 3001)
+│   ├── 🔍 Meilisearch
+│   ├── 📨 RabbitMQ
+│   └── 📊 Monitoring
+    ↓
+🗄️ Managed Services
+│   ├── PostgreSQL (with Read Replicas)
+│   ├── Redis Cache
+│   └── Spaces (Object Storage)
 ```
+
+### **Core Services**
+
+- **Load Balancer**: Digital Ocean Load Balancer with health checks
+- **API**: NestJS backend with production optimizations
+- **Database**: PostgreSQL with 2 read replicas for scaling
+- **Cache**: Redis for sessions and application caching
+- **Search**: Meilisearch for full-text search capabilities
+- **Queue**: RabbitMQ for background job processing
+- **Monitoring**: New Relic APM + Sentry error tracking
+
+## 📚 **Infrastructure Guides**
+
+### **Complete Setup Guides**
+
+Each guide is comprehensive and covers all aspects:
+
+- **[Docker Infrastructure Guide](DOCKER-GUIDE.md)** - Complete containerization setup
+- **[Terraform Deployment Guide](TERRAFORM-DEPLOYMENT-GUIDE.md)** - Infrastructure as Code
+- **[Environment & Third-Party Setup](DOPPLER-AND-THIRD-PARTY-SETUP.md)** - Secrets and integrations
+
+### **Key Benefits**
+
+- ✅ **Full Docker Stack**: PostgreSQL, Redis, Meilisearch, RabbitMQ
+- ✅ **Production Optimizations**: Multi-stage builds, health checks, resource limits
+- ✅ **Infrastructure as Code**: Complete Terraform configuration for Digital Ocean
+- ✅ **Environment Management**: Doppler for secure secret management
+- ✅ **Comprehensive Monitoring**: APM, error tracking, and health monitoring
 
 ## 🚀 **Quick Start Guides**
 

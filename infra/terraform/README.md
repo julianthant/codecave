@@ -7,6 +7,7 @@ This directory contains the Terraform configuration for deploying CodeCave.tech 
 The Terraform configuration creates:
 
 ### **Core Infrastructure**
+
 - **VPC Network** - Private network for secure communication
 - **Droplet** - Ubuntu 20.04 application server with Docker
 - **Volume** - 50GB persistent storage for application data
@@ -14,11 +15,13 @@ The Terraform configuration creates:
 - **SSH Key** - Secure access to the server
 
 ### **Managed Services**
+
 - **PostgreSQL Cluster** - Managed database with automated backups
 - **Database** - Application database with dedicated user
 - **Database Firewall** - Restricts access to VPC only
 
 ### **Security Features**
+
 - Private networking for internal services
 - Firewall rules with least-privilege access
 - Automated security updates
@@ -37,25 +40,28 @@ The Terraform configuration creates:
 ### **Setup Steps**
 
 1. **Configure Variables**
+
    ```bash
    # Copy example variables
    cp terraform.tfvars.example terraform.tfvars
-   
+
    # Edit with your values
    vim terraform.tfvars
    ```
 
 2. **Initialize Terraform**
+
    ```bash
    cd infra/terraform
    terraform init
    ```
 
 3. **Plan Deployment**
+
    ```bash
    # Use Doppler for do_token
    doppler run -- terraform plan
-   
+
    # Or export manually
    export do_token="your_token_here"
    terraform plan
@@ -69,18 +75,21 @@ The Terraform configuration creates:
 ## 📝 **Configuration Files**
 
 ### **Core Files**
+
 - `versions.tf` - Terraform and provider versions
 - `variables.tf` - Input variable definitions
 - `providers.tf` - DigitalOcean provider configuration
 - `outputs.tf` - Output values (IPs, connection strings, etc.)
 
 ### **Infrastructure Files**
+
 - `vpc.tf` - Virtual Private Cloud network
 - `firewall.tf` - Security rules and access control
 - `droplet.tf` - Application server and storage
 - `database.tf` - Managed PostgreSQL cluster
 
 ### **Supporting Files**
+
 - `scripts/user_data.sh` - Server initialization script
 - `terraform.tfvars.example` - Example configuration
 - `README.md` - This documentation
@@ -88,22 +97,25 @@ The Terraform configuration creates:
 ## 🔧 **Configuration Options**
 
 ### **Droplet Sizes**
-| Size | vCPUs | RAM | Storage | Monthly Cost |
-|------|-------|-----|---------|--------------|
-| `s-1vcpu-2gb` | 1 | 2GB | 50GB | ~$12 |
-| `s-2vcpu-4gb` | 2 | 4GB | 80GB | ~$24 |
-| `s-4vcpu-8gb` | 4 | 8GB | 160GB | ~$48 |
+
+| Size          | vCPUs | RAM | Storage | Monthly Cost |
+| ------------- | ----- | --- | ------- | ------------ |
+| `s-1vcpu-2gb` | 1     | 2GB | 50GB    | ~$12         |
+| `s-2vcpu-4gb` | 2     | 4GB | 80GB    | ~$24         |
+| `s-4vcpu-8gb` | 4     | 8GB | 160GB   | ~$48         |
 
 ### **Database Sizes**
-| Size | vCPUs | RAM | Storage | Monthly Cost |
-|------|-------|-----|---------|--------------|
-| `db-s-1vcpu-1gb` | 1 | 1GB | 10GB | ~$15 |
-| `db-s-2vcpu-2gb` | 2 | 2GB | 38GB | ~$30 |
-| `db-s-4vcpu-4gb` | 4 | 4GB | 76GB | ~$60 |
+
+| Size             | vCPUs | RAM | Storage | Monthly Cost |
+| ---------------- | ----- | --- | ------- | ------------ |
+| `db-s-1vcpu-1gb` | 1     | 1GB | 10GB    | ~$15         |
+| `db-s-2vcpu-2gb` | 2     | 2GB | 38GB    | ~$30         |
+| `db-s-4vcpu-4gb` | 4     | 4GB | 76GB    | ~$60         |
 
 ### **Regions**
+
 - `nyc1`, `nyc3` - New York
-- `sfo2`, `sfo3` - San Francisco  
+- `sfo2`, `sfo3` - San Francisco
 - `tor1` - Toronto
 - `lon1` - London
 - `fra1` - Frankfurt
@@ -112,17 +124,19 @@ The Terraform configuration creates:
 ## 🔐 **Security Configuration**
 
 ### **Firewall Rules**
+
 - **SSH (22)** - World accessible for management
 - **HTTP (80)** - World accessible, redirects to HTTPS
 - **HTTPS (443)** - World accessible for web traffic
 - **API (3001)** - World accessible for direct API access
-- **Kong (8000, 8001)** - World accessible for gateway
+- **API (3001)** - Load balancer accessible for API
 - **Database (5432)** - VPC only
 - **Redis (6379)** - VPC only
 - **RabbitMQ (5672, 15672)** - VPC only
 - **Meilisearch (7700)** - VPC only
 
 ### **Best Practices**
+
 - All internal services accessible only via VPC
 - Automated security updates enabled
 - Fail2ban configured for SSH protection
@@ -134,22 +148,26 @@ The Terraform configuration creates:
 After deployment, Terraform provides:
 
 ### **Connection Information**
+
 - `droplet_ip` - Public IP address
 - `ssh_connection` - SSH command
 - `api_url` - Application URL
 
 ### **Database Information**
+
 - `database_host` - Database host (sensitive)
 - `database_connection_string` - Full connection string (sensitive)
 - `database_name` - Database name
 
 ### **Infrastructure Details**
+
 - `vpc_id` - VPC identifier
 - `data_volume_id` - Storage volume ID
 
 ## 🔄 **Management Commands**
 
 ### **Check Infrastructure**
+
 ```bash
 # View current state
 terraform show
@@ -162,6 +180,7 @@ terraform output
 ```
 
 ### **Updates**
+
 ```bash
 # Plan changes
 terraform plan
@@ -174,6 +193,7 @@ terraform refresh
 ```
 
 ### **Cleanup**
+
 ```bash
 # Destroy infrastructure (be careful!)
 terraform destroy
@@ -182,6 +202,7 @@ terraform destroy
 ## 🚀 **Post-Deployment Steps**
 
 1. **Configure DNS**
+
    ```bash
    # Point your domain to the droplet IP
    # A record: codecave.tech -> droplet_ip
@@ -189,15 +210,17 @@ terraform destroy
    ```
 
 2. **Set Up SSL**
+
    ```bash
    # SSH to server
    ssh root@<droplet_ip>
-   
+
    # Generate certificates
    certbot --nginx -d codecave.tech -d api.codecave.tech
    ```
 
 3. **Configure Environment**
+
    ```bash
    # Create .env file on server
    scp .env root@<droplet_ip>:/opt/codecave/
@@ -213,11 +236,13 @@ terraform destroy
 ## 🔍 **Monitoring**
 
 ### **Health Checks**
+
 - Application: `https://api.codecave.tech/health`
-- Kong Gateway: `http://<droplet_ip>:8001`
+- API Direct: `http://<droplet_ip>:3001`
 - RabbitMQ: `http://<droplet_ip>:15672`
 
 ### **Logs**
+
 ```bash
 # Application logs
 docker-compose -f /opt/codecave/docker-compose.yml logs -f
@@ -230,6 +255,7 @@ tail -f /var/log/nginx/access.log
 ```
 
 ### **Monitoring Scripts**
+
 - `/opt/codecave/monitor.sh` - System monitoring
 - `/opt/codecave/backup.sh` - Database backups
 
@@ -238,6 +264,7 @@ tail -f /var/log/nginx/access.log
 ### **Common Issues**
 
 **SSH Connection Refused**
+
 ```bash
 # Check firewall
 ufw status
@@ -247,6 +274,7 @@ systemctl status ssh
 ```
 
 **Database Connection Issues**
+
 ```bash
 # Check database cluster status in DO dashboard
 # Verify firewall rules allow droplet access
@@ -254,6 +282,7 @@ systemctl status ssh
 ```
 
 **SSL Certificate Issues**
+
 ```bash
 # Check nginx configuration
 nginx -t
@@ -263,6 +292,7 @@ certbot renew --dry-run
 ```
 
 **Application Not Starting**
+
 ```bash
 # Check Docker containers
 docker ps -a
@@ -277,19 +307,22 @@ cat /opt/codecave/.env
 ## 💰 **Cost Estimation**
 
 Monthly costs for default configuration:
+
 - Droplet (s-2vcpu-4gb): ~$24
-- Database (db-s-1vcpu-1gb): ~$15  
+- Database (db-s-1vcpu-1gb): ~$15
 - Volume (50GB): ~$5
 - **Total: ~$44/month**
 
 ## 🔄 **Backup & Recovery**
 
 ### **Automated Backups**
+
 - Database: Managed service handles backups
 - Volume: Daily snapshots via cron job
 - Configuration: Version controlled in Git
 
 ### **Recovery Procedures**
+
 1. Re-run Terraform to recreate infrastructure
 2. Restore data from volume snapshots
 3. Restore database from managed service backups
@@ -297,4 +330,4 @@ Monthly costs for default configuration:
 
 ---
 
-For questions or issues, refer to the main project documentation or create an issue in the repository. 
+For questions or issues, refer to the main project documentation or create an issue in the repository.

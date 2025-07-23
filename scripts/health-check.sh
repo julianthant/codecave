@@ -108,26 +108,22 @@ check_service_health() {
     fi
 }
 
-# Function to check HTTP endpoint
+# Function to check HTTP endpoint health
 check_http_endpoint() {
-    local url=$1
-    local description=$2
-    local expected_code=${3:-200}
+    local url="$1"
+    local name="$2"
+    local timeout="${3:-10}"
     
     SERVICE_COUNT=$((SERVICE_COUNT + 1))
-    print_status "Checking $description..."
+    print_status "Checking $name ($url)..."
     
-    if response=$(curl -s -o /dev/null -w "%{http_code}" "$url" 2>/dev/null); then
-        if [ "$response" -eq "$expected_code" ]; then
-            print_success "$description is responding (HTTP $response)"
-            HEALTHY_COUNT=$((HEALTHY_COUNT + 1))
-            return 0
-        else
-            print_error "$description returned HTTP $response (expected $expected_code)"
-            return 1
-        fi
+    if curl -s -f -m "$timeout" "$url" >/dev/null 2>&1; then
+        print_success "$name is healthy"
+        HEALTHY_COUNT=$((HEALTHY_COUNT + 1))
+        return 0
     else
-        print_error "$description is not responding"
+        print_error "$name is not responding"
+        OVERALL_HEALTH=1
         return 1
     fi
 }
@@ -204,20 +200,11 @@ main() {
     # RabbitMQ Management Interface
     check_http_endpoint "http://localhost:15672" "RabbitMQ Management UI"
     
-    # Kong Gateway (if running)
-    if docker-compose ps gateway | grep -q "Up"; then
-        check_http_endpoint "http://localhost:8001" "Kong Admin API"
-        check_http_endpoint "http://localhost:8002" "Kong Admin GUI"
-    else
-        print_warning "Kong Gateway is not running (this is normal for infrastructure-only setup)"
-    fi
-    
-    # API Service (if running)
-    if docker-compose ps api | grep -q "Up"; then
-        check_http_endpoint "http://localhost:3001/health" "NestJS API"
-    else
-        print_warning "API service is not running (this is normal for development)"
-    fi
+    # Check API health endpoints
+    print_status "Checking CodeCave API health..."
+    check_http_endpoint "http://localhost:3001/health/live" "API Liveness"
+    check_http_endpoint "http://localhost:3001/health/ready" "API Readiness"
+    check_http_endpoint "http://localhost:3001/health" "API Comprehensive Health"
     
     echo
     echo "📊 Health Summary:"
@@ -229,21 +216,17 @@ main() {
     if [ "$HEALTHY_COUNT" -eq "$SERVICE_COUNT" ]; then
         print_success "All services are healthy! 🎉"
         echo
+        echo "📋 Container Status:"
+        docker-compose ps
+        echo
         echo "🌐 Service URLs:"
-        echo "  • PostgreSQL: localhost:5432"
+        echo "  • Frontend: http://localhost:3000"
+        echo "  • API: http://localhost:3001"
+        echo "  • API Health: http://localhost:3001/health"
+        echo "  • Database: localhost:5432"
         echo "  • Redis: localhost:6379"
         echo "  • Meilisearch: http://localhost:7700"
-        echo "  • RabbitMQ Management: http://localhost:15672"
-        
-        if docker-compose ps api | grep -q "Up"; then
-            echo "  • API: http://localhost:3001"
-        fi
-        
-        if docker-compose ps gateway | grep -q "Up"; then
-            echo "  • Kong Admin: http://localhost:8001"
-            echo "  • Kong GUI: http://localhost:8002"
-        fi
-        
+        echo "  • RabbitMQ Admin: http://localhost:15672"
         OVERALL_HEALTH=0
     else
         print_error "Some services are unhealthy"
