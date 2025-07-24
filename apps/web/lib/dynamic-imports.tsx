@@ -8,37 +8,75 @@ import { PageLoading, LoadingSkeleton } from "@/components/ui/loading-spinner";
 
 // Heavy page components that should be loaded lazily
 export const LazyCollaboration = dynamic(
-  () => import("@/app/collaboration/_components/Collaboration")
+  () => import("@/app/collaboration/_components/Collaboration"),
+  {
+    loading: () => <PageLoading />,
+    ssr: true,
+  }
 );
 
 export const LazyNetwork = dynamic(
-  () => import("@/app/network/_components/Network")
+  () => import("@/app/network/_components/Network"),
+  {
+    loading: () => <PageLoading />,
+    ssr: true,
+  }
 );
 
 export const LazyProjects = dynamic(
-  () => import("@/app/projects/_components/Projects")
+  () => import("@/app/projects/_components/Projects"),
+  {
+    loading: () => <PageLoading />,
+    ssr: true,
+  }
 );
 
 export const LazyProfile = dynamic(
-  () => import("@/app/profile/_components/Profile")
+  () => import("@/app/profile/_components/Profile"),
+  {
+    loading: () => <PageLoading />,
+    ssr: true,
+  }
 );
 
 export const LazyTrending = dynamic(
-  () => import("@/app/trending/_components/Trending")
+  () => import("@/app/trending/_components/Trending"),
+  {
+    loading: () => <PageLoading />,
+    ssr: true,
+  }
 );
 
-export const LazyQA = dynamic(() => import("@/app/qa/_components/QA"));
+export const LazyQA = dynamic(
+  () => import("@/app/qa/_components/QA"),
+  {
+    loading: () => <PageLoading />,
+    ssr: true,
+  }
+);
 
 export const LazyGroups = dynamic(
-  () => import("@/app/groups/_components/Groups")
+  () => import("@/app/groups/_components/Groups"),
+  {
+    loading: () => <PageLoading />,
+    ssr: true,
+  }
 );
 
 export const LazyPricing = dynamic(
-  () => import("@/app/pricing/_components/Pricing")
+  () => import("@/app/pricing/_components/Pricing"),
+  {
+    loading: () => <PageLoading />,
+    ssr: true,
+  }
 );
 
 export const LazyPremium = dynamic(
-  () => import("@/app/premium/_components/Premium")
+  () => import("@/app/premium/_components/Premium"),
+  {
+    loading: () => <PageLoading />,
+    ssr: true,
+  }
 );
 
 // Placeholder components for heavy features (future implementation)
