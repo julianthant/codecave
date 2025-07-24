@@ -28,7 +28,7 @@ _(Only perform these checks if you edit the respective file types)_
 - **Server/Client Side Split**: If components can be split more into server side and client side, do it. Don't have unnecessary client side components. Check if pages are client side. I dont want any client side pages. I want the compnents to be client side on the bare minimum. if they can be rendered on the server do that.a
 - **useEffect Prohibition**: Don't use useEffect at all. There are always better alternatives. Go through files to check for useEffect usage. Keep only if really necessary
 - **Compliance Check**: Check through all files to ensure compliance with requests
-- **Error Detection**: Look for runtime errors. **ALWAYS DOUBLE CHECK FILES AFTER CREATION**
+- **Error Detection**: Look for runtime errors. and typescript errors. **ALWAYS DOUBLE CHECK FILES AFTER CREATION**
 - **Cleanup**: Remove unused components and imports
 
 ### BACKEND CHECKS
