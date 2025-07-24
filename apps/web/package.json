@@ -8,7 +8,11 @@
     "start": "next start",
     "lint": "next lint",
     "format.fix": "prettier --write .",
-    "typecheck": "tsc --noEmit"
+    "typecheck": "tsc --noEmit",
+    "test": "playwright test",
+    "test:ui": "playwright test --ui",
+    "test:debug": "playwright test --debug",
+    "test:report": "playwright show-report"
   },
   "dependencies": {
     "@sentry/nextjs": "^9.40.0",

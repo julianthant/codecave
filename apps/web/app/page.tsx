@@ -4,7 +4,7 @@ import { Metadata } from "next";
 export const metadata: Metadata = {
   title: "CodeCave - Share & Discover Code Snippets | Developer Community",
   description:
-    "Join CodeCave, the premier platform for developers to share, discover, and collaborate on code snippets. Find solutions, get feedback, and connect with fellow programmers.",
+    "CodeCave is the premier platform for project creators to share, discover, and collaborate on code snippets. Join developers worldwide.",
   keywords: [
     "code snippets",
     "programming",
@@ -20,7 +20,7 @@ export const metadata: Metadata = {
   openGraph: {
     title: "CodeCave - Developer Code Sharing Platform",
     description:
-      "Share code snippets, discover solutions, and connect with developers worldwide.",
+      "CodeCave is the premier platform for project creators to share, discover, and collaborate on code snippets worldwide.",
     type: "website",
     locale: "en_US",
     siteName: "CodeCave",

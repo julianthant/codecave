@@ -338,10 +338,10 @@ export default function Index() {
   };
 
   return (
-    <div className="bg-background min-h-screen">
+    <div className="bg-background min-h-screen overflow-x-hidden">
       {/* Minimalistic Header */}
       <header className="top-0 z-50 sticky bg-background border-b border-border w-full">
-        <div className="mx-auto px-4 max-w-7xl">
+        <div className="mx-auto px-2 sm:px-4 max-w-7xl">
           <div className="flex justify-between items-center h-12">
             {/* Left: Logo as Home Button */}
             <Link
@@ -357,7 +357,7 @@ export default function Index() {
             </Link>
 
             {/* Center: Search */}
-            <div className="flex-1 mx-8 max-w-md">
+            <div className="flex-1 mx-2 sm:mx-8 max-w-md">
               <div className="relative">
                 <Search className="top-1/2 left-3 absolute w-4 h-4 text-muted-foreground -translate-y-1/2 transform" />
                 <Input
@@ -369,7 +369,7 @@ export default function Index() {
 
             {/* Right: Navigation Icons */}
             <nav className="flex items-center space-x-0.5">
-              <Link href="/network">
+              <Link href="/network" className="hidden sm:inline-block">
                 <Button
                   variant="ghost"
                   size="sm"
@@ -382,7 +382,7 @@ export default function Index() {
                 </Button>
               </Link>
 
-              <Link href="/premium">
+              <Link href="/premium" className="hidden sm:inline-block">
                 <Button
                   variant="ghost"
                   size="sm"
@@ -395,7 +395,7 @@ export default function Index() {
                 </Button>
               </Link>
 
-              <Link href="/collaboration">
+              <Link href="/collaboration" className="hidden md:inline-block">
                 <Button
                   variant="ghost"
                   size="sm"
@@ -483,10 +483,10 @@ export default function Index() {
         </div>
       </header>
 
-      <div className="mx-auto px-4 py-6 max-w-7xl">
-        <div className="flex gap-6">
+      <div className="mx-auto px-2 sm:px-4 py-6 max-w-7xl">
+        <div className="flex gap-2 sm:gap-6 flex-col lg:flex-row">
           {/* Left Sidebar - Navigation & Profile */}
-          <aside className="flex-shrink-0 w-60">
+          <aside className="flex-shrink-0 w-full lg:w-60">
             <div className="top-20 sticky space-y-4">
               {/* Developer Profile Card */}
               <Card className="bg-card/50 border-border/50">
@@ -680,7 +680,9 @@ export default function Index() {
           </aside>
 
           {/* Main Feed */}
-          <main className="flex-1 mx-6 max-w-xl">
+          <main className="flex-1 mx-0 lg:mx-6 max-w-full lg:max-w-xl">
+            {/* Screen Reader Heading */}
+            <h1 className="sr-only">CodeCave Developer Community Feed</h1>
             <div className="space-y-6">
               {activeView === "feed" && (
                 <>
