@@ -15,7 +15,7 @@ const getURL = () => {
   return url;
 };
 
-export async function loginWithGoogle(formData: FormData) {
+export async function loginWithGoogle() {
   const supabase = await createClient();
 
   // type-casting here for convenience
@@ -40,7 +40,7 @@ export async function loginWithGoogle(formData: FormData) {
   }
 }
 
-export async function loginWithGitHub(formData: FormData) {
+export async function loginWithGitHub() {
   const supabase = await createClient();
 
   const { data, error } = await supabase.auth.signInWithOAuth({
@@ -63,7 +63,7 @@ export async function loginWithGitHub(formData: FormData) {
   }
 }
 
-export async function loginWithDiscord(formData: FormData) {
+export async function loginWithDiscord() {
   const supabase = await createClient();
 
   const { data, error } = await supabase.auth.signInWithOAuth({
