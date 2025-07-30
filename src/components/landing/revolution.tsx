@@ -1,5 +1,7 @@
+import Link from "next/link";
 import { Button } from "../ui/button";
 import { Divider } from "../ui/divider";
+import { loginWithGitHub, loginWithGoogle } from "@/app/auth/login/actions";
 
 export default function Revolution() {
   return (
@@ -20,8 +22,9 @@ export default function Revolution() {
           </p>
 
           {/* CTA Buttons */}
-          <div className="flex sm:flex-row flex-col justify-center gap-4">
+          <form className="flex sm:flex-row flex-col justify-center gap-4">
             <Button
+              formAction={loginWithGitHub}
               variant="default"
               className="bg-slate-900 hover:bg-slate-700 py-3 rounded-full w-32 font-light text-landing-primary"
             >
@@ -31,9 +34,10 @@ export default function Revolution() {
                   fill="currentColor"
                 />
               </svg>
-              GitHub
+              Github
             </Button>
             <Button
+              formAction={loginWithGoogle}
               variant="outline"
               className="hover:bg-slate-50 py-3 border-slate-300 rounded-full w-32 font-light text-slate-700"
             >
@@ -45,7 +49,7 @@ export default function Revolution() {
               </svg>
               Google
             </Button>
-          </div>
+          </form>
         </div>
 
         {/* Code Snippet */}

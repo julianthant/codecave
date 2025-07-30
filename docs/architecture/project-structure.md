@@ -30,24 +30,31 @@ brocode/
 ## Key Directories
 
 ### `/src/app/`
+
 Contains all pages and API routes using Next.js App Router:
+
 - **`auth/`** - Authentication-related pages and callbacks
 - **`private/`** - Protected pages requiring authentication
 - **`layout.tsx`** - Root layout with global providers
 
 ### `/src/components/`
+
 Reusable React components organized by domain:
+
 - **`auth/`** - Login forms, auth buttons
 - **`landing/`** - Landing page sections
 - **`ui/`** - Base UI components (buttons, cards, etc.)
 
 ### `/src/utils/supabase/`
+
 Supabase client configurations:
+
 - **`client.ts`** - Browser client
 - **`server.ts`** - Server-side client
 - **`middleware.ts`** - Middleware helper
 
 ### `/src/types/`
+
 TypeScript type definitions and declarations
 
 ## File Naming Conventions
@@ -62,12 +69,12 @@ TypeScript type definitions and declarations
 
 ```typescript
 // Absolute imports using @ alias
-import { Button } from "@/components/ui/button"
-import { createClient } from "@/utils/supabase/server"
-import { AuthUser } from "@/types/auth"
+import { Button } from "@/components/ui/button";
+import { createClient } from "@/utils/supabase/server";
+import { AuthUser } from "@/types/auth";
 
 // Relative imports for local files
-import { LoginForm } from "./login-form"
+import { LoginForm } from "./login-form";
 ```
 
 ## Component Organization
@@ -75,10 +82,12 @@ import { LoginForm } from "./login-form"
 Components are organized by domain and complexity:
 
 1. **Base UI Components** (`/components/ui/`)
+
    - Atomic components (Button, Input, Card)
    - Shared across the application
 
 2. **Feature Components** (`/components/[domain]/`)
+
    - Domain-specific components
    - Business logic included
 
