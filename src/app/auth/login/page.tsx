@@ -66,7 +66,7 @@ export default function LoginPage() {
                 {"}"}
               </div>
               <blockquote className="mb-4 font-medium text-xl leading-relaxed">
-                Code is like humor. When you have to explain it, it's bad.
+                Code is like humor. When you have to explain it, it&apos;s bad.
               </blockquote>
               <cite className="opacity-75 font-light text-sm">
                 — Cory House
