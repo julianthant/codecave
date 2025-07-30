@@ -1,12 +1,6 @@
-import { ArrowRight } from "lucide-react";
 import { Button } from "../ui/button";
-import { Geist_Mono } from "next/font/google";
 import Link from "next/link";
 import { Divider } from "../ui/divider";
-
-const geistMono = Geist_Mono({
-  subsets: ["latin"],
-});
 
 export default function Hero() {
   return (
