@@ -8,10 +8,9 @@ import { Button } from "@/components/ui/button";
 import { LogoWhite } from "@/components/ui/logo";
 
 const menuItems = [
-  { name: "Features", href: "#features" },
-  { name: "Solution", href: "#solution" },
-  { name: "Pricing", href: "#pricing" },
-  { name: "About", href: "#about" },
+  { name: "Features", href: "/features" },
+  { name: "Resources", href: "/resources" },
+  { name: "Premium", href: "/premium" },
 ];
 
 export function HeroHeader() {
