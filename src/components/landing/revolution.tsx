@@ -22,7 +22,7 @@ export default function Revolution() {
           </p>
 
           {/* CTA Buttons */}
-          <form className="flex sm:flex-row flex-col justify-center gap-4">
+          <form className="flex justify-center gap-4">
             <Button
               formAction={loginWithGitHub}
               variant="default"
@@ -53,20 +53,20 @@ export default function Revolution() {
         </div>
 
         {/* Code Snippet */}
-        <div className="bg-slate-900 p-6 rounded-lg font-mono text-sm">
+        <div className="bg-slate-900 p-3 sm:p-4 md:p-6 rounded-lg overflow-x-auto font-mono text-xs sm:text-sm md:text-base">
           <div className="mb-2 text-green-400">
             {/* Getting started is simple */}
           </div>
-          <div className="text-blue-300">
+          <div className="text-blue-300 break-words">
             import <span className="text-yellow-300">{"{ CodeCave }"}</span>{" "}
             from{" "}
             <span className="text-orange-300">&apos;@codecave/sdk&apos;</span>;
           </div>
-          <div className="text-blue-300">
+          <div className="text-blue-300 break-words">
             const <span className="text-white">developer</span> = new{" "}
             <span className="text-yellow-300">CodeCave</span>();
           </div>
-          <div className="text-blue-300">
+          <div className="text-blue-300 break-words">
             developer.<span className="text-yellow-300">showcase</span>(
             <span className="text-orange-300">
               &apos;your-amazing-project&apos;
