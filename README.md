@@ -1,36 +1,113 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# CodeCave
 
-## Getting Started
+A modern full-stack application built with Next.js 15, Supabase, and Tailwind CSS featuring OAuth authentication and protected routes.
 
-First, run the development server:
+## 🚀 Quick Start
 
 ```bash
-npm run dev
-# or
-yarn dev
-# or
+# Install dependencies
+pnpm install
+
+# Start development server
 pnpm dev
-# or
-bun dev
+
+# Build for production
+pnpm build
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+## 📖 Documentation
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+This README serves as an index to comprehensive documentation. Click on any topic below to access detailed guides:
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+### 🏗️ Architecture & Setup
+- **[Project Structure](./docs/architecture/project-structure.md)** - Overview of the codebase organization
+- **[Technology Stack](./docs/architecture/tech-stack.md)** - Technologies used and why
+- **[Environment Setup](./docs/setup/environment.md)** - Environment variables and configuration
+- **[Database Setup](./docs/setup/database.md)** - Supabase configuration and schema
 
-## Learn More
+### 🔐 Authentication
+- **[Authentication Overview](./docs/auth/overview.md)** - How authentication works in the app
+- **[OAuth Setup](./docs/auth/oauth-setup.md)** - Google, GitHub, Discord OAuth configuration
+- **[Route Protection](./docs/auth/route-protection.md)** - Middleware and protected routes
+- **[Troubleshooting Auth](./docs/auth/troubleshooting.md)** - Common authentication issues
 
-To learn more about Next.js, take a look at the following resources:
+### 🎨 Frontend
+- **[Components Guide](./docs/frontend/components.md)** - UI components and usage
+- **[Styling Guide](./docs/frontend/styling.md)** - Tailwind CSS patterns and conventions
+- **[Pages & Routing](./docs/frontend/routing.md)** - Next.js App Router usage
+- **[State Management](./docs/frontend/state-management.md)** - Client-side state patterns
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+### 🔧 Development
+- **[Development Workflow](./docs/development/workflow.md)** - How to develop new features
+- **[Code Standards](./docs/development/standards.md)** - Coding conventions and best practices
+- **[Testing Guide](./docs/development/testing.md)** - Testing strategies and setup
+- **[Deployment](./docs/development/deployment.md)** - Deployment process and environments
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+### 🔌 API & Backend
+- **[API Routes](./docs/api/routes.md)** - Next.js API routes documentation
+- **[Database Operations](./docs/api/database.md)** - Supabase queries and operations
+- **[Server Actions](./docs/api/server-actions.md)** - Next.js Server Actions usage
 
-## Deploy on Vercel
+### 🛠️ Configuration
+- **[TypeScript Configuration](./docs/config/typescript.md)** - TypeScript setup and types
+- **[ESLint & Prettier](./docs/config/linting.md)** - Code quality tools
+- **[Tailwind Configuration](./docs/config/tailwind.md)** - Tailwind CSS customization
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+## 🏃‍♂️ Getting Started
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+1. **Clone and Install**
+   ```bash
+   git clone <your-repo>
+   cd brocode
+   pnpm install
+   ```
+
+2. **Environment Setup**
+   - Copy `.env.example` to `.env.local`
+   - Configure Supabase credentials
+   - Set up OAuth providers
+   - See [Environment Setup](./docs/setup/environment.md) for details
+
+3. **Database Setup**
+   - Set up Supabase project
+   - Run database migrations
+   - Configure RLS policies
+   - See [Database Setup](./docs/setup/database.md) for details
+
+4. **Start Development**
+   ```bash
+   pnpm dev
+   ```
+
+## 🌟 Features
+
+- ✅ OAuth Authentication (Google, GitHub, Discord)
+- ✅ Protected Routes with Middleware
+- ✅ Modern UI with Tailwind CSS
+- ✅ Type-safe with TypeScript
+- ✅ Server-side Rendering with Next.js 15
+- ✅ Real-time Database with Supabase
+- ✅ Responsive Design
+- ✅ SEO Optimized
+
+## 📦 Tech Stack
+
+- **Framework**: Next.js 15 (App Router)
+- **Database**: Supabase (PostgreSQL)
+- **Authentication**: Supabase Auth
+- **Styling**: Tailwind CSS v4
+- **UI Components**: Radix UI
+- **TypeScript**: Full type safety
+- **Package Manager**: pnpm
+
+## 🤝 Contributing
+
+Please read our [Development Workflow](./docs/development/workflow.md) and [Code Standards](./docs/development/standards.md) before contributing.
+
+## 📝 License
+
+This project is private and proprietary.
+
+---
+
+**Need help?** Check the [troubleshooting guides](./docs/auth/troubleshooting.md) or create an issue.

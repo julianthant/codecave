@@ -146,6 +146,27 @@ Imagine you are a human UX tester of the feature you implemented.
 Output a comprehensive list of scenarios you would test, sorted by highest priority.
 ```
 
+### QDOCS
+
+When I type "qdocs", this means:
+
+```
+Generate comprehensive documentation for the project:
+
+1. Update README.md as a documentation index with links to specific guides
+2. Create organized docs/ folder structure:
+   - docs/architecture/ - Project structure, tech stack
+   - docs/setup/ - Environment setup, database configuration
+   - docs/auth/ - Authentication guides and troubleshooting
+   - docs/frontend/ - Components, styling, routing
+   - docs/development/ - Workflow, standards, testing
+   - docs/api/ - API routes, database operations
+   - docs/config/ - TypeScript, linting, Tailwind setup
+3. Write detailed markdown files for each section
+4. Ensure all links work and documentation is comprehensive
+5. Follow the existing project structure and conventions
+```
+
 ### QGIT
 
 When I type "qgit", this means:

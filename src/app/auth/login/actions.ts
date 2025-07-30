@@ -7,7 +7,7 @@ const getURL = () => {
   let url =
     process?.env?.NEXT_PUBLIC_SITE_URL ?? // Set this to your site URL in production env.
     process?.env?.NEXT_PUBLIC_VERCEL_URL ?? // Automatically set by Vercel.
-    "http://localhost:3000/private/";
+    "http://localhost:3000/";
   // Make sure to include `https://` when not localhost.
   url = url.startsWith("http") ? url : `https://${url}`;
   // Make sure to include a trailing `/`.
@@ -27,7 +27,7 @@ export async function loginWithGoogle(formData: FormData) {
         access_type: "offline",
         prompt: "consent",
       },
-      redirectTo: getURL(),
+      redirectTo: `${getURL()}auth/callback?next=/private`,
     },
   });
 
@@ -36,7 +36,7 @@ export async function loginWithGoogle(formData: FormData) {
   }
 
   if (data.url) {
-    redirect(data.url); // use the redirect API for your server framework
+    redirect(data.url);
   }
 }
 
@@ -50,7 +50,7 @@ export async function loginWithGitHub(formData: FormData) {
         access_type: "offline",
         prompt: "consent",
       },
-      redirectTo: getURL(),
+      redirectTo: `${getURL()}auth/callback?next=/private`,
     },
   });
 
@@ -59,7 +59,7 @@ export async function loginWithGitHub(formData: FormData) {
   }
 
   if (data.url) {
-    redirect(data.url); // use the redirect API for your server framework
+    redirect(data.url);
   }
 }
 
@@ -73,7 +73,7 @@ export async function loginWithDiscord(formData: FormData) {
         access_type: "offline",
         prompt: "consent",
       },
-      redirectTo: getURL(),
+      redirectTo: `${getURL()}auth/callback?next=/private`,
     },
   });
 
@@ -82,7 +82,7 @@ export async function loginWithDiscord(formData: FormData) {
   }
 
   if (data.url) {
-    redirect(data.url); // use the redirect API for your server framework
+    redirect(data.url);
   }
 }
 
@@ -94,4 +94,6 @@ export async function signOut() {
   if (error) {
     redirect("/error");
   }
+
+  redirect("/");
 }
