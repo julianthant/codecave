@@ -1,33 +1,4 @@
 import React from "react";
-import { Github, Twitter, Linkedin, Mail, Code } from "lucide-react";
-import { Logo } from "../ui/logo";
-
-const footerLinks = {
-  product: [
-    { name: "Features", href: "#features" },
-    { name: "Showcase", href: "/showcase" },
-    { name: "Pricing", href: "/tiers" },
-    { name: "API Docs", href: "/docs" },
-  ],
-  community: [
-    { name: "Discord", href: "#" },
-    { name: "Forum", href: "#" },
-    { name: "Events", href: "#" },
-    { name: "Blog", href: "#" },
-  ],
-  resources: [
-    { name: "Documentation", href: "#" },
-    { name: "Tutorials", href: "#" },
-    { name: "Examples", href: "#" },
-    { name: "Support", href: "#" },
-  ],
-  company: [
-    { name: "About", href: "#" },
-    { name: "Careers", href: "#" },
-    { name: "Contact", href: "#" },
-    { name: "Privacy", href: "#" },
-  ],
-};
 
 export function Footer() {
   return (
