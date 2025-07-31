@@ -1,6 +1,7 @@
 import type { Metadata, Viewport } from "next";
 import { SpeedInsights } from "@vercel/speed-insights/next";
 import { Analytics } from "@vercel/analytics/next";
+import { Providers } from "./providers";
 import "./globals.css";
 
 export const metadata: Metadata = {
@@ -98,14 +99,6 @@ export default function RootLayout({
   return (
     <html lang="en">
       <head>
-        {/* Preload critical resources */}
-        <link
-          rel="preload"
-          href="/fonts/inter-var.woff2"
-          as="font"
-          type="font/woff2"
-          crossOrigin="anonymous"
-        />
         {/* DNS prefetch for external resources */}
         <link rel="dns-prefetch" href="//fonts.googleapis.com" />
         <link rel="dns-prefetch" href="//images.unsplash.com" />
@@ -119,7 +112,9 @@ export default function RootLayout({
         <meta name="format-detection" content="telephone=no" />
       </head>
       <body>
-        {children}
+        <Providers>
+          {children}
+        </Providers>
         <SpeedInsights />
         <Analytics />
       </body>

@@ -1,6 +1,5 @@
 import React from "react";
 import Link from "next/link";
-import { ArrowRight, ChevronRight } from "lucide-react";
 import { Button } from "./button";
 import { AnimatedGroup } from "./animated-group";
 
@@ -64,13 +63,7 @@ export function HeroSection() {
             }}
             className="-z-20 absolute inset-0"
           >
-            <img
-              src="https://ik.imagekit.io/lrigu76hy/tailark/night-background.jpg?updatedAt=1745733451120"
-              alt="background"
-              className="hidden dark:block top-56 lg:top-32 -z-20 absolute inset-x-0"
-              width="3276"
-              height="4095"
-            />
+            <div className="hidden dark:block top-56 lg:top-32 -z-20 absolute inset-x-0 bg-gradient-to-b from-slate-900 to-slate-800 h-full" />
           </AnimatedGroup>
           <div
             aria-hidden

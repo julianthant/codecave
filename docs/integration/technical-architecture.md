@@ -413,4 +413,4 @@ main
 
 ## Next Steps
 
-Continue to [Database Schema](./03-database-schema.md) →
+Continue to [Database Schema](./database-schema.md) →

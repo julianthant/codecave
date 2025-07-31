@@ -58,14 +58,182 @@ describe('properties', () => {
 10. SHOULD test edge cases, realistic input, unexpected input, and value boundaries.
 11. SHOULD NOT test conditions that are caught by the type checker.
 
-## Code Organization
+## Project Context: CodeCave
 
-- `packages/api` - Fastify API server
-  - `packages/api/src/publisher/*.ts` - Specific implementations of publishing to social media platforms
-- `packages/web` - Next.js 15 app with App Router
-- `packages/shared` - Shared types and utilities
-  - `packages/shared/social.ts` - Character size and media validations for social media platforms
-- `packages/api-schema` - API contract schemas using TypeBox
+**CodeCave** is a developer-focused social platform combining code sharing, professional networking, and community building with a unique block-based editor similar to Notion.
+
+### Technology Stack
+
+- **Frontend**: Next.js 15.4.4, React 19.1.0, TypeScript 5.x
+- **Styling**: Tailwind CSS v4 (CSS-based config), Shadcn/ui components
+- **Backend**: Supabase (PostgreSQL 15, Auth, Storage, Realtime)
+- **State Management**: Zustand 5.x + TanStack Query 5.x + Immer
+- **Code Processing**: Shiki syntax highlighting, Monaco Editor, Prettier
+- **Package Manager**: pnpm (not npm)
+
+### Code Organization
+
+```
+codecave/
+├── src/
+│   ├── app/                          # Next.js App Router
+│   │   ├── (public)/                # Guest-accessible routes
+│   │   │   ├── page.tsx            # Landing/Feed page
+│   │   │   ├── explore/           # Explore page
+│   │   │   ├── trending/          # Trending posts
+│   │   │   ├── groups/            # Public groups
+│   │   │   └── u/[username]/      # Public profiles
+│   │   │
+│   │   ├── (authenticated)/         # Auth-required routes
+│   │   │   ├── dashboard/         # User dashboard
+│   │   │   ├── editor/           # Post editor
+│   │   │   │   ├── new/         # Create post
+│   │   │   │   └── [id]/       # Edit post
+│   │   │   ├── settings/        # User settings
+│   │   │   └── groups/         # Group management
+│   │   │
+│   │   ├── auth/                    # Auth routes
+│   │   │   ├── callback/          # OAuth callback
+│   │   │   └── signout/          # Sign out
+│   │   │
+│   │   ├── api/                     # API routes
+│   │   │   ├── posts/            # Posts CRUD
+│   │   │   ├── users/            # User operations
+│   │   │   ├── groups/           # Groups API
+│   │   │   ├── code/             # Code processing
+│   │   │   └── webhooks/         # External webhooks
+│   │   │
+│   │   └── layout.tsx              # Root layout
+│   │
+│   ├── components/                  # React components
+│   │   ├── auth/                   # Auth components
+│   │   │   ├── auth-button.tsx   # OAuth provider buttons
+│   │   │   ├── auth-modal.tsx    # Modal authentication UI
+│   │   │   ├── user-menu.tsx     # User profile dropdown menu
+│   │   │   └── auth-guard.tsx    # Route protection component
+│   │   ├── editor/                 # Editor components
+│   │   │   ├── blocks/           # Block components
+│   │   │   └── toolbar/          # Editor toolbar
+│   │   ├── feed/                   # Feed components
+│   │   ├── groups/                 # Group components
+│   │   ├── layout/                 # Layout components
+│   │   ├── landing/                # Landing page components
+│   │   └── ui/                     # Base UI components (Shadcn)
+│   │
+│   ├── lib/                         # Utilities
+│   │   ├── supabase/              # Supabase clients (now unused)
+│   │   ├── code/                  # Code processing utilities
+│   │   ├── algorithms/            # Feed algorithms
+│   │   └── notion/                # Template generation
+│   │
+│   ├── utils/supabase/              # Supabase clients (current)
+│   │   ├── client.ts              # Browser client
+│   │   ├── server.ts              # Server client
+│   │   └── middleware.ts          # Middleware client
+│   │
+│   ├── stores/                      # Zustand stores
+│   │   ├── auth.store.ts          # Auth state
+│   │   ├── editor.store.ts        # Editor state
+│   │   ├── feed.store.ts          # Feed preferences
+│   │   └── ui.store.ts            # UI state
+│   │
+│   ├── hooks/                       # Custom hooks
+│   ├── types/                       # TypeScript types
+│   │   ├── database.types.ts      # Supabase generated types
+│   │   ├── index.ts               # Application types
+│   │   └── google-one-tap.d.ts    # Third-party types
+│   └── utils/                       # Helper functions
+│
+├── supabase/migrations/             # Database migrations
+├── docs/                           # Documentation
+│   ├── integration/                # Project docs
+│   └── tasks/                      # Task completion docs
+└── public/                         # Static assets
+```
+
+### Database Schema Overview
+
+- **users**: Core user information, skills, collaboration preferences
+- **posts**: User-generated content with blocks (JSON), tags, analytics
+- **follows**: User following relationships
+- **likes**: Post likes system
+- **comments**: Threaded comments system
+- **notifications**: User notification system
+- **user_settings**: Preferences, privacy, app settings
+
+### Important Configuration Notes
+
+#### Tailwind CSS v4
+
+- Uses CSS-based configuration (no tailwind.config.ts file)
+- Configuration in `src/app/globals.css` using `@theme` directive
+- Custom animations and keyframes defined in CSS
+
+#### Supabase Setup
+
+- Database types auto-generated in `src/types/database.types.ts`
+- All clients include proper TypeScript typing
+- RLS policies implemented for security
+
+#### Development Commands
+
+- `pnpm dev` - Start development server with Turbopack
+- `pnpm build` - Build for production
+- `pnpm lint` / `pnpm lint:fix` - ESLint
+- `pnpm format` - Prettier formatting
+- `pnpm type-check` - TypeScript checking
+- `pnpm db:generate` - Generate TypeScript types from Supabase
+- `pnpm db:push` - Push local migrations to Supabase
+- `pnpm db:reset` - Reset Supabase database
+- `pnpm db:migrate` - Reset and apply database migrations
+
+#### Post-Task Verification Commands
+
+After completing any task, run these to ensure everything works:
+
+```bash
+pnpm type-check    # Verify TypeScript compilation
+pnpm lint         # Check code style and catch issues
+pnpm build        # Test production build
+```
+
+#### Environment Setup
+
+- Copy `.env.example` to `.env.local` and fill in Supabase credentials
+- Supabase project URL and keys are required for database operations
+- Database migration file: `supabase/migrations/20250731_initial_schema.sql`
+
+#### MCP Servers Available & Usage Requirements
+
+- **Context7**: `npx -y @upstash/context7-mcp` - **ALWAYS USE** for documentation lookup, even when confident about implementation details
+- **Sequential Thinking**: `npx -y @modelcontextprotocol/server-sequential-thinking` - **USE BY DEFAULT** for most prompts unless very short/simple
+- **IDE Integration**: Use `mcp__ide__getDiagnostics` for TypeScript/ESLint issues
+- **Code Execution**: Use `mcp__ide__executeCode` for Jupyter/Python code when needed
+
+#### Working Methodology
+
+- **Documentation-First**: Always verify implementation details with Context7 MCP before coding
+- **Think-Then-Act**: Use sequential thinking to break down complex tasks systematically
+- **No Assumptions**: Even when confident, look up official documentation to ensure accuracy
+
+### Key Features
+
+- **Block-based content creation** (text, code, image, video, collaborator blocks)
+- **Modern OAuth authentication** (GitHub, Google, Discord) with client-side flow and onboarding
+- **Smart code features** (auto-formatting, syntax highlighting, live preview)
+- **User profile management** with onboarding flow and profile customization
+- **Collaboration discovery** (skill-based matching, project templates)
+- **Developer groups** and communities
+- **Real-time features** via Supabase
+
+### Authentication System
+
+- **Client-side OAuth flow** with loading states and error handling
+- **Comprehensive onboarding** for new users with profile setup
+- **Route protection** at middleware, layout, and component levels
+- **User menu** with profile links and account management
+- **State management** with Zustand + React Query integration
+- **Security features** including PKCE flow, HTTP-only cookies, and CSRF protection
 
 ## Remember Shortcuts
 

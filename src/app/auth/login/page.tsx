@@ -1,8 +1,8 @@
-import { GalleryVerticalEnd } from "lucide-react";
-
-import { LoginForm } from "@/components/auth/login-form";
 import { LogoBlack } from "@/components/ui/logo";
+import { AuthButton } from "@/components/auth/auth-button";
 import Link from "next/link";
+import { User } from "lucide-react";
+import { Button } from "@/components/ui/button";
 
 export default function LoginPage() {
   return (
@@ -14,7 +14,36 @@ export default function LoginPage() {
         >
           <LogoBlack />
         </Link>
-        <LoginForm />
+        <div className="space-y-6">
+          <div className="text-center">
+            <h1 className="text-2xl font-bold">Welcome to CodeCave</h1>
+            <p className="text-sm text-muted-foreground mt-2">
+              Join the developer revolution!
+            </p>
+          </div>
+          <div className="space-y-3">
+            <AuthButton provider="github" redirectTo="/dashboard" />
+            <AuthButton provider="google" redirectTo="/dashboard" />
+            <AuthButton provider="discord" redirectTo="/dashboard" />
+            <Button asChild variant="outline" className="w-full">
+              <Link href="/">
+                <User className="mr-2 h-4 w-4" />
+                Continue as Guest
+              </Link>
+            </Button>
+          </div>
+          <p className="text-center text-xs text-muted-foreground">
+            By continuing, you agree to our{" "}
+            <Link href="#" className="underline hover:text-primary">
+              Terms of Service
+            </Link>{" "}
+            and{" "}
+            <Link href="#" className="underline hover:text-primary">
+              Privacy Policy
+            </Link>
+            .
+          </p>
+        </div>
       </div>
     </div>
   );
