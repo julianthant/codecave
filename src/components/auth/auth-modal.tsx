@@ -27,9 +27,15 @@ export function AuthModal({ isOpen, onClose, redirectTo = '/' }: AuthModalProps)
         </DialogHeader>
         <div className="space-y-4 py-4">
           <div className="space-y-3">
-            <AuthButton provider="github" redirectTo={redirectTo} />
-            <AuthButton provider="google" redirectTo={redirectTo} />
-            <AuthButton provider="discord" redirectTo={redirectTo} />
+            <AuthButton provider="github" redirectTo={redirectTo} variant="outline" className="w-full">
+              Continue with GitHub
+            </AuthButton>
+            <AuthButton provider="google" redirectTo={redirectTo} variant="outline" className="w-full">
+              Continue with Google
+            </AuthButton>
+            <AuthButton provider="discord" redirectTo={redirectTo} variant="outline" className="w-full">
+              Continue with Discord
+            </AuthButton>
           </div>
           <p className="text-center text-sm text-muted-foreground">
             By continuing, you agree to our Terms of Service and Privacy Policy.

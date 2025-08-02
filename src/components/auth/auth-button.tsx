@@ -15,7 +15,11 @@ interface AuthButtonProps {
   className?: string
 }
 
-export function AuthButton({ provider, redirectTo = '/', className }: AuthButtonProps) {
+export function AuthButton({
+  provider,
+  redirectTo = '/',
+  className,
+}: AuthButtonProps) {
   const [isLoading, setIsLoading] = useState(false)
   const supabase = createClient()
 
@@ -43,9 +47,9 @@ export function AuthButton({ provider, redirectTo = '/', className }: AuthButton
   }
 
   const icons = {
-    discord: <FaDiscord className="mr-2 h-5 w-5" />,
-    google: <FcGoogle className="mr-2 h-5 w-5" />,
-    github: <FaGithub className="mr-2 h-5 w-5" />,
+    discord: <FaDiscord className="mr-2 w-5 h-5" />,
+    google: <FcGoogle className="mr-2 w-5 h-5" />,
+    github: <FaGithub className="mr-2 w-5 h-5" />,
   }
 
   const labels = {

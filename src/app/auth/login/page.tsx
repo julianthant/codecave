@@ -1,8 +1,8 @@
-import { LogoBlack } from "@/components/ui/logo";
-import { AuthButton } from "@/components/auth/auth-button";
-import Link from "next/link";
-import { User } from "lucide-react";
-import { Button } from "@/components/ui/button";
+import { LogoBlack } from '@/components/ui/logo'
+import { AuthButton } from '@/components/auth/auth-button'
+import Link from 'next/link'
+import { User } from 'lucide-react'
+import { Button } from '@/components/ui/button'
 
 export default function LoginPage() {
   return (
@@ -16,8 +16,8 @@ export default function LoginPage() {
         </Link>
         <div className="space-y-6">
           <div className="text-center">
-            <h1 className="text-2xl font-bold">Welcome to CodeCave</h1>
-            <p className="text-sm text-muted-foreground mt-2">
+            <h1 className="font-bold text-2xl">Welcome to CodeCave</h1>
+            <p className="mt-2 text-muted-foreground text-sm">
               Join the developer revolution!
             </p>
           </div>
@@ -27,18 +27,18 @@ export default function LoginPage() {
             <AuthButton provider="discord" redirectTo="/dashboard" />
             <Button asChild variant="outline" className="w-full">
               <Link href="/">
-                <User className="mr-2 h-4 w-4" />
+                <User className="mr-2 w-4 h-4" />
                 Continue as Guest
               </Link>
             </Button>
           </div>
-          <p className="text-center text-xs text-muted-foreground">
-            By continuing, you agree to our{" "}
-            <Link href="#" className="underline hover:text-primary">
+          <p className="text-muted-foreground text-xs text-center">
+            By continuing, you agree to our{' '}
+            <Link href="#" className="hover:text-primary underline">
               Terms of Service
-            </Link>{" "}
-            and{" "}
-            <Link href="#" className="underline hover:text-primary">
+            </Link>{' '}
+            and{' '}
+            <Link href="#" className="hover:text-primary underline">
               Privacy Policy
             </Link>
             .
@@ -46,5 +46,5 @@ export default function LoginPage() {
         </div>
       </div>
     </div>
-  );
+  )
 }

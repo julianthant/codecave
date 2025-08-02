@@ -9,6 +9,11 @@ export const metadata: Metadata = {
     default: "CodeCave - Where Developers Build Together",
     template: "%s | CodeCave",
   },
+  icons: {
+    icon: '/favicon.ico',
+    shortcut: '/favicon.ico',
+    apple: '/favicon.ico',
+  },
   description:
     "The focused platform for project creators and vibecoders. Showcase your work, find collaborators, and build the future together.",
   keywords: [
@@ -99,14 +104,6 @@ export default function RootLayout({
   return (
     <html lang="en">
       <head>
-        {/* DNS prefetch for external resources */}
-        <link rel="dns-prefetch" href="//fonts.googleapis.com" />
-        <link rel="dns-prefetch" href="//images.unsplash.com" />
-        {/* Favicon and app icons */}
-        <link rel="icon" href="/favicon.ico" sizes="32x32" />
-        <link rel="icon" href="/icon.svg" type="image/svg+xml" />
-        <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
-        <link rel="manifest" href="/manifest.json" />
         {/* Security headers */}
         <meta name="referrer" content="origin-when-cross-origin" />
         <meta name="format-detection" content="telephone=no" />

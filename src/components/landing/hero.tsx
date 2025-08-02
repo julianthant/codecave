@@ -1,27 +1,27 @@
-import React from "react";
-import Link from "next/link";
-import { Button } from "./button";
-import { AnimatedGroup } from "./animated-group";
+import React from 'react'
+import { HoverBorderGradient } from '@/components/ui/hover-button'
+import { AnimatedGroup } from './animated-group'
+import { Button } from '../ui/button'
 
 const transitionVariants = {
   item: {
     hidden: {
       opacity: 0,
-      filter: "blur(12px)",
+      filter: 'blur(12px)',
       y: 12,
     },
     visible: {
       opacity: 1,
-      filter: "blur(0px)",
+      filter: 'blur(0px)',
       y: 0,
       transition: {
-        type: "spring" as const,
+        type: 'spring' as const,
         bounce: 0.3,
         duration: 1.5,
       },
     },
   },
-};
+}
 
 export function HeroSection() {
   return (
@@ -54,7 +54,7 @@ export function HeroSection() {
                   opacity: 1,
                   y: 0,
                   transition: {
-                    type: "spring" as const,
+                    type: 'spring' as const,
                     bounce: 0.3,
                     duration: 2,
                   },
@@ -79,12 +79,12 @@ export function HeroSection() {
                 </div>
 
                 <h1 className="mt-8 font-light text-landing-foreground text-5xl md:text-7xl leading-[1.1] tracking-tight">
-                  The{" "}
+                  The{' '}
                   <span className="font-normal text-landing-primary">
                     Developer
                     <br />
                     Community
-                  </span>{" "}
+                  </span>{' '}
                   Platform
                 </h1>
                 <p className="mx-auto mt-8 max-w-3xl font-light text-landing-muted-foreground text-xl text-balance leading-relaxed">
@@ -110,9 +110,13 @@ export function HeroSection() {
               >
                 <div className="flex justify-center items-center gap-4">
                   <div className="bg-border w-16 h-px"></div>
-                  <Button as={Link} href="/auth/login">
+                  <HoverBorderGradient
+                    href="/auth/login"
+                    containerClassName="rounded-md"
+                    className="flex items-center space-x-2 bg-black px-6 py-3 text-white"
+                  >
                     Explore
-                  </Button>
+                  </HoverBorderGradient>
                   <div className="bg-border w-16 h-px"></div>
                 </div>
               </AnimatedGroup>
@@ -121,5 +125,5 @@ export function HeroSection() {
         </div>
       </section>
     </main>
-  );
+  )
 }

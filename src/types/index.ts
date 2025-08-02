@@ -4,23 +4,17 @@ export type Tables<T extends keyof Database['public']['Tables']> =
   Database['public']['Tables'][T]['Row']
 
 export type User = Tables<'users'>
-export type Post = Tables<'posts'>
 export type Comment = Tables<'comments'>
 export type Like = Tables<'likes'>
 export type Follow = Tables<'follows'>
 export type Notification = Tables<'notifications'>
 export type UserSettings = Tables<'user_settings'>
 
-// Block types for posts
-export interface Block {
-  id: string
-  type: 'text' | 'code' | 'image' | 'video' | 'collaborator' | 'poll' | 'divider'
-  content: any
-  order: number
-}
+// Re-export comprehensive post types
+export * from './post-types'
 
-// Extended types with relations
-export interface PostWithUser extends Post {
+// Extended types with relations  
+export interface PostWithUser {
   user: Pick<User, 'id' | 'username' | 'display_name' | 'avatar_url' | 'is_pro'>
 }
 
@@ -88,13 +82,13 @@ export interface AppPreferences {
   }
 }
 
-// Form types
-export interface CreatePostData {
+// Legacy form types (consider migrating to post-types.ts)
+export interface LegacyCreatePostData {
   title: string
   slug: string
-  blocks: Block[]
+  blocks: any[]
   tags: string[]
-  type: Post['type']
+  type: string
   is_published: boolean
 }
 
