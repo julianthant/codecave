@@ -1,7 +1,7 @@
 'use client'
 
 import React, { useState, useCallback } from 'react'
-import { Button } from '../ui/button'
+import { Button } from '../../ui/button'
 import Link from 'next/link'
 import { cn } from '@/lib/utils'
 
@@ -34,10 +34,10 @@ export function DesktopNav() {
           )}
           aria-current={activeTab === item.name ? 'page' : undefined}
         >
-          <Link 
+          <Link
             href={item.href}
             onClick={() => handleTabClick(item.name)}
-            className="focus:outline-none focus-visible:ring-2 focus-visible:ring-[hsl(25_95%_65%)] focus-visible:ring-offset-2 rounded-md"
+            className="rounded-md focus:outline-none focus-visible:ring-[hsl(25_95%_65%)] focus-visible:ring-2 focus-visible:ring-offset-2"
           >
             {item.name}
           </Link>

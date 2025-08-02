@@ -1,4 +1,4 @@
-import Navbar from '@/components/feed/navbar'
+import Navbar from '@/components/feed/navbar/navbar'
 
 export default function FeedLayout({
   children,
@@ -8,7 +8,7 @@ export default function FeedLayout({
   return (
     <>
       <Navbar />
-      <main className="bg-gray-50 pt-16 md:pt-16 pb-16 md:pb-0 min-h-screen">
+      <main className="bg-gray-50 pb-16 md:pb-0 min-h-[calc(100vh-64px)]">
         {children}
       </main>
     </>
