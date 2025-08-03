@@ -9,7 +9,7 @@ import {
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu'
 import { useAuth } from '@/hooks/use-auth'
-import { SignInButton } from './sign-in-button'
+import { SignInButton } from '../sign-in-button'
 import { Button } from '@/components/ui/button'
 import { Avatar, AvatarImage, AvatarFallback } from '@/components/ui/avatar'
 import { UserInfoSection } from './user-info-section'
@@ -44,9 +44,9 @@ export function UserAvatar() {
         <Button
           variant="ghost"
           aria-label="Profile menu"
-          className="relative rounded-full p-0 h-10 w-10 hover:bg-gray-100 focus:outline-none transition-all duration-200 ease-in-out"
+          className="relative hover:bg-gray-100 p-0 rounded-full focus:outline-none w-10 h-10 transition-all duration-200 ease-in-out"
         >
-          <Avatar className="h-10 w-10">
+          <Avatar className="w-10 h-10">
             <AvatarImage src={avatarSrc || undefined} alt="User avatar" />
             <AvatarFallback className="bg-[hsl(25_95%_65%)] text-white">
               <User className="w-5 h-5" />
@@ -55,22 +55,22 @@ export function UserAvatar() {
           <span className="sr-only">Open user menu</span>
         </Button>
       </DropdownMenuTrigger>
-      
+
       <DropdownMenuContent align="end" className="w-72" sideOffset={8}>
         <UserInfoSection user={user} avatarSrc={avatarSrc} />
-        
+
         <ProfileSection />
         <DropdownMenuSeparator />
-        
+
         <SocialSection />
         <DropdownMenuSeparator />
-        
+
         <DeveloperSection />
         <DropdownMenuSeparator />
-        
+
         <PreferencesSection />
         <DropdownMenuSeparator />
-        
+
         <AccountSection onSignOut={signOut} />
       </DropdownMenuContent>
     </DropdownMenu>

@@ -1,7 +1,7 @@
 import React from 'react'
 import { Search } from 'lucide-react'
 import { NotificationIcon } from './notification-icon'
-import { UserAvatar } from './user-avatar'
+import { UserAvatar } from './user-avatar/user-avatar'
 import { SearchBar, MobileSearchBar } from './search-bar'
 import { MobileMenu } from './mobile-menu'
 import { DesktopNav } from './desktop-nav'
