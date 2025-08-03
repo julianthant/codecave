@@ -1,6 +1,6 @@
 'use client'
 
-import React, { useCallback, useState } from 'react'
+import React, { useCallback } from 'react'
 import { Bell } from 'lucide-react'
 import {
   DropdownMenu,

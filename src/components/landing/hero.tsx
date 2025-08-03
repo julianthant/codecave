@@ -1,7 +1,6 @@
 import React from 'react'
 import { HoverBorderGradient } from '@/components/ui/hover-button'
 import { AnimatedGroup } from './animated-group'
-import { Button } from '../ui/button'
 
 const transitionVariants = {
   item: {

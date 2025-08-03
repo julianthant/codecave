@@ -13,12 +13,16 @@ interface AuthButtonProps {
   provider: Provider
   redirectTo?: string
   className?: string
+  children?: React.ReactNode
+  variant?: "default" | "destructive" | "outline" | "secondary" | "ghost" | "link"
 }
 
 export function AuthButton({
   provider,
   redirectTo = '/',
   className,
+  children,
+  variant = "outline",
 }: AuthButtonProps) {
   const [isLoading, setIsLoading] = useState(false)
   const supabase = createClient()
@@ -61,12 +65,16 @@ export function AuthButton({
   return (
     <Button
       onClick={handleLogin}
-      variant="outline"
+      variant={variant}
       className={`w-full ${className}`}
       disabled={isLoading}
     >
-      {icons[provider]}
-      Continue with {labels[provider]}
+      {children || (
+        <>
+          {icons[provider]}
+          Continue with {labels[provider]}
+        </>
+      )}
     </Button>
   )
 }
