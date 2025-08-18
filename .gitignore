@@ -40,13 +40,6 @@ yarn-error.log*
 *.tsbuildinfo
 next-env.d.ts
 
-# claude code
-.claude/commands/
-.claude/settings.local.json
-
-# mcp
-.mcp.json
-
 # generated files
 .trees/
 
