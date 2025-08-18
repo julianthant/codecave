@@ -2,12 +2,11 @@
 
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
-import { createClient } from '@/utils/supabase/client'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Textarea } from '@/components/ui/textarea'
-import toast from 'react-hot-toast'
+import { toast } from 'sonner'
 import type { User } from '@supabase/supabase-js'
 
 interface OnboardingFormProps {
@@ -16,14 +15,13 @@ interface OnboardingFormProps {
 
 export function OnboardingForm({ user }: OnboardingFormProps) {
   const router = useRouter()
-  const supabase = createClient()
   const [isLoading, setIsLoading] = useState(false)
 
   const [formData, setFormData] = useState({
     username: user.user_metadata?.user_name || '',
-    display_name: user.user_metadata?.full_name || '',
+    displayName: user.user_metadata?.full_name || '',
     bio: '',
-    github_username: user.app_metadata?.provider === 'github' ? user.user_metadata?.user_name : '',
+    githubUsername: user.app_metadata?.provider === 'github' ? user.user_metadata?.user_name : '',
   })
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -34,51 +32,33 @@ export function OnboardingForm({ user }: OnboardingFormProps) {
       console.log('Starting profile creation for user:', user.id)
       console.log('Form data:', formData)
       
-      // Check if username is available
-      const { data: existing, error: checkError } = await supabase
-        .from('users')
-        .select('id')
-        .eq('username', formData.username)
-
-      if (checkError) {
-        console.error('Error checking username:', checkError)
-        toast.error('Error checking username availability')
-        setIsLoading(false)
-        return
-      }
-
-      if (existing && existing.length > 0) {
-        toast.error('Username already taken')
-        setIsLoading(false)
-        return
-      }
-
-      // Create user profile
-      const { error } = await supabase.from('users').insert({
-        id: user.id,
-        email: user.email!,
-        username: formData.username,
-        display_name: formData.display_name,
-        bio: formData.bio || null,
-        github_username: formData.github_username || null,
-        avatar_url: user.user_metadata?.avatar_url || null,
+      // Call API route that uses Drizzle
+      const response = await fetch('/api/users/onboarding', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          id: user.id,
+          email: user.email!,
+          username: formData.username,
+          displayName: formData.displayName,
+          bio: formData.bio || null,
+          githubUsername: formData.githubUsername || null,
+          avatarUrl: user.user_metadata?.avatar_url || null,
+        }),
       })
 
-      if (error) {
-        console.error('Profile creation error:', error)
-        throw error
+      const data = await response.json()
+
+      if (!response.ok) {
+        throw new Error(data.error || 'Failed to create profile')
       }
+
       toast.success('Profile created successfully!')
       router.push('/dashboard')
     } catch (error) {
       console.error('Error creating profile:', error)
-      
-      // More specific error messages
-      if (error && typeof error === 'object' && 'message' in error) {
-        toast.error(`Failed to create profile: ${error.message}`)
-      } else {
-        toast.error('Failed to create profile')
-      }
+      const message = error instanceof Error ? error.message : 'Failed to create profile'
+      toast.error(message)
     } finally {
       setIsLoading(false)
     }
@@ -109,8 +89,8 @@ export function OnboardingForm({ user }: OnboardingFormProps) {
           <Input
             id="display_name"
             type="text"
-            value={formData.display_name}
-            onChange={(e) => setFormData({ ...formData, display_name: e.target.value })}
+            value={formData.displayName}
+            onChange={(e) => setFormData({ ...formData, displayName: e.target.value })}
             placeholder="John Doe"
             required
           />
@@ -133,8 +113,8 @@ export function OnboardingForm({ user }: OnboardingFormProps) {
             <Input
               id="github_username"
               type="text"
-              value={formData.github_username}
-              onChange={(e) => setFormData({ ...formData, github_username: e.target.value })}
+              value={formData.githubUsername}
+              onChange={(e) => setFormData({ ...formData, githubUsername: e.target.value })}
               placeholder="johndoe"
             />
           </div>

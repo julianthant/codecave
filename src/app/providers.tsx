@@ -2,7 +2,7 @@
 
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import { ReactQueryDevtools } from '@tanstack/react-query-devtools'
-import { Toaster } from 'react-hot-toast'
+import { Toaster } from '@/components/ui/sonner'
 import { useEffect } from 'react'
 import { createClient } from '@/utils/supabase/client'
 import { useAuthStore } from '@/stores/auth.store'
@@ -28,7 +28,7 @@ export function Providers({ children }: { children: React.ReactNode }) {
       // Fetch user profile if logged in
       if (session?.user) {
         supabase
-          .from('users')
+          .from('profiles')
           .select('*')
           .eq('id', session.user.id)
           .then(({ data, error }) => {
@@ -54,7 +54,7 @@ export function Providers({ children }: { children: React.ReactNode }) {
       if (session?.user) {
         // Fetch updated profile
         const { data, error } = await supabase
-          .from('users')
+          .from('profiles')
           .select('*')
           .eq('id', session.user.id)
 
@@ -75,17 +75,7 @@ export function Providers({ children }: { children: React.ReactNode }) {
   return (
     <QueryClientProvider client={queryClient}>
       {children}
-      <Toaster
-        position="bottom-right"
-        toastOptions={{
-          duration: 4000,
-          style: {
-            background: 'hsl(var(--background))',
-            color: 'hsl(var(--foreground))',
-            border: '1px solid hsl(var(--border))',
-          },
-        }}
-      />
+      <Toaster position="top-right" />
       <ReactQueryDevtools initialIsOpen={false} />
     </QueryClientProvider>
   )

@@ -278,8 +278,13 @@ export class PostUtils {
   /**
    * Get nested property from object using dot notation
    */
-  private static getNestedProperty(obj: any, path: string): any {
-    return path.split('.').reduce((current, key) => current?.[key], obj)
+  private static getNestedProperty(obj: unknown, path: string): unknown {
+    return path.split('.').reduce((current, key) => {
+      if (current && typeof current === 'object' && key in current) {
+        return (current as Record<string, unknown>)[key]
+      }
+      return undefined
+    }, obj)
   }
 
   /**
@@ -325,7 +330,8 @@ export class PostUtils {
         }
         break
       case 'discussion':
-        if (!POST_CATEGORIES.discussion.includes((post as any).category)) {
+        const discussionPost = post as { category?: string }
+        if (!discussionPost.category || !POST_CATEGORIES.discussion.includes(discussionPost.category)) {
           errors.push('Invalid discussion category')
         }
         break

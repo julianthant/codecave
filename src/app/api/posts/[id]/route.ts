@@ -50,7 +50,7 @@ export async function GET(
     const processedPost = {
       ...post,
       user_liked: user
-        ? post.user_liked?.some((like: any) => like.user_id === user.id)
+        ? post.user_liked?.some((like: { user_id: string }) => like.user_id === user.id)
         : false,
       likes: post.likes?.[0]?.count || 0,
       comments: post.comments?.[0]?.count || 0,

@@ -5,7 +5,7 @@ import { Button } from '@/components/ui/button'
 import { FaDiscord, FaGithub } from 'react-icons/fa'
 import { FcGoogle } from 'react-icons/fc'
 import { useState } from 'react'
-import toast from 'react-hot-toast'
+import { toast } from 'sonner'
 
 type Provider = 'discord' | 'google' | 'github'
 

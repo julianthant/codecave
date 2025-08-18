@@ -1,118 +1,37 @@
-import { Database } from './database.types'
+// Database types (from Drizzle schema)
+export type { Profile, NewProfile, UpdateProfile, UserSettings, NewUserSettings, UpdateUserSettings, UserWithProfile } from '@/db'
+import type { UserSettings, UserWithProfile } from '@/db'
 
-export type Tables<T extends keyof Database['public']['Tables']> =
-  Database['public']['Tables'][T]['Row']
+// User-related types
+export interface UpdateUserData {
+  displayName?: string
+  bio?: string
+  avatarUrl?: string
+  githubUsername?: string
+  twitterUsername?: string
+  discordUsername?: string
+  linkedinUrl?: string
+  skills?: string[]
+  languages?: string[]
+  experienceLevel?: UserSettings['experienceLevel']
+  availableForCollab?: boolean
+}
 
-export type User = Tables<'users'>
-export type Comment = Tables<'comments'>
-export type Like = Tables<'likes'>
-export type Follow = Tables<'follows'>
-export type Notification = Tables<'notifications'>
-export type UserSettings = Tables<'user_settings'>
-
-// Re-export comprehensive post types
-export * from './post-types'
-
-// Extended types with relations  
+// Future feature types (when implemented)
 export interface PostWithUser {
-  user: Pick<User, 'id' | 'username' | 'display_name' | 'avatar_url' | 'is_pro'>
+  user: Pick<UserWithProfile, 'id' | 'username' | 'displayName' | 'avatarUrl'> & {
+    isPro?: boolean
+  }
 }
 
-export interface CommentWithUser extends Comment {
-  user: Pick<User, 'id' | 'username' | 'display_name' | 'avatar_url' | 'is_pro'>
-}
-
-// Collaboration preferences type
 export interface CollabPreferences {
   remote: boolean
   commitment: string
   interests: string[]
 }
 
-// Notification settings types
-export interface NotificationSettings {
-  email: {
-    new_follower: boolean
-    post_liked: boolean
-    new_comment: boolean
-    mentioned: boolean
-    collaboration_request: boolean
-    weekly_digest: boolean
-    marketing: boolean
-  }
-  push: {
-    enabled: boolean
-    new_follower: boolean
-    post_liked: boolean
-    new_comment: boolean
-    mentioned: boolean
-    collaboration_request: boolean
-  }
-  in_app: {
-    new_follower: boolean
-    post_liked: boolean
-    new_comment: boolean
-    mentioned: boolean
-    collaboration_request: boolean
-    group_activity: boolean
-  }
-}
-
-export interface PrivacySettings {
-  profile_visibility: 'public' | 'private'
-  show_email: boolean
-  show_location: boolean
-  show_online_status: boolean
-  allow_messages: 'everyone' | 'followers' | 'none'
-  anonymous_mode: boolean
-}
-
-export interface AppPreferences {
-  theme: 'light' | 'dark' | 'system'
-  code_theme: string
-  feed_view: 'chronological' | 'algorithm'
-  language: string
-  timezone: string
-  editor: {
-    auto_save: boolean
-    auto_format: boolean
-    show_line_numbers: boolean
-    font_size: number
-    tab_size: number
-  }
-}
-
-// Legacy form types (consider migrating to post-types.ts)
-export interface LegacyCreatePostData {
-  title: string
-  slug: string
-  blocks: any[]
-  tags: string[]
-  type: string
-  is_published: boolean
-}
-
-export interface UpdateUserData {
-  display_name?: string
-  bio?: string
-  avatar_url?: string
-  banner_url?: string
-  location?: string
-  website_url?: string
-  github_username?: string
-  twitter_username?: string
-  discord_username?: string
-  linkedin_url?: string
-  skills?: string[]
-  languages?: string[]
-  experience_level?: User['experience_level']
-  years_coding?: number
-  available_for_collab?: boolean
-  collab_preferences?: CollabPreferences
-}
-
 // API response types
-export interface ApiResponse<T = any> {
+export interface ApiResponse<T = unknown> {
   data?: T
   error?: string
   message?: string

@@ -1,6 +1,6 @@
 'use client'
 
-import { useAuthStore } from '@/stores/auth.store'
+import { useAuth } from '@/hooks/use-auth'
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -12,45 +12,10 @@ import {
 import { Button } from '@/components/ui/button'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import Link from 'next/link'
-import { User, Settings, FileText, Users, LogOut, Crown } from 'lucide-react'
-import { useRouter } from 'next/navigation'
-import toast from 'react-hot-toast'
+import { User, Settings, FileText, Users, LogOut } from 'lucide-react'
 
 export function UserMenu() {
-  const { user, profile, setUser, setProfile } = useAuthStore()
-  const router = useRouter()
-
-  const handleSignOut = async (e: React.MouseEvent) => {
-    e.preventDefault()
-    e.stopPropagation()
-
-    // Immediately clear the auth store to prevent UI issues
-    setUser(null)
-    setProfile(null)
-    
-    // Show loading state
-    toast.loading('Signing out...', { id: 'signout' })
-
-    try {
-      // Use the server-side sign out endpoint
-      const response = await fetch('/auth/signout', {
-        method: 'POST',
-      })
-      
-      if (response.ok) {
-        toast.success('Signed out successfully', { id: 'signout' })
-      } else {
-        throw new Error('Sign out failed')
-      }
-    } catch {
-      console.log('Server signout failed, clearing local state')
-      toast.success('Signed out successfully', { id: 'signout' })
-    }
-    
-    // Always redirect and refresh
-    router.push('/')
-    window.location.href = '/' // Force a full page reload to clear all state
-  }
+  const { user, profile, signOut } = useAuth()
 
   if (!user) return null
 
@@ -61,10 +26,10 @@ export function UserMenu() {
           <Avatar className="w-8 h-8">
             <AvatarImage
               src={user.user_metadata?.avatar_url || ''}
-              alt={profile?.display_name || user.email || ''}
+              alt={profile?.displayName || user.email || ''}
             />
             <AvatarFallback>
-              {profile?.display_name?.[0]?.toUpperCase() ||
+              {profile?.displayName?.[0]?.toUpperCase() ||
                 user.email?.[0]?.toUpperCase() ||
                 'U'}
             </AvatarFallback>
@@ -75,7 +40,7 @@ export function UserMenu() {
         <DropdownMenuLabel className="font-normal">
           <div className="flex flex-col space-y-1">
             <p className="font-medium text-sm leading-none">
-              {profile?.display_name || 'User'}
+              {profile?.displayName || 'User'}
             </p>
             <p className="text-muted-foreground text-xs leading-none">
               @{profile?.username || 'username'}
@@ -107,16 +72,8 @@ export function UserMenu() {
             <span>Settings</span>
           </Link>
         </DropdownMenuItem>
-        {profile?.is_pro && (
-          <DropdownMenuItem asChild>
-            <Link href="/pro" className="text-blue-600 cursor-pointer">
-              <Crown className="mr-2 w-4 h-4" />
-              <span>Pro Settings</span>
-            </Link>
-          </DropdownMenuItem>
-        )}
         <DropdownMenuSeparator />
-        <DropdownMenuItem onClick={handleSignOut} className="cursor-pointer">
+        <DropdownMenuItem onClick={signOut} className="cursor-pointer">
           <LogOut className="mr-2 w-4 h-4" />
           <span>Sign out</span>
         </DropdownMenuItem>

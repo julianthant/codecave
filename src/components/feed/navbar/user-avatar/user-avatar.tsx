@@ -26,8 +26,8 @@ export function UserAvatar() {
     if (isAuthenticated && user?.user_metadata?.avatar_url) {
       return user.user_metadata.avatar_url
     }
-    if (isAuthenticated && profile?.avatar_url) {
-      return profile.avatar_url
+    if (isAuthenticated && profile?.avatarUrl) {
+      return profile.avatarUrl
     }
     return null
   }

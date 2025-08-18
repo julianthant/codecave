@@ -269,7 +269,7 @@ export interface PostInteraction {
   user_id: string
   type: 'like' | 'bookmark' | 'view' | 'share' | 'comment'
   created_at: string
-  metadata?: Record<string, any>
+  metadata?: Record<string, unknown>
 }
 
 // Comment system
@@ -293,7 +293,7 @@ export interface BlockValidation {
   optional_fields: string[]
   max_content_length?: number
   allowed_formats?: string[]
-  validation_rules?: Record<string, any>
+  validation_rules?: Record<string, unknown>
 }
 
 // Export utilities type

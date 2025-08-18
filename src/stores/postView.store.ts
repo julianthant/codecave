@@ -1,9 +1,10 @@
 import { create } from 'zustand'
+import type { Post } from '@/types/post-types'
 
 interface PostViewState {
   viewingPost: boolean
-  postData: any | null
-  setPost: (post: any) => void
+  postData: Post | null
+  setPost: (post: Post) => void
   clearPost: () => void
 }
 

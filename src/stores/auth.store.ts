@@ -2,16 +2,17 @@ import { create } from "zustand";
 import { devtools, persist } from "zustand/middleware";
 import { immer } from "zustand/middleware/immer";
 import type { User } from "@supabase/supabase-js";
+import type { Profile } from "@/db";
 
 interface AuthState {
   user: User | null;
-  profile: any | null;
+  profile: Profile | null;
   isLoading: boolean;
   isInitialized: boolean;
 
   // Actions
   setUser: (user: User | null) => void;
-  setProfile: (profile: any | null) => void;
+  setProfile: (profile: Profile | null) => void;
   setLoading: (loading: boolean) => void;
   initialize: () => void;
   reset: () => void;

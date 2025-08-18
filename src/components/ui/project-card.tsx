@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { Eye, Heart, GitFork, Bookmark } from "lucide-react";
 import { cn } from "@/lib/utils";
+import Image from "next/image";
 
 interface ProjectCardProps {
   id: string;
@@ -49,10 +50,12 @@ export function ProjectCard({
   return (
     <div className="relative bg-white rounded-lg shadow-sm hover:shadow-md transition-all duration-300 overflow-hidden border">
       <div className="aspect-video bg-gradient-to-br from-green-100 to-emerald-100 relative">
-        <img
+        <Image
           src={image}
           alt={title}
           className="w-full h-full object-cover"
+          width={800}
+          height={450}
         />
 
         {/* Top corner actions */}
@@ -86,10 +89,12 @@ export function ProjectCard({
         <h3 className="font-medium text-gray-900 mb-1 text-sm">{title}</h3>
         <div className="flex items-center justify-between text-xs text-gray-500">
           <div className="flex items-center gap-2">
-            <img
+            <Image
               src={authorAvatar}
               alt={author}
               className="w-6 h-6 rounded-full object-cover"
+              width={24}
+              height={24}
             />
             <span className="font-medium text-gray-700">{author}</span>
           </div>

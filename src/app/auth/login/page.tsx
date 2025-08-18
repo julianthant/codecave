@@ -26,7 +26,7 @@ export default function LoginPage() {
             <AuthButton provider="google" redirectTo="/dashboard" />
             <AuthButton provider="discord" redirectTo="/dashboard" />
             <Button asChild variant="outline" className="w-full">
-              <Link href="/">
+              <Link href="/feed">
                 <User className="mr-2 w-4 h-4" />
                 Continue as Guest
               </Link>

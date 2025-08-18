@@ -6,6 +6,8 @@ import React from "react";
 import { Menu, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { LogoWhite } from "@/components/ui/logo";
+import { useAuth } from "@/hooks/use-auth";
+import { useRouter } from "next/navigation";
 
 const menuItems = [
   { name: "Features", href: "/features" },
@@ -16,6 +18,8 @@ const menuItems = [
 export function HeroHeader() {
   const [menuState, setMenuState] = React.useState(false);
   const [isScrolled, setIsScrolled] = React.useState(false);
+  const { isAuthenticated, isLoading } = useAuth();
+  const router = useRouter();
 
   React.useEffect(() => {
     const handleScroll = () => {
@@ -24,6 +28,14 @@ export function HeroHeader() {
     window.addEventListener("scroll", handleScroll);
     return () => window.removeEventListener("scroll", handleScroll);
   }, []);
+
+  const handleLoginClick = () => {
+    if (isAuthenticated) {
+      router.push('/feed');
+    } else {
+      router.push('/auth/login');
+    }
+  };
   return (
     <header>
       <nav
@@ -95,17 +107,16 @@ export function HeroHeader() {
               </div>
               <div className="flex sm:flex-row flex-col sm:gap-3 space-y-3 sm:space-y-0 w-full md:w-fit">
                 <Button
-                  asChild
                   variant="outline"
                   size="sm"
                   className={cn(
                     isScrolled && "lg:hidden",
                     "text-landing-muted border-0"
                   )}
+                  onClick={handleLoginClick}
+                  disabled={isLoading}
                 >
-                  <Link href="/auth/login">
-                    <span>Login</span>
-                  </Link>
+                  <span>{isAuthenticated ? "Go to Feed" : "Login"}</span>
                 </Button>
                 <Button
                   asChild
@@ -120,14 +131,13 @@ export function HeroHeader() {
                   </Link>
                 </Button>
                 <Button
-                  asChild
                   size="sm"
                   variant="outline"
                   className={cn(isScrolled ? "lg:inline-flex" : "hidden")}
+                  onClick={handleLoginClick}
+                  disabled={isLoading}
                 >
-                  <Link href="/auth/login">
-                    <span>Get Started</span>
-                  </Link>
+                  <span>{isAuthenticated ? "Go to Feed" : "Get Started"}</span>
                 </Button>
               </div>
             </div>
