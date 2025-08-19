@@ -73,11 +73,11 @@ export function ProfileHero({
 
   const handleCoverPhotoSave = async (file: File) => {
     // Simulate upload delay
-    await new Promise(resolve => setTimeout(resolve, 2000))
-    
+    await new Promise((resolve) => setTimeout(resolve, 2000))
+
     // In a real app, this would upload to your storage service
     console.log('Uploading cover photo:', file.name)
-    
+
     // Mock success - in real app, you'd update the profile data
     toast.success('Cover photo updated successfully!')
   }
@@ -171,10 +171,10 @@ export function ProfileHero({
       className="bg-white shadow-sm border border-gray-200 rounded-lg overflow-hidden"
     >
       {/* Cover Banner - Card-based */}
-      <div className="relative bg-gradient-to-br from-orange-400 via-orange-500 to-orange-600 h-32 overflow-hidden group">
+      <div className="group relative bg-gradient-to-br from-orange-400 via-orange-500 to-orange-600 h-32 overflow-hidden">
         {backgroundPattern}
         <div className="absolute inset-0 bg-gradient-to-r from-black/10 to-transparent" />
-        
+
         {/* Edit Cover Button - Always visible for demo purposes */}
         <motion.button
           initial={{ opacity: 0 }}
@@ -182,9 +182,9 @@ export function ProfileHero({
           whileHover={{ scale: 1.05 }}
           whileTap={{ scale: 0.95 }}
           onClick={() => setIsCoverModalOpen(true)}
-          className="absolute bottom-4 right-4 bg-black/50 hover:bg-black/70 text-white p-2 rounded-full transition-all duration-200 opacity-0 group-hover:opacity-100"
+          className="right-4 bottom-4 absolute bg-black/50 hover:bg-black/70 opacity-0 group-hover:opacity-100 p-2 rounded-full text-white transition-all duration-200"
         >
-          <Camera className="h-4 w-4" />
+          <Camera className="w-4 h-4" />
         </motion.button>
       </div>
 

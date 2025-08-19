@@ -2,10 +2,10 @@
 
 import React, { useState, useEffect } from 'react'
 import { motion } from 'framer-motion'
-import { 
-  Calendar as CalendarIcon, 
-  Clock, 
-  User, 
+import {
+  Calendar as CalendarIcon,
+  Clock,
+  User,
   MessageSquare,
   Check,
   Coffee,
@@ -13,7 +13,7 @@ import {
   BookOpen,
   Zap,
   Users,
-  CheckCircle
+  CheckCircle,
 } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Calendar } from '@/components/ui/calendar'
@@ -104,12 +104,32 @@ const sessionTypes: SessionType[] = [
 ]
 
 const timeSlots = [
-  '9:00 AM', '9:30 AM', '10:00 AM', '10:30 AM', '11:00 AM', '11:30 AM',
-  '12:00 PM', '12:30 PM', '1:00 PM', '1:30 PM', '2:00 PM', '2:30 PM',
-  '3:00 PM', '3:30 PM', '4:00 PM', '4:30 PM', '5:00 PM', '5:30 PM'
+  '9:00 AM',
+  '9:30 AM',
+  '10:00 AM',
+  '10:30 AM',
+  '11:00 AM',
+  '11:30 AM',
+  '12:00 PM',
+  '12:30 PM',
+  '1:00 PM',
+  '1:30 PM',
+  '2:00 PM',
+  '2:30 PM',
+  '3:00 PM',
+  '3:30 PM',
+  '4:00 PM',
+  '4:30 PM',
+  '5:00 PM',
+  '5:30 PM',
 ]
 
-export function BookingModal({ isOpen, onClose, selectedType, startingStep = 1 }: BookingModalProps) {
+export function BookingModal({
+  isOpen,
+  onClose,
+  selectedType,
+  startingStep = 1,
+}: BookingModalProps) {
   const [currentStep, setCurrentStep] = useState(startingStep)
   const [selectedDate, setSelectedDate] = useState<Date>()
   const [selectedTime, setSelectedTime] = useState<string>()
@@ -117,7 +137,9 @@ export function BookingModal({ isOpen, onClose, selectedType, startingStep = 1 }
   const [message, setMessage] = useState('')
   const [isSubmitting, setIsSubmitting] = useState(false)
 
-  const selectedSessionType = sessionTypes.find(type => type.id === sessionType)
+  const selectedSessionType = sessionTypes.find(
+    (type) => type.id === sessionType
+  )
 
   useEffect(() => {
     if (selectedType) {
@@ -135,14 +157,15 @@ export function BookingModal({ isOpen, onClose, selectedType, startingStep = 1 }
     setIsSubmitting(true)
 
     // Simulate API call
-    await new Promise(resolve => setTimeout(resolve, 2000))
+    await new Promise((resolve) => setTimeout(resolve, 2000))
 
-    const sessionTitle = sessionTypes.find(t => t.id === sessionType)?.title || 'Session'
+    const sessionTitle =
+      sessionTypes.find((t) => t.id === sessionType)?.title || 'Session'
     const formattedDate = selectedDate.toLocaleDateString('en-US', {
       weekday: 'long',
       year: 'numeric',
       month: 'long',
-      day: 'numeric'
+      day: 'numeric',
     })
 
     toast.success(
@@ -162,13 +185,13 @@ export function BookingModal({ isOpen, onClose, selectedType, startingStep = 1 }
     onClose()
   }
 
-  const nextStep = () => setCurrentStep(prev => Math.min(prev + 1, 3))
-  const prevStep = () => setCurrentStep(prev => Math.max(prev - 1, 1))
+  const nextStep = () => setCurrentStep((prev) => Math.min(prev + 1, 3))
+  const prevStep = () => setCurrentStep((prev) => Math.max(prev - 1, 1))
 
   const isDateDisabled = (date: Date) => {
     const today = new Date()
     const dayOfWeek = date.getDay()
-    
+
     // Disable past dates and weekends
     return date < today || dayOfWeek === 0 || dayOfWeek === 6
   }
@@ -178,7 +201,7 @@ export function BookingModal({ isOpen, onClose, selectedType, startingStep = 1 }
       <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle className="flex items-center space-x-2">
-            <CalendarIcon className="h-5 w-5 text-orange-600" />
+            <CalendarIcon className="w-5 h-5 text-orange-600" />
             <span>Schedule a Session</span>
           </DialogTitle>
           <DialogDescription>
@@ -197,7 +220,7 @@ export function BookingModal({ isOpen, onClose, selectedType, startingStep = 1 }
                     : 'bg-gray-200 text-gray-600'
                 }`}
               >
-                {step < currentStep ? <Check className="h-4 w-4" /> : step}
+                {step < currentStep ? <Check className="w-4 h-4" /> : step}
               </div>
               {step < 3 && (
                 <div
@@ -218,13 +241,13 @@ export function BookingModal({ isOpen, onClose, selectedType, startingStep = 1 }
             className="space-y-4"
           >
             <div>
-              <h3 className="text-lg font-medium mb-2">Choose Session Type</h3>
-              <p className="text-sm text-gray-600 mb-4">
+              <h3 className="mb-2 font-medium text-lg">Choose Session Type</h3>
+              <p className="mb-4 text-gray-600 text-sm">
                 Select the type of session you'd like to book
               </p>
             </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div className="gap-4 grid grid-cols-1 md:grid-cols-2">
               {sessionTypes.map((type) => {
                 const Icon = type.icon
                 return (
@@ -239,12 +262,18 @@ export function BookingModal({ isOpen, onClose, selectedType, startingStep = 1 }
                     onClick={() => setSessionType(type.id)}
                   >
                     <div className="flex items-start space-x-3">
-                      <div className={`w-10 h-10 ${type.color} rounded-lg flex items-center justify-center`}>
-                        <Icon className="h-5 w-5 text-white" />
+                      <div
+                        className={`w-10 h-10 ${type.color} rounded-lg flex items-center justify-center`}
+                      >
+                        <Icon className="w-5 h-5 text-white" />
                       </div>
                       <div className="flex-1">
-                        <h4 className="font-medium text-gray-900 mb-1">{type.title}</h4>
-                        <p className="text-sm text-gray-600 mb-2">{type.description}</p>
+                        <h4 className="mb-1 font-medium text-gray-900">
+                          {type.title}
+                        </h4>
+                        <p className="mb-2 text-gray-600 text-sm">
+                          {type.description}
+                        </p>
                         <Badge variant="secondary" className="text-xs">
                           {type.duration}
                         </Badge>
@@ -265,33 +294,35 @@ export function BookingModal({ isOpen, onClose, selectedType, startingStep = 1 }
             className="space-y-6"
           >
             <div>
-              <h3 className="text-lg font-medium mb-2">Select Date & Time</h3>
-              <p className="text-sm text-gray-600 mb-4">
+              <h3 className="mb-2 font-medium text-lg">Select Date & Time</h3>
+              <p className="mb-4 text-gray-600 text-sm">
                 Choose a convenient date and time for your session
               </p>
             </div>
 
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            <div className="gap-6 grid grid-cols-1 lg:grid-cols-2">
               {/* Calendar */}
               <div>
-                <Label className="text-sm font-medium mb-2 block">Date</Label>
+                <Label className="block mb-2 font-medium text-sm">Date</Label>
                 <Calendar
                   mode="single"
                   selected={selectedDate}
                   onSelect={setSelectedDate}
                   disabled={isDateDisabled}
-                  className="rounded-md border"
+                  className="border rounded-md"
                 />
               </div>
 
               {/* Time Slots */}
               <div>
-                <Label className="text-sm font-medium mb-2 block">Time (PST)</Label>
-                <div className="grid grid-cols-2 gap-2 max-h-80 overflow-y-auto">
+                <Label className="block mb-2 font-medium text-sm">
+                  Time (PST)
+                </Label>
+                <div className="gap-2 grid grid-cols-2 max-h-80 overflow-y-auto">
                   {timeSlots.map((time) => (
                     <Button
                       key={time}
-                      variant={selectedTime === time ? "default" : "outline"}
+                      variant={selectedTime === time ? 'default' : 'outline'}
                       size="sm"
                       onClick={() => setSelectedTime(time)}
                       className={`text-xs ${
@@ -309,32 +340,34 @@ export function BookingModal({ isOpen, onClose, selectedType, startingStep = 1 }
 
             {/* Selected Session Summary */}
             {selectedSessionType && (
-              <div className="bg-gray-50 rounded-lg p-4">
-                <h4 className="font-medium text-gray-900 mb-2">Session Summary</h4>
+              <div className="bg-gray-50 p-4 rounded-lg">
+                <h4 className="mb-2 font-medium text-gray-900">
+                  Session Summary
+                </h4>
                 <div className="space-y-2 text-sm">
                   <div className="flex items-center space-x-2">
-                    <MessageSquare className="h-4 w-4 text-gray-500" />
+                    <MessageSquare className="w-4 h-4 text-gray-500" />
                     <span>{selectedSessionType.title}</span>
                   </div>
                   <div className="flex items-center space-x-2">
-                    <Clock className="h-4 w-4 text-gray-500" />
+                    <Clock className="w-4 h-4 text-gray-500" />
                     <span>{selectedSessionType.duration}</span>
                   </div>
                   {selectedDate && (
                     <div className="flex items-center space-x-2">
-                      <CalendarIcon className="h-4 w-4 text-gray-500" />
+                      <CalendarIcon className="w-4 h-4 text-gray-500" />
                       <span>
                         {selectedDate.toLocaleDateString('en-US', {
                           weekday: 'long',
                           month: 'long',
-                          day: 'numeric'
+                          day: 'numeric',
                         })}
                       </span>
                     </div>
                   )}
                   {selectedTime && (
                     <div className="flex items-center space-x-2">
-                      <Clock className="h-4 w-4 text-gray-500" />
+                      <Clock className="w-4 h-4 text-gray-500" />
                       <span>{selectedTime} PST</span>
                     </div>
                   )}
@@ -352,14 +385,17 @@ export function BookingModal({ isOpen, onClose, selectedType, startingStep = 1 }
             className="space-y-4"
           >
             <div>
-              <h3 className="text-lg font-medium mb-2">Additional Details</h3>
-              <p className="text-sm text-gray-600 mb-4">
+              <h3 className="mb-2 font-medium text-lg">Additional Details</h3>
+              <p className="mb-4 text-gray-600 text-sm">
                 Share any specific topics or questions you'd like to discuss
               </p>
             </div>
 
             <div>
-              <Label htmlFor="message" className="text-sm font-medium mb-2 block">
+              <Label
+                htmlFor="message"
+                className="block mb-2 font-medium text-sm"
+              >
                 Message (Optional)
               </Label>
               <Textarea
@@ -369,23 +405,30 @@ export function BookingModal({ isOpen, onClose, selectedType, startingStep = 1 }
                 onChange={(e) => setMessage(e.target.value)}
                 className="min-h-[120px]"
               />
-              <p className="text-xs text-gray-500 mt-2">
-                This helps me prepare for our session and make it more valuable for you.
+              <p className="mt-2 text-gray-500 text-xs">
+                This helps me prepare for our session and make it more valuable
+                for you.
               </p>
             </div>
 
             {/* Final Summary */}
             {selectedSessionType && selectedDate && selectedTime && (
-              <div className="bg-orange-50 border border-orange-200 rounded-lg p-4">
-                <h4 className="font-medium text-orange-900 mb-3">Booking Summary</h4>
-                <div className="space-y-2 text-sm text-orange-800">
+              <div className="bg-orange-50 p-4 border border-orange-200 rounded-lg">
+                <h4 className="mb-3 font-medium text-orange-900">
+                  Booking Summary
+                </h4>
+                <div className="space-y-2 text-orange-800 text-sm">
                   <div className="flex justify-between">
                     <span>Session Type:</span>
-                    <span className="font-medium">{selectedSessionType.title}</span>
+                    <span className="font-medium">
+                      {selectedSessionType.title}
+                    </span>
                   </div>
                   <div className="flex justify-between">
                     <span>Duration:</span>
-                    <span className="font-medium">{selectedSessionType.duration}</span>
+                    <span className="font-medium">
+                      {selectedSessionType.duration}
+                    </span>
                   </div>
                   <div className="flex justify-between">
                     <span>Date:</span>
@@ -393,7 +436,7 @@ export function BookingModal({ isOpen, onClose, selectedType, startingStep = 1 }
                       {selectedDate.toLocaleDateString('en-US', {
                         weekday: 'long',
                         month: 'long',
-                        day: 'numeric'
+                        day: 'numeric',
                       })}
                     </span>
                   </div>
@@ -408,7 +451,7 @@ export function BookingModal({ isOpen, onClose, selectedType, startingStep = 1 }
         )}
 
         {/* Navigation Buttons */}
-        <div className="flex items-center justify-between pt-6 border-t">
+        <div className="flex justify-between items-center pt-6 border-t">
           <div>
             {currentStep > 1 && (
               <Button
@@ -420,7 +463,7 @@ export function BookingModal({ isOpen, onClose, selectedType, startingStep = 1 }
               </Button>
             )}
           </div>
-          
+
           <div className="flex items-center space-x-3">
             <Button
               variant="outline"
@@ -429,7 +472,7 @@ export function BookingModal({ isOpen, onClose, selectedType, startingStep = 1 }
             >
               Cancel
             </Button>
-            
+
             {currentStep < 3 ? (
               <Button
                 onClick={nextStep}
@@ -444,12 +487,14 @@ export function BookingModal({ isOpen, onClose, selectedType, startingStep = 1 }
             ) : (
               <Button
                 onClick={handleSubmit}
-                disabled={!selectedDate || !selectedTime || !sessionType || isSubmitting}
+                disabled={
+                  !selectedDate || !selectedTime || !sessionType || isSubmitting
+                }
                 className="bg-orange-600 hover:bg-orange-700"
               >
                 {isSubmitting ? (
                   <>
-                    <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2" />
+                    <div className="mr-2 border-white border-b-2 rounded-full w-4 h-4 animate-spin" />
                     Booking...
                   </>
                 ) : (
