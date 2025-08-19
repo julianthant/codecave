@@ -8,17 +8,17 @@ export const metadata: Metadata = {
 
 export default function SettingsPage() {
   return (
-    <div className="min-h-screen bg-gray-50">
-      <div className="mx-auto max-w-6xl px-4 py-8 sm:px-6 lg:px-8">
+    <div className="bg-gray-50 min-h-screen">
+      <div className="mx-auto px-4 sm:px-6 lg:px-8 py-8 max-w-7xl">
         <div className="mb-8">
-          <h1 className="text-3xl font-bold tracking-tight text-gray-900">
+          <h1 className="font-bold text-gray-900 text-3xl tracking-tight">
             Settings
           </h1>
           <p className="mt-2 text-gray-600">
             Manage your account settings and preferences
           </p>
         </div>
-        
+
         <SettingsContainer />
       </div>
     </div>

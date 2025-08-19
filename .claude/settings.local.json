@@ -25,7 +25,8 @@
       "Bash(git merge feed_sidebar)",
       "mcp__playwright__browser_evaluate",
       "mcp__playwright__browser_close",
-      "Bash(npx shadcn@latest add:*)"
+      "Bash(npx shadcn@latest add:*)",
+      "Bash(pnpm type-check:*)"
     ],
     "defaultMode": "acceptEdits"
   },

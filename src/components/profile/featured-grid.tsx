@@ -2,17 +2,17 @@
 
 import React from 'react'
 import { motion } from 'framer-motion'
-import { 
-  Github, 
-  Star, 
-  GitFork, 
-  ExternalLink, 
-  Calendar, 
+import {
+  Github,
+  Star,
+  GitFork,
+  ExternalLink,
+  Calendar,
   Globe,
   Lock,
   TrendingUp,
   Code,
-  Zap
+  Zap,
 } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
@@ -39,7 +39,7 @@ interface FeaturedGridProps {
 export function FeaturedGrid({ projects }: FeaturedGridProps) {
   // Sort projects by importance/popularity for grid placement
   const sortedProjects = [...projects]
-    .filter(p => !p.isPrivate) // Only show public projects in featured grid
+    .filter((p) => !p.isPrivate) // Only show public projects in featured grid
     .sort((a, b) => b.stars - a.stars)
     .slice(0, 6) // Limit to 6 projects for the grid
 
@@ -71,14 +71,14 @@ export function FeaturedGrid({ projects }: FeaturedGridProps) {
   // Small projects
   const smallProjects = sortedProjects.slice(3, 6)
 
-  const ProjectCard = ({ 
-    project, 
+  const ProjectCard = ({
+    project,
     size = 'small',
-    className = '' 
-  }: { 
+    className = '',
+  }: {
     project: ProjectData
     size?: 'large' | 'medium' | 'small'
-    className?: string 
+    className?: string
   }) => {
     const isLarge = size === 'large'
     const isMedium = size === 'medium'
@@ -95,47 +95,59 @@ export function FeaturedGrid({ projects }: FeaturedGridProps) {
       >
         {/* Project Header */}
         <div className={`p-4 ${isLarge ? 'pb-2' : ''}`}>
-          <div className="flex items-start justify-between mb-3">
+          <div className="flex justify-between items-start mb-3">
             <div className="flex-grow">
               <div className="flex items-center space-x-2 mb-2">
-                <h3 className={`
+                <h3
+                  className={`
                   font-semibold text-gray-900 group-hover:text-orange-600 transition-colors
                   ${isLarge ? 'text-xl' : isMedium ? 'text-lg' : 'text-base'}
-                `}>
+                `}
+                >
                   {project.name}
                 </h3>
                 {project.isPrivate && (
-                  <Lock className="h-4 w-4 text-gray-400" />
+                  <Lock className="w-4 h-4 text-gray-400" />
                 )}
                 {project.stars > 100 && (
-                  <Badge variant="secondary" className="bg-yellow-100 text-yellow-800 border-yellow-200">
-                    <Star className="h-3 w-3 mr-1" />
+                  <Badge
+                    variant="secondary"
+                    className="bg-yellow-100 border-yellow-200 text-yellow-800"
+                  >
+                    <Star className="mr-1 w-3 h-3" />
                     Popular
                   </Badge>
                 )}
               </div>
-              
-              <p className={`
+
+              <p
+                className={`
                 text-gray-600 leading-relaxed mb-3
                 ${isLarge ? 'text-sm' : 'text-xs line-clamp-2'}
                 ${isLarge ? 'line-clamp-3' : ''}
-              `}>
+              `}
+              >
                 {project.description}
               </p>
 
               {/* Technologies */}
               <div className="flex flex-wrap gap-1.5 mb-3">
-                {project.technologies.slice(0, isLarge ? 6 : isMedium ? 4 : 3).map((tech, index) => (
-                  <SkillBadge 
-                    key={index} 
-                    skill={tech} 
-                    variant="secondary" 
-                    size="sm" 
-                  />
-                ))}
-                {project.technologies.length > (isLarge ? 6 : isMedium ? 4 : 3) && (
-                  <span className="text-xs text-gray-500 self-center">
-                    +{project.technologies.length - (isLarge ? 6 : isMedium ? 4 : 3)}
+                {project.technologies
+                  .slice(0, isLarge ? 6 : isMedium ? 4 : 3)
+                  .map((tech, index) => (
+                    <SkillBadge
+                      key={index}
+                      skill={tech}
+                      variant="secondary"
+                      size="sm"
+                    />
+                  ))}
+                {project.technologies.length >
+                  (isLarge ? 6 : isMedium ? 4 : 3) && (
+                  <span className="self-center text-gray-500 text-xs">
+                    +
+                    {project.technologies.length -
+                      (isLarge ? 6 : isMedium ? 4 : 3)}
                   </span>
                 )}
               </div>
@@ -144,26 +156,28 @@ export function FeaturedGrid({ projects }: FeaturedGridProps) {
 
           {/* Large project additional content */}
           {isLarge && (
-            <div className="mb-4 p-3 bg-gray-50 rounded-lg border">
-              <div className="flex items-center justify-between mb-2">
-                <span className="text-xs text-gray-600 font-medium">Project Highlights</span>
-                <TrendingUp className="h-4 w-4 text-green-600" />
+            <div className="bg-gray-50 mb-4 p-3 border rounded-lg">
+              <div className="flex justify-between items-center mb-2">
+                <span className="font-medium text-gray-600 text-xs">
+                  Project Highlights
+                </span>
+                <TrendingUp className="w-4 h-4 text-green-600" />
               </div>
-              <div className="grid grid-cols-2 gap-3 text-xs">
+              <div className="gap-3 grid grid-cols-2 text-xs">
                 <div className="flex items-center space-x-1">
-                  <Star className="h-3 w-3 text-yellow-500" />
+                  <Star className="w-3 h-3 text-yellow-500" />
                   <span className="text-gray-600">{project.stars} stars</span>
                 </div>
                 <div className="flex items-center space-x-1">
-                  <GitFork className="h-3 w-3 text-blue-500" />
+                  <GitFork className="w-3 h-3 text-blue-500" />
                   <span className="text-gray-600">{project.forks} forks</span>
                 </div>
                 <div className="flex items-center space-x-1">
-                  <Code className="h-3 w-3 text-purple-500" />
+                  <Code className="w-3 h-3 text-purple-500" />
                   <span className="text-gray-600">{project.language}</span>
                 </div>
                 <div className="flex items-center space-x-1">
-                  <Zap className="h-3 w-3 text-orange-500" />
+                  <Zap className="w-3 h-3 text-orange-500" />
                   <span className="text-gray-600">Active</span>
                 </div>
               </div>
@@ -173,20 +187,20 @@ export function FeaturedGrid({ projects }: FeaturedGridProps) {
 
         {/* Project Footer */}
         <div className={`px-4 pb-4 ${isLarge ? 'pt-0' : 'pt-2'}`}>
-          <div className="flex items-center justify-between">
+          <div className="flex justify-between items-center">
             {/* Stats for non-large cards */}
             {!isLarge && (
-              <div className="flex items-center space-x-3 text-xs text-gray-500">
+              <div className="flex items-center space-x-3 text-gray-500 text-xs">
                 <div className="flex items-center space-x-1">
-                  <div className="h-2 w-2 rounded-full bg-blue-500"></div>
+                  <div className="bg-blue-500 rounded-full w-2 h-2"></div>
                   <span>{project.language}</span>
                 </div>
                 <div className="flex items-center space-x-1">
-                  <Star className="h-3 w-3" />
+                  <Star className="w-3 h-3" />
                   <span>{project.stars}</span>
                 </div>
                 <div className="flex items-center space-x-1">
-                  <Calendar className="h-3 w-3" />
+                  <Calendar className="w-3 h-3" />
                   <span>{project.lastUpdated}</span>
                 </div>
               </div>
@@ -199,40 +213,48 @@ export function FeaturedGrid({ projects }: FeaturedGridProps) {
                   variant="ghost"
                   size="sm"
                   asChild
-                  className="h-7 w-7 p-0 text-gray-400 hover:text-gray-900 hover:bg-gray-100"
+                  className="hover:bg-gray-100 p-0 w-7 h-7 text-gray-400 hover:text-gray-900"
                 >
-                  <a href={project.githubUrl} target="_blank" rel="noopener noreferrer">
-                    <Github className="h-3 w-3" />
+                  <a
+                    href={project.githubUrl}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                  >
+                    <Github className="w-3 h-3" />
                   </a>
                 </Button>
               )}
-              
+
               {project.liveUrl && (
                 <Button
                   variant="ghost"
                   size="sm"
                   asChild
-                  className="h-7 w-7 p-0 text-gray-400 hover:text-orange-600 hover:bg-orange-50"
+                  className="hover:bg-orange-50 p-0 w-7 h-7 text-gray-400 hover:text-orange-600"
                 >
-                  <a href={project.liveUrl} target="_blank" rel="noopener noreferrer">
-                    <Globe className="h-3 w-3" />
+                  <a
+                    href={project.liveUrl}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                  >
+                    <Globe className="w-3 h-3" />
                   </a>
                 </Button>
               )}
-              
+
               <Button
                 variant="ghost"
                 size="sm"
-                className="h-7 w-7 p-0 text-gray-400 hover:text-orange-600 hover:bg-orange-50"
+                className="hover:bg-orange-50 p-0 w-7 h-7 text-gray-400 hover:text-orange-600"
               >
-                <ExternalLink className="h-3 w-3" />
+                <ExternalLink className="w-3 h-3" />
               </Button>
             </div>
           </div>
 
           {/* Last updated for large cards */}
           {isLarge && (
-            <div className="flex items-center justify-between text-xs text-gray-500 mt-3 pt-3 border-t border-gray-100">
+            <div className="flex justify-between items-center mt-3 pt-3 border-gray-100 border-t text-gray-500 text-xs">
               <span>Last updated {project.lastUpdated}</span>
               <span>⭐ Trending in {project.language}</span>
             </div>
@@ -244,18 +266,22 @@ export function FeaturedGrid({ projects }: FeaturedGridProps) {
 
   if (sortedProjects.length === 0) {
     return (
-      <div className="mx-auto max-w-6xl px-4 py-8 sm:px-6 lg:px-8">
-        <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-8 text-center">
-          <Code className="h-12 w-12 text-gray-400 mx-auto mb-4" />
-          <h3 className="text-lg font-medium text-gray-900 mb-2">No Public Projects</h3>
-          <p className="text-gray-500">This developer hasn&apos;t shared any public projects yet.</p>
+      <div className="mx-auto px-4 sm:px-6 lg:px-8 py-8 max-w-7xl">
+        <div className="bg-white shadow-sm p-8 border border-gray-200 rounded-lg text-center">
+          <Code className="mx-auto mb-4 w-12 h-12 text-gray-400" />
+          <h3 className="mb-2 font-medium text-gray-900 text-lg">
+            No Public Projects
+          </h3>
+          <p className="text-gray-500">
+            This developer hasn&apos;t shared any public projects yet.
+          </p>
         </div>
       </div>
     )
   }
 
   return (
-    <div className="mx-auto max-w-6xl px-4 py-8 sm:px-6 lg:px-8">
+    <div className="mx-auto px-4 sm:px-6 lg:px-8 py-8 max-w-7xl">
       <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
@@ -263,8 +289,10 @@ export function FeaturedGrid({ projects }: FeaturedGridProps) {
       >
         {/* Header */}
         <div className="mb-6">
-          <h2 className="text-lg font-semibold text-gray-900 mb-2">Featured Projects</h2>
-          <p className="text-sm text-gray-500">
+          <h2 className="mb-2 font-semibold text-gray-900 text-lg">
+            Featured Projects
+          </h2>
+          <p className="text-gray-500 text-sm">
             Showcasing the most popular and impactful work
           </p>
         </div>
@@ -274,7 +302,7 @@ export function FeaturedGrid({ projects }: FeaturedGridProps) {
           variants={containerVariants}
           initial="hidden"
           animate="visible"
-          className="grid grid-cols-1 md:grid-cols-4 lg:grid-cols-6 gap-4 auto-rows-fr"
+          className="gap-4 grid grid-cols-1 md:grid-cols-4 lg:grid-cols-6 auto-rows-fr"
         >
           {/* Featured project - 2x2 */}
           {featuredProject && (
@@ -308,8 +336,11 @@ export function FeaturedGrid({ projects }: FeaturedGridProps) {
 
         {/* View all projects link */}
         <div className="mt-6 text-center">
-          <Button variant="outline" className="border-orange-200 text-orange-600 hover:bg-orange-50">
-            <Github className="h-4 w-4 mr-2" />
+          <Button
+            variant="outline"
+            className="hover:bg-orange-50 border-orange-200 text-orange-600"
+          >
+            <Github className="mr-2 w-4 h-4" />
             View All Projects on GitHub
           </Button>
         </div>

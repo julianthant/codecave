@@ -11,7 +11,7 @@ import Link from 'next/link'
 export default function Navbar() {
   return (
     <nav className="top-0 z-50 sticky bg-white/95 supports-[backdrop-filter]:bg-white/60 shadow-sm backdrop-blur-sm border-gray-200 border-b">
-      <div className="mx-auto px-4 sm:px-6 lg:px-8 w-full">
+      <div className="mx-auto px-4 sm:px-6 lg:px-8 max-w-7xl">
         <div className="flex justify-between items-center h-16">
           {/* Left side - Logo */}
           <div className="flex items-center">
