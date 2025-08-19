@@ -175,19 +175,17 @@ export function ProfileHero({
         {backgroundPattern}
         <div className="absolute inset-0 bg-gradient-to-r from-black/10 to-transparent" />
         
-        {/* Edit Cover Button - Only show for own profile */}
-        {isOwnProfile && (
-          <motion.button
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            whileHover={{ scale: 1.05 }}
-            whileTap={{ scale: 0.95 }}
-            onClick={() => setIsCoverModalOpen(true)}
-            className="absolute bottom-4 right-4 bg-black/50 hover:bg-black/70 text-white p-2 rounded-full transition-all duration-200 opacity-0 group-hover:opacity-100"
-          >
-            <Camera className="h-4 w-4" />
-          </motion.button>
-        )}
+        {/* Edit Cover Button - Always visible for demo purposes */}
+        <motion.button
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          whileHover={{ scale: 1.05 }}
+          whileTap={{ scale: 0.95 }}
+          onClick={() => setIsCoverModalOpen(true)}
+          className="absolute bottom-4 right-4 bg-black/50 hover:bg-black/70 text-white p-2 rounded-full transition-all duration-200 opacity-0 group-hover:opacity-100"
+        >
+          <Camera className="h-4 w-4" />
+        </motion.button>
       </div>
 
       {/* Main Profile Content */}

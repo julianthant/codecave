@@ -141,8 +141,8 @@ export function SkillsMatrix({ }: SkillsMatrixProps) {
       </div>
 
       {/* Content */}
-      <div className="p-6">
-        <div className="space-y-6">
+      <div className="p-4">
+        <div className="space-y-4">
           {skillCategories.map((category) => {
             const Icon = category.icon
             return (
@@ -150,28 +150,24 @@ export function SkillsMatrix({ }: SkillsMatrixProps) {
                 key={category.id}
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
-                className="border border-gray-200 rounded-lg p-4"
+                className="border border-gray-200 rounded-lg p-3"
               >
-                <div className="flex items-center space-x-3 mb-4">
-                  <div className={`w-8 h-8 ${category.color} rounded-lg flex items-center justify-center`}>
-                    <Icon className="h-4 w-4 text-white" />
+                <div className="flex items-center space-x-2 mb-3">
+                  <div className={`w-6 h-6 ${category.color} rounded-md flex items-center justify-center`}>
+                    <Icon className="h-3 w-3 text-white" />
                   </div>
                   <div>
-                    <h3 className="font-medium text-gray-900">{category.name}</h3>
+                    <h3 className="font-medium text-gray-900 text-sm">{category.name}</h3>
                     <p className="text-xs text-gray-500">{category.skills.length} skills</p>
                   </div>
                 </div>
                 
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                <div className="flex flex-wrap gap-2">
                   {category.skills.map((skill) => (
-                    <div key={skill.name} className="flex items-center justify-between p-3 bg-gray-50 rounded-lg hover:bg-gray-100 transition-colors">
-                      <div className="flex items-center space-x-2">
-                        <span className="font-medium text-sm text-gray-900">{skill.name}</span>
-                        {skill.isLearning && <BookOpen className="h-3 w-3 text-green-600" />}
-                      </div>
-                      <span className="text-xs text-gray-500">
-                        {skill.yearsExperience}y exp
-                      </span>
+                    <div key={skill.name} className="flex items-center space-x-1 px-2 py-1 bg-gray-50 rounded-md hover:bg-gray-100 transition-colors border border-gray-200">
+                      <span className="text-xs font-medium text-gray-900">{skill.name}</span>
+                      {skill.isLearning && <BookOpen className="h-3 w-3 text-green-600" />}
+                      <span className="text-xs text-gray-500">({skill.yearsExperience}y)</span>
                     </div>
                   ))}
                 </div>
@@ -182,11 +178,11 @@ export function SkillsMatrix({ }: SkillsMatrixProps) {
       </div>
 
       {/* Footer */}
-      <div className="px-6 py-4 bg-gray-50 border-t border-gray-200 rounded-b-lg">
+      <div className="px-6 py-3 bg-gray-50 border-t border-gray-200 rounded-b-lg">
         <div className="flex items-center justify-between text-sm text-gray-600">
           <div className="flex items-center space-x-4">
-            <span>📊 {allSkills.length} total skills</span>
-            <span>🌱 {allSkills.filter(s => s.isLearning).length} learning</span>
+            <span>{allSkills.length} total skills</span>
+            <span>{allSkills.filter(s => s.isLearning).length} learning</span>
           </div>
           <span className="text-xs">Continuously expanding skillset</span>
         </div>

@@ -142,6 +142,11 @@ export function ConnectSection({ profile, userSettings }: ConnectSectionProps) {
     setIsBookingModalOpen(true)
   }
 
+  const handleScheduleMeeting = () => {
+    setSelectedCollabType(null)
+    setIsBookingModalOpen(true)
+  }
+
   const handleContactMethod = (method: typeof contactMethods[0]) => {
     if (method.url) {
       window.open(method.url, '_blank')
@@ -282,7 +287,7 @@ export function ConnectSection({ profile, userSettings }: ConnectSectionProps) {
                 <div className="mt-4 text-center">
                   <Button 
                     className="bg-orange-600 hover:bg-orange-700"
-                    onClick={() => setIsBookingModalOpen(true)}
+                    onClick={handleScheduleMeeting}
                   >
                     <Calendar className="h-4 w-4 mr-2" />
                     Schedule a Meeting
@@ -369,6 +374,7 @@ export function ConnectSection({ profile, userSettings }: ConnectSectionProps) {
             setSelectedCollabType(null)
           }}
           selectedType={selectedCollabType || undefined}
+          startingStep={selectedCollabType ? 2 : 1}
         />
       </motion.div>
   )

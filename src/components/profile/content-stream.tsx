@@ -20,6 +20,8 @@ import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
 import { ProfilePost } from './profile-post'
 import { SkillBadge } from './skill-badge'
+import { ContentCardFooter } from './content-card-footer'
+import { InlineComments } from './inline-comments'
 import { toast } from 'sonner'
 import type { Post, Profile } from '@/db/schema'
 
@@ -56,6 +58,7 @@ export function ContentStream({ posts, profile }: ContentStreamProps) {
   const [currentPage, setCurrentPage] = useState(1)
   const [isLoadingMore, setIsLoadingMore] = useState(false)
   const [hasMoreContent, setHasMoreContent] = useState(true)
+  const [expandedComments, setExpandedComments] = useState<Set<string>>(new Set())
 
   // Generate additional mock content for pagination
   const generateAdditionalContent = (page: number): StreamItem[] => {
@@ -289,31 +292,39 @@ const handleResponse = <T>(response: ApiResponse<T>) => {
             )}
           </div>
 
-          {/* Engagement */}
-          <div className="flex items-center justify-between border-t border-gray-100 pt-4">
-            <div className="flex items-center space-x-6 text-sm text-gray-500">
-              <div className="flex items-center space-x-1">
-                <Eye className="h-4 w-4" />
-                <span>{item.engagement.views}</span>
-              </div>
-              <div className="flex items-center space-x-1">
-                <Heart className="h-4 w-4" />
-                <span>{item.engagement.likes}</span>
-              </div>
-              <div className="flex items-center space-x-1">
-                <MessageSquare className="h-4 w-4" />
-                <span>{item.engagement.comments}</span>
-              </div>
-            </div>
-
-            <Button
-              variant="ghost"
-              size="sm"
-              className="text-gray-500 hover:text-orange-600 hover:bg-orange-50"
-            >
-              <ExternalLink className="h-4 w-4" />
-            </Button>
-          </div>
+          {/* Unified Content Card Footer */}
+          <ContentCardFooter
+            stats={{
+              views: item.engagement.views,
+              likes: item.engagement.likes,
+              comments: item.engagement.comments
+            }}
+            onComment={() => {
+              const newExpanded = new Set(expandedComments)
+              if (expandedComments.has(item.id)) {
+                newExpanded.delete(item.id)
+              } else {
+                newExpanded.add(item.id)
+              }
+              setExpandedComments(newExpanded)
+            }}
+            showExternalLink={true}
+          />
+          
+          {/* Inline Comments */}
+          <InlineComments
+            postId={item.id}
+            isExpanded={expandedComments.has(item.id)}
+            onToggle={() => {
+              const newExpanded = new Set(expandedComments)
+              if (expandedComments.has(item.id)) {
+                newExpanded.delete(item.id)
+              } else {
+                newExpanded.add(item.id)
+              }
+              setExpandedComments(newExpanded)
+            }}
+          />
         </div>
       </motion.div>
     )
@@ -432,7 +443,7 @@ const handleResponse = <T>(response: ApiResponse<T>) => {
       {!hasMoreContent && filteredItems.length > 0 && (
         <div className="px-6 py-4 border-t border-gray-200 text-center">
           <p className="text-sm text-gray-500">
-            🎉 You've seen all the content! Check back later for new updates.
+            You've reached the end! Check back later for new updates.
           </p>
         </div>
       )}

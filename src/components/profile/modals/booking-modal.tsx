@@ -1,6 +1,6 @@
 'use client'
 
-import React, { useState } from 'react'
+import React, { useState, useEffect } from 'react'
 import { motion } from 'framer-motion'
 import { 
   Calendar as CalendarIcon, 
@@ -40,6 +40,7 @@ interface BookingModalProps {
   isOpen: boolean
   onClose: () => void
   selectedType?: string
+  startingStep?: number
 }
 
 interface SessionType {
@@ -108,8 +109,8 @@ const timeSlots = [
   '3:00 PM', '3:30 PM', '4:00 PM', '4:30 PM', '5:00 PM', '5:30 PM'
 ]
 
-export function BookingModal({ isOpen, onClose, selectedType }: BookingModalProps) {
-  const [currentStep, setCurrentStep] = useState(1)
+export function BookingModal({ isOpen, onClose, selectedType, startingStep = 1 }: BookingModalProps) {
+  const [currentStep, setCurrentStep] = useState(startingStep)
   const [selectedDate, setSelectedDate] = useState<Date>()
   const [selectedTime, setSelectedTime] = useState<string>()
   const [sessionType, setSessionType] = useState(selectedType || '')
@@ -117,6 +118,13 @@ export function BookingModal({ isOpen, onClose, selectedType }: BookingModalProp
   const [isSubmitting, setIsSubmitting] = useState(false)
 
   const selectedSessionType = sessionTypes.find(type => type.id === sessionType)
+
+  useEffect(() => {
+    if (selectedType) {
+      setSessionType(selectedType)
+    }
+    setCurrentStep(startingStep)
+  }, [selectedType, startingStep])
 
   const handleSubmit = async () => {
     if (!selectedDate || !selectedTime || !sessionType) {
@@ -145,7 +153,7 @@ export function BookingModal({ isOpen, onClose, selectedType }: BookingModalProp
   }
 
   const handleClose = () => {
-    setCurrentStep(1)
+    setCurrentStep(startingStep)
     setSelectedDate(undefined)
     setSelectedTime(undefined)
     setSessionType(selectedType || '')

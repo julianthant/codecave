@@ -7,16 +7,12 @@ import { Badge } from '@/components/ui/badge'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import { Button } from '@/components/ui/button'
 import { 
-  Heart, 
-  MessageCircle, 
-  Bookmark, 
-  Share, 
   Clock,
-  User,
-  Eye
+  User
 } from 'lucide-react'
 import { SkillBadge } from './skill-badge'
-import { CommentsDrawer } from './modals/comments-drawer'
+import { ContentCardFooter } from './content-card-footer'
+import { InlineComments } from './inline-comments'
 import { toast } from 'sonner'
 import type { Post, Profile } from '@/db/schema'
 
@@ -28,7 +24,7 @@ interface ProfilePostProps {
 export function ProfilePost({ post, author }: ProfilePostProps) {
   const [isLiked, setIsLiked] = React.useState(false)
   const [isBookmarked, setIsBookmarked] = React.useState(false)
-  const [isCommentsOpen, setIsCommentsOpen] = React.useState(false)
+  const [isCommentsExpanded, setIsCommentsExpanded] = React.useState(false)
   const [isMobile, setIsMobile] = React.useState(false)
 
   // Check for mobile on mount
@@ -55,7 +51,7 @@ export function ProfilePost({ post, author }: ProfilePostProps) {
   }
 
   const handleComments = () => {
-    setIsCommentsOpen(true)
+    setIsCommentsExpanded(!isCommentsExpanded)
   }
 
   return (
@@ -128,80 +124,29 @@ export function ProfilePost({ post, author }: ProfilePostProps) {
             )}
           </div>
 
-          {/* Post Stats and Actions */}
-          <div className="flex items-center justify-between border-t border-gray-100 pt-4">
-            <div className="flex items-center space-x-6 text-sm text-gray-500">
-              <div className="flex items-center space-x-1">
-                <Eye className="h-4 w-4" />
-                <span>{parseInt(post.viewCount || '0').toLocaleString()}</span>
-              </div>
-              <div className="flex items-center space-x-1">
-                <Heart className="h-4 w-4" />
-                <span>{parseInt(post.likeCount || '0').toLocaleString()}</span>
-              </div>
-              <div className="flex items-center space-x-1">
-                <MessageCircle className="h-4 w-4" />
-                <span>{parseInt(post.commentCount || '0').toLocaleString()}</span>
-              </div>
-            </div>
-
-            <div className="flex items-center space-x-2">
-              <Button
-                variant="ghost"
-                size="sm"
-                onClick={handleLike}
-                className={`${
-                  isLiked 
-                    ? 'text-red-600 hover:text-red-700' 
-                    : 'text-gray-500 hover:text-red-600'
-                } hover:bg-red-50`}
-              >
-                <Heart className={`h-4 w-4 ${isLiked ? 'fill-current' : ''}`} />
-              </Button>
-              
-              <Button
-                variant="ghost"
-                size="sm"
-                onClick={handleComments}
-                className="text-gray-500 hover:text-orange-600 hover:bg-orange-50"
-              >
-                <MessageCircle className="h-4 w-4" />
-              </Button>
-              
-              <Button
-                variant="ghost"
-                size="sm"
-                onClick={handleBookmark}
-                className={`${
-                  isBookmarked 
-                    ? 'text-orange-600 hover:text-orange-700' 
-                    : 'text-gray-500 hover:text-orange-600'
-                } hover:bg-orange-50`}
-              >
-                <Bookmark className={`h-4 w-4 ${isBookmarked ? 'fill-current' : ''}`} />
-              </Button>
-              
-              <Button
-                variant="ghost"
-                size="sm"
-                onClick={handleShare}
-                className="text-gray-500 hover:text-orange-600 hover:bg-orange-50"
-              >
-                <Share className="h-4 w-4" />
-              </Button>
-            </div>
-          </div>
+          {/* Unified Content Card Footer */}
+          <ContentCardFooter
+            stats={{
+              views: parseInt(post.viewCount || '0'),
+              likes: parseInt(post.likeCount || '0'),
+              comments: parseInt(post.commentCount || '0')
+            }}
+            isLiked={isLiked}
+            isBookmarked={isBookmarked}
+            onLike={handleLike}
+            onComment={handleComments}
+            onBookmark={handleBookmark}
+            onShare={handleShare}
+            showExternalLink={true}
+          />
+          {/* Inline Comments */}
+          <InlineComments
+            postId={post.id}
+            isExpanded={isCommentsExpanded}
+            onToggle={() => setIsCommentsExpanded(!isCommentsExpanded)}
+          />
         </CardContent>
       </Card>
-
-      {/* Comments Drawer */}
-      <CommentsDrawer
-        isOpen={isCommentsOpen}
-        onClose={() => setIsCommentsOpen(false)}
-        post={post}
-        postAuthor={author}
-        isMobile={isMobile}
-      />
     </motion.div>
   )
 }
