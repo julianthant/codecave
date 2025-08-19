@@ -1,12 +1,12 @@
 'use client'
 
 import React, { useState } from 'react'
-import Image from 'next/image'
 import { useRouter } from 'next/navigation'
 import { motion } from 'framer-motion'
 import { Card, CardContent } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
+import { Avatar, AvatarFallback } from '@/components/ui/avatar'
 import { 
   UserPlus, 
   UserCheck, 
@@ -20,6 +20,32 @@ import {
 } from 'lucide-react'
 import { ConnectionUser, ConnectionInvitation } from '@/types/connections'
 import { cn } from '@/lib/utils'
+
+// Helper function to generate initials from display name
+const getInitials = (name: string) => {
+  return name
+    .split(' ')
+    .map(word => word[0])
+    .join('')
+    .toUpperCase()
+    .slice(0, 2)
+}
+
+// Helper function to get avatar background color based on username
+const getAvatarColor = (username: string) => {
+  const colors = [
+    'bg-orange-500',
+    'bg-blue-500',
+    'bg-green-500',
+    'bg-purple-500',
+    'bg-pink-500',
+    'bg-yellow-500',
+    'bg-indigo-500',
+    'bg-red-500'
+  ]
+  const hash = username.split('').reduce((acc, char) => acc + char.charCodeAt(0), 0)
+  return colors[hash % colors.length]
+}
 
 type CardVariant = 
   | 'discover' 
@@ -207,13 +233,14 @@ export function GlobalConnectionCard({
           {/* User Header */}
           <div className="flex items-start space-x-3">
             <div className="relative flex-shrink-0">
-              <Image
-                src={user.avatarUrl || '/default-avatar.png'}
-                alt={user.displayName}
-                width={avatarSize}
-                height={avatarSize}
-                className="rounded-full object-cover"
-              />
+              <Avatar className={cn(compact ? "w-8 h-8" : "w-10 h-10")}>
+                <AvatarFallback className={cn(
+                  "text-white font-medium text-sm",
+                  getAvatarColor(user.username)
+                )}>
+                  {getInitials(user.displayName)}
+                </AvatarFallback>
+              </Avatar>
               {user.availableForCollab && (
                 <div className={cn(
                   "absolute bg-green-500 border-2 border-white rounded-full",
@@ -238,28 +265,27 @@ export function GlobalConnectionCard({
                 @{user.username}
               </p>
               
-              {/* Location and mutual connections */}
+              {/* Location and mutual connections - single line with bullets */}
               <div className={cn(
-                "flex items-center space-x-3 mt-1 text-gray-500",
-                compact ? "text-[10px]" : "text-[10px]"
+                "flex items-center flex-nowrap mt-1 text-gray-500 text-[10px] gap-2"
               )}>
                 {user.location && (
-                  <div className="flex items-center space-x-1">
-                    <MapPin className="w-2.5 h-2.5" />
-                    <span>{user.location.split(',')[0]}</span>
-                  </div>
+                  <span className="flex items-center gap-1">
+                    <MapPin className="w-2 h-2" />
+                    {user.location.split(',')[0]}
+                  </span>
                 )}
                 {user.mutualConnections && user.mutualConnections > 0 && (
-                  <div className="flex items-center space-x-1">
-                    <Users className="w-2.5 h-2.5" />
+                  <>
+                    {user.location && <span>•</span>}
                     <span>{user.mutualConnections} mutual</span>
-                  </div>
+                  </>
                 )}
                 {invitation && (
-                  <div className="flex items-center space-x-1">
-                    <Clock className="w-2.5 h-2.5" />
+                  <>
+                    {(user.location || (user.mutualConnections && user.mutualConnections > 0)) && <span>•</span>}
                     <span>{formatTimeAgo(invitation.sentAt)}</span>
-                  </div>
+                  </>
                 )}
               </div>
             </div>
@@ -275,14 +301,7 @@ export function GlobalConnectionCard({
             </p>
           )}
 
-          {/* Invitation Message */}
-          {invitation?.message && (
-            <div className="bg-gray-50 rounded-md p-2 border-l-2 border-orange-200">
-              <p className="text-xs text-gray-700 italic line-clamp-2">
-                &quot;{invitation.message}&quot;
-              </p>
-            </div>
-          )}
+
 
           {/* Skills */}
           <div className="flex flex-wrap gap-1">
