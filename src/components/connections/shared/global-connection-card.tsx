@@ -7,16 +7,16 @@ import { Card, CardContent } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
 import { Avatar, AvatarFallback } from '@/components/ui/avatar'
-import { 
-  UserPlus, 
-  UserCheck, 
-  UserMinus, 
-  MessageCircle, 
-  MapPin, 
-  Users, 
-  Clock, 
-  Check, 
-  X 
+import {
+  UserPlus,
+  UserCheck,
+  UserMinus,
+  MessageCircle,
+  MapPin,
+  Users,
+  Clock,
+  Check,
+  X,
 } from 'lucide-react'
 import { ConnectionUser, ConnectionInvitation } from '@/types/connections'
 import { cn } from '@/lib/utils'
@@ -25,7 +25,7 @@ import { cn } from '@/lib/utils'
 const getInitials = (name: string) => {
   return name
     .split(' ')
-    .map(word => word[0])
+    .map((word) => word[0])
     .join('')
     .toUpperCase()
     .slice(0, 2)
@@ -41,18 +41,20 @@ const getAvatarColor = (username: string) => {
     'bg-pink-500',
     'bg-yellow-500',
     'bg-indigo-500',
-    'bg-red-500'
+    'bg-red-500',
   ]
-  const hash = username.split('').reduce((acc, char) => acc + char.charCodeAt(0), 0)
+  const hash = username
+    .split('')
+    .reduce((acc, char) => acc + char.charCodeAt(0), 0)
   return colors[hash % colors.length]
 }
 
-type CardVariant = 
-  | 'discover' 
-  | 'connection' 
-  | 'invitation-received' 
-  | 'invitation-sent' 
-  | 'following' 
+type CardVariant =
+  | 'discover'
+  | 'connection'
+  | 'invitation-received'
+  | 'invitation-sent'
+  | 'following'
   | 'follower'
 
 interface PrimaryAction {
@@ -81,22 +83,27 @@ interface GlobalConnectionCardProps {
   compact?: boolean // For mobile optimization
 }
 
-export function GlobalConnectionCard({ 
-  user, 
-  variant, 
+export function GlobalConnectionCard({
+  user,
+  variant,
   invitation,
   primaryAction,
   secondaryAction,
   className,
-  compact = false
+  compact = false,
 }: GlobalConnectionCardProps) {
   const router = useRouter()
   const [isPrimaryLoading, setIsPrimaryLoading] = useState(false)
   const [isSecondaryLoading, setIsSecondaryLoading] = useState(false)
-  const [actionState, setActionState] = useState<'default' | 'success' | 'following'>('default')
+  const [actionState, setActionState] = useState<
+    'default' | 'success' | 'following'
+  >('default')
 
   // Default actions based on variant
-  const getDefaultActions = (): { primary?: PrimaryAction, secondary?: SecondaryAction } => {
+  const getDefaultActions = (): {
+    primary?: PrimaryAction
+    secondary?: SecondaryAction
+  } => {
     switch (variant) {
       case 'discover':
         return {
@@ -104,8 +111,8 @@ export function GlobalConnectionCard({
             label: 'Connect',
             icon: UserPlus,
             onClick: handleConnect,
-            loadingText: 'Connecting...'
-          }
+            loadingText: 'Connecting...',
+          },
         }
       case 'connection':
         return {
@@ -113,8 +120,8 @@ export function GlobalConnectionCard({
             label: 'Message',
             icon: MessageCircle,
             onClick: (userId) => console.log('Message user:', userId),
-            variant: 'outline'
-          }
+            variant: 'outline',
+          },
         }
       case 'invitation-received':
         return {
@@ -122,15 +129,15 @@ export function GlobalConnectionCard({
             label: 'Accept',
             icon: Check,
             onClick: (userId) => console.log('Accept invitation:', userId),
-            loadingText: 'Accepting...'
+            loadingText: 'Accepting...',
           },
           secondary: {
             label: 'Decline',
             icon: X,
             onClick: (userId) => console.log('Decline invitation:', userId),
             variant: 'outline',
-            loadingText: 'Declining...'
-          }
+            loadingText: 'Declining...',
+          },
         }
       case 'invitation-sent':
         return {
@@ -139,8 +146,8 @@ export function GlobalConnectionCard({
             icon: X,
             onClick: (userId) => console.log('Withdraw invitation:', userId),
             variant: 'outline',
-            loadingText: 'Withdrawing...'
-          }
+            loadingText: 'Withdrawing...',
+          },
         }
       case 'following':
         return {
@@ -149,8 +156,8 @@ export function GlobalConnectionCard({
             icon: UserMinus,
             onClick: (userId) => console.log('Unfollow user:', userId),
             variant: 'outline',
-            loadingText: 'Unfollowing...'
-          }
+            loadingText: 'Unfollowing...',
+          },
         }
       case 'follower':
         return {
@@ -158,8 +165,8 @@ export function GlobalConnectionCard({
             label: actionState === 'following' ? 'Following' : 'Follow Back',
             icon: actionState === 'following' ? UserCheck : UserPlus,
             onClick: handleFollowBack,
-            loadingText: 'Following...'
-          }
+            loadingText: 'Following...',
+          },
         }
       default:
         return {}
@@ -206,14 +213,16 @@ export function GlobalConnectionCard({
 
   const formatTimeAgo = (date: Date) => {
     const now = new Date()
-    const diffInHours = Math.floor((now.getTime() - date.getTime()) / (1000 * 60 * 60))
-    
+    const diffInHours = Math.floor(
+      (now.getTime() - date.getTime()) / (1000 * 60 * 60)
+    )
+
     if (diffInHours < 1) return 'Just now'
     if (diffInHours < 24) return `${diffInHours}h ago`
-    
+
     const diffInDays = Math.floor(diffInHours / 24)
     if (diffInDays < 7) return `${diffInDays}d ago`
-    
+
     return `${Math.floor(diffInDays / 7)}w ago`
   }
 
@@ -225,50 +234,57 @@ export function GlobalConnectionCard({
       transition={{ duration: 0.2 }}
       className={className}
     >
-      <Card 
-        className="h-full hover:shadow-lg transition-all duration-200 border-gray-200 hover:border-orange-200 cursor-pointer group"
+      <Card
+        className="group hover:shadow-lg border-gray-200 hover:border-orange-200 h-full transition-all duration-200 cursor-pointer"
         onClick={handleCardClick}
       >
-        <CardContent className={cn("space-y-3", compact ? "p-3" : "p-4")}>
+        <CardContent className={cn('space-y-3', compact ? 'p-3' : 'p-4')}>
           {/* User Header */}
           <div className="flex items-start space-x-3">
             <div className="relative flex-shrink-0">
-              <Avatar className={cn(compact ? "w-8 h-8" : "w-10 h-10")}>
-                <AvatarFallback className={cn(
-                  "text-white font-medium text-sm",
-                  getAvatarColor(user.username)
-                )}>
+              <Avatar className={cn(compact ? 'w-8 h-8' : 'w-10 h-10')}>
+                <AvatarFallback
+                  className={cn(
+                    'text-white font-medium text-sm',
+                    getAvatarColor(user.username)
+                  )}
+                >
                   {getInitials(user.displayName)}
                 </AvatarFallback>
               </Avatar>
               {user.availableForCollab && (
-                <div className={cn(
-                  "absolute bg-green-500 border-2 border-white rounded-full",
-                  compact 
-                    ? "-bottom-0.5 -right-0.5 w-2.5 h-2.5" 
-                    : "-bottom-0.5 -right-0.5 w-3 h-3"
-                )} />
+                <div
+                  className={cn(
+                    'absolute bg-green-500 border-2 border-white rounded-full',
+                    compact
+                      ? '-bottom-0.5 -right-0.5 w-2.5 h-2.5'
+                      : '-bottom-0.5 -right-0.5 w-3 h-3'
+                  )}
+                />
               )}
             </div>
-            
+
             <div className="flex-1 min-w-0">
-              <h3 className={cn(
-                "font-semibold text-gray-900 truncate group-hover:text-orange-600 transition-colors",
-                compact ? "text-sm" : "text-base"
-              )}>
+              <h3
+                className={cn(
+                  'font-semibold text-gray-900 truncate group-hover:text-orange-600 transition-colors',
+                  compact ? 'text-sm' : 'text-base'
+                )}
+              >
                 {user.displayName}
               </h3>
-              <p className={cn(
-                "text-gray-600",
-                compact ? "text-xs" : "text-xs"
-              )}>
+              <p
+                className={cn('text-gray-600', compact ? 'text-xs' : 'text-xs')}
+              >
                 @{user.username}
               </p>
-              
+
               {/* Location and mutual connections - single line with bullets */}
-              <div className={cn(
-                "flex items-center flex-nowrap mt-1 text-gray-500 text-[10px] gap-2"
-              )}>
+              <div
+                className={cn(
+                  'flex items-center flex-nowrap mt-1 text-gray-500 text-[10px] gap-2'
+                )}
+              >
                 {user.location && (
                   <span className="flex items-center gap-1">
                     <MapPin className="w-2 h-2" />
@@ -283,7 +299,9 @@ export function GlobalConnectionCard({
                 )}
                 {invitation && (
                   <>
-                    {(user.location || (user.mutualConnections && user.mutualConnections > 0)) && <span>•</span>}
+                    {(user.location ||
+                      (user.mutualConnections &&
+                        user.mutualConnections > 0)) && <span>•</span>}
                     <span>{formatTimeAgo(invitation.sentAt)}</span>
                   </>
                 )}
@@ -293,15 +311,15 @@ export function GlobalConnectionCard({
 
           {/* Bio */}
           {user.bio && (
-            <p className={cn(
-              "text-gray-700 leading-relaxed",
-              compact ? "text-xs line-clamp-1" : "text-xs line-clamp-2"
-            )}>
+            <p
+              className={cn(
+                'text-gray-700 leading-relaxed',
+                compact ? 'text-xs line-clamp-1' : 'text-xs line-clamp-2'
+              )}
+            >
               {user.bio}
             </p>
           )}
-
-
 
           {/* Skills */}
           <div className="flex flex-wrap gap-1">
@@ -310,8 +328,10 @@ export function GlobalConnectionCard({
                 key={skill}
                 variant="outline"
                 className={cn(
-                  "bg-gray-50 text-gray-700 border-gray-200",
-                  compact ? "text-[9px] px-1.5 py-0.5" : "text-[10px] px-2 py-0.5"
+                  'bg-gray-50 text-gray-700 border-gray-200',
+                  compact
+                    ? 'text-[9px] px-1.5 py-0.5'
+                    : 'text-[10px] px-2 py-0.5'
                 )}
               >
                 {skill}
@@ -321,8 +341,10 @@ export function GlobalConnectionCard({
               <Badge
                 variant="outline"
                 className={cn(
-                  "bg-gray-50 text-gray-600 border-gray-200",
-                  compact ? "text-[9px] px-1.5 py-0.5" : "text-[10px] px-2 py-0.5"
+                  'bg-gray-50 text-gray-600 border-gray-200',
+                  compact
+                    ? 'text-[9px] px-1.5 py-0.5'
+                    : 'text-[10px] px-2 py-0.5'
                 )}
               >
                 +{user.skills.length - 2}
@@ -331,37 +353,33 @@ export function GlobalConnectionCard({
           </div>
 
           {/* Actions */}
-          <div className={cn(
-            "pt-2",
-            finalSecondaryAction ? "flex space-x-2" : ""
-          )}>
+          <div
+            className={cn('pt-2', finalSecondaryAction ? 'flex space-x-2' : '')}
+          >
             {finalSecondaryAction && (
               <Button
                 variant={finalSecondaryAction.variant || 'outline'}
                 size="sm"
                 onClick={handleSecondaryAction}
                 disabled={isSecondaryLoading}
-                className={cn(
-                  "flex-1 text-xs",
-                  compact ? "h-7" : "h-8"
-                )}
+                className={cn('flex-1 text-xs', compact ? 'h-7' : 'h-8')}
               >
                 {isSecondaryLoading ? (
                   <>
-                    <div className="w-3 h-3 border-2 border-gray-400 border-t-transparent rounded-full animate-spin mr-1.5" />
+                    <div className="mr-1.5 border-2 border-gray-400 border-t-transparent rounded-full w-3 h-3 animate-spin" />
                     {finalSecondaryAction.loadingText || 'Loading...'}
                   </>
                 ) : (
                   <>
                     {finalSecondaryAction.icon && (
-                      <finalSecondaryAction.icon className="w-3 h-3 mr-1.5" />
+                      <finalSecondaryAction.icon className="mr-1.5 w-3 h-3" />
                     )}
                     {finalSecondaryAction.label}
                   </>
                 )}
               </Button>
             )}
-            
+
             {finalPrimaryAction && (
               <Button
                 variant={finalPrimaryAction.variant || 'default'}
@@ -369,24 +387,28 @@ export function GlobalConnectionCard({
                 onClick={handlePrimaryAction}
                 disabled={isPrimaryLoading}
                 className={cn(
-                  "text-xs",
-                  finalSecondaryAction ? "flex-1" : "w-full",
-                  compact ? "h-7" : "h-8",
-                  actionState === 'success' && "bg-green-600 hover:bg-green-700",
-                  actionState === 'following' && "bg-green-600 hover:bg-green-700"
+                  'text-xs',
+                  finalSecondaryAction ? 'flex-1' : 'w-full',
+                  compact ? 'h-7' : 'h-8',
+                  actionState === 'success' &&
+                    'bg-green-600 hover:bg-green-700',
+                  actionState === 'following' &&
+                    'bg-green-600 hover:bg-green-700'
                 )}
               >
                 {isPrimaryLoading ? (
                   <>
-                    <div className="w-3 h-3 border-2 border-white border-t-transparent rounded-full animate-spin mr-1.5" />
+                    <div className="mr-1.5 border-2 border-white border-t-transparent rounded-full w-3 h-3 animate-spin" />
                     {finalPrimaryAction.loadingText || 'Loading...'}
                   </>
                 ) : (
                   <>
                     {finalPrimaryAction.icon && (
-                      <finalPrimaryAction.icon className="w-3 h-3 mr-1.5" />
+                      <finalPrimaryAction.icon className="mr-1.5 w-3 h-3" />
                     )}
-                    {actionState === 'success' ? 'Connected' : finalPrimaryAction.label}
+                    {actionState === 'success'
+                      ? 'Connected'
+                      : finalPrimaryAction.label}
                   </>
                 )}
               </Button>
