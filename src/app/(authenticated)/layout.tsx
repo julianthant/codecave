@@ -1,5 +1,6 @@
 import { redirect } from 'next/navigation'
 import { createClient } from '@/utils/supabase/server'
+import Navbar from '@/components/feed/navbar/navbar'
 
 export default async function AuthenticatedLayout({
   children,
@@ -7,7 +8,9 @@ export default async function AuthenticatedLayout({
   children: React.ReactNode
 }) {
   const supabase = await createClient()
-  const { data: { user } } = await supabase.auth.getUser()
+  const {
+    data: { user },
+  } = await supabase.auth.getUser()
 
   if (!user) {
     redirect('/')
@@ -15,7 +18,7 @@ export default async function AuthenticatedLayout({
 
   // Check if user has completed onboarding
   const { data: profile } = await supabase
-    .from('users')
+    .from('profiles')
     .select('*')
     .eq('id', user.id)
     .single()
@@ -26,7 +29,8 @@ export default async function AuthenticatedLayout({
 
   return (
     <>
-      <main className="min-h-screen bg-background">{children}</main>
+      <Navbar />
+      <main className="bg-background min-h-screen">{children}</main>
     </>
   )
 }

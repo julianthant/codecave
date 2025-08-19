@@ -22,7 +22,10 @@
       "mcp__playwright__browser_console_messages",
       "Bash(git worktree:*)",
       "Bash(git merge dashboard)",
-      "Bash(git merge feed_sidebar)"
+      "Bash(git merge feed_sidebar)",
+      "mcp__playwright__browser_evaluate",
+      "mcp__playwright__browser_close",
+      "Bash(npx shadcn@latest add:*)"
     ],
     "defaultMode": "acceptEdits"
   },

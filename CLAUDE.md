@@ -58,6 +58,10 @@ pnpm db:drop      # Drop migrations
   - `auth/` - Authentication-related components
   - `feed/` - Feed and navigation components
   - `landing/` - Landing page components
+  - `dashboard/` - Dashboard metrics and analytics components
+  - `profile/` - User profile and showcase components
+  - `settings/` - Settings and preferences components
+  - `onboarding/` - User onboarding flow components
 - `/src/hooks/` - Custom React hooks
 - `/src/utils/` - Utility functions
   - `supabase/` - Supabase client configurations
@@ -94,6 +98,9 @@ pnpm db:drop      # Drop migrations
 
 **Current Zustand Stores:**
 - `useAuthStore` - Authentication and user profile state with persistence
+- `useFeedStore` - Feed algorithm selection and content filtering
+- `usePostViewStore` - Post viewing and interaction state management  
+- `useSidebarStore` - UI sidebar state for responsive navigation
 - Additional stores can be created following the same pattern
 
 **Zustand Store Pattern:**
@@ -346,6 +353,30 @@ The project enforces strict code quality standards with zero tolerance for warni
 - `src/hooks/use-auth.ts` - Fixed function parameter types
 - `src/components/**/*.tsx` - Replaced img tags with Image components
 - `src/components/ui/hover-button.tsx` - Fixed React hook dependencies
+
+## Current Features
+
+### ✅ Implemented Features
+- **Landing Page**: Hero section with animated components and call-to-action
+- **Authentication**: Supabase OAuth with GitHub/Google/Discord providers
+- **User Profiles**: Comprehensive profile pages with bio, skills, projects showcase
+- **Dashboard**: Analytics dashboard with metrics, charts, and post management
+- **Settings**: Account, profile, developer, and preference settings management
+- **Onboarding**: New user profile creation flow
+- **Database**: Drizzle ORM with profiles, user_settings, and posts tables
+
+### 🚧 In Progress / Mock Data
+- **Feed**: Basic structure exists, content uses mock data
+- **Posts**: Database schema ready, UI uses mock data for development
+- **Features/Premium Pages**: Placeholder pages exist
+- **Social Features**: Database structure ready, UI not implemented
+
+### 📋 Planned Features
+- Real-time feed with algorithm-based content
+- Post creation and editing interface
+- Collaboration tools and project matching
+- Advanced search and filtering
+- Notification system
 
 ## Development Notes
 
