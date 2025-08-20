@@ -8,7 +8,6 @@ import {
   Users, 
   TrendingUp, 
   Eye, 
-  UserPlus, 
   Download, 
   Share2, 
   Lightbulb,
@@ -78,26 +77,26 @@ export function ConnectionsSidebar() {
       </Card>
 
       {/* Quick Actions */}
-      <Card>
-        <CardHeader>
-          <CardTitle className="flex items-center space-x-2 text-base">
-            <UserPlus className="w-4 h-4 text-orange-500" />
-            <span>Grow Your Network</span>
-          </CardTitle>
-        </CardHeader>
-        <CardContent className="space-y-3">
-          <Button variant="outline" className="w-full justify-start text-sm" size="sm">
-            <Download className="w-4 h-4 mr-2" />
-            Import Contacts
-          </Button>
-          <Button variant="outline" className="w-full justify-start text-sm" size="sm">
-            <Share2 className="w-4 h-4 mr-2" />
-            Share Profile
-          </Button>
-          <Button variant="outline" className="w-full justify-start text-sm" size="sm">
-            <Eye className="w-4 h-4 mr-2" />
-            Who Viewed Profile
-          </Button>
+      <Card className="bg-white py-4 border-gray-200">
+        <CardContent className="space-y-1">
+          <button className="group flex items-center space-x-3 hover:bg-gray-50 py-2 rounded-md w-full text-left transition-colors duration-150">
+            <Download className="w-4 h-4 text-gray-500 group-hover:text-gray-700" />
+            <span className="font-semibold text-gray-900 group-hover:text-gray-700 text-sm">
+              Import Contacts
+            </span>
+          </button>
+          <button className="group flex items-center space-x-3 hover:bg-gray-50 py-2 rounded-md w-full text-left transition-colors duration-150">
+            <Share2 className="w-4 h-4 text-gray-500 group-hover:text-gray-700" />
+            <span className="font-semibold text-gray-900 group-hover:text-gray-700 text-sm">
+              Share Profile
+            </span>
+          </button>
+          <button className="group flex items-center space-x-3 hover:bg-gray-50 py-2 rounded-md w-full text-left transition-colors duration-150">
+            <Eye className="w-4 h-4 text-gray-500 group-hover:text-gray-700" />
+            <span className="font-semibold text-gray-900 group-hover:text-gray-700 text-sm">
+              Who Viewed Profile
+            </span>
+          </button>
         </CardContent>
       </Card>
 
