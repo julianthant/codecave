@@ -49,7 +49,7 @@ export function ConnectSection({ profile, userSettings }: ConnectSectionProps) {
   const [selectedCollabType, setSelectedCollabType] = useState<string | null>(
     null
   )
-  const [showCalendar, setShowCalendar] = useState(false)
+
   const [isBookingModalOpen, setIsBookingModalOpen] = useState(false)
 
   // Mock availability data - in real app, this would come from calendar integration

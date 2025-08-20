@@ -14,7 +14,6 @@ import {
   Settings,
   User,
   Coffee,
-  Code,
   Zap,
   Camera,
 } from 'lucide-react'
@@ -28,33 +27,6 @@ interface ProfileHeroProps {
   userSettings?: UserSettings
   isOwnProfile?: boolean
   isFollowing?: boolean
-}
-
-const TypewriterText = ({
-  text,
-  delay = 0,
-}: {
-  text: string
-  delay?: number
-}) => {
-  const [displayText, setDisplayText] = useState('')
-  const [index, setIndex] = useState(0)
-
-  useEffect(() => {
-    const timeout = setTimeout(
-      () => {
-        if (index < text.length) {
-          setDisplayText(text.slice(0, index + 1))
-          setIndex(index + 1)
-        }
-      },
-      delay + index * 50
-    )
-
-    return () => clearTimeout(timeout)
-  }, [index, text, delay])
-
-  return <span className="font-mono">{displayText}</span>
 }
 
 export function ProfileHero({
@@ -218,6 +190,11 @@ export function ProfileHero({
                 <h1 className="font-mono font-bold text-gray-900 text-2xl">
                   {profile.displayName || profile.username}
                 </h1>
+                {profile.tagline && (
+                  <p className="text-gray-700 text-sm font-medium">
+                    {profile.tagline}
+                  </p>
+                )}
                 <p className="mb-2 text-gray-600 text-sm">
                   @{profile.username}
                 </p>

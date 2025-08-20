@@ -8,26 +8,16 @@ import { mockInvitations } from '@/lib/mock-data/connections-data'
 
 export function InvitationsSection() {
   const [activeSubTab, setActiveSubTab] = useState('received')
-  
-  const receivedInvitations = mockInvitations.filter(inv => inv.type === 'received')
-  const sentInvitations = mockInvitations.filter(inv => inv.type === 'sent')
 
-  const handleAccept = (invitationId: string) => {
-    console.log('Accept invitation:', invitationId)
-  }
-
-  const handleDecline = (invitationId: string) => {
-    console.log('Decline invitation:', invitationId)
-  }
-
-  const handleWithdraw = (invitationId: string) => {
-    console.log('Withdraw invitation:', invitationId)
-  }
+  const receivedInvitations = mockInvitations.filter(
+    (inv) => inv.type === 'received'
+  )
+  const sentInvitations = mockInvitations.filter((inv) => inv.type === 'sent')
 
   return (
     <div className="space-y-6">
       <Tabs value={activeSubTab} onValueChange={setActiveSubTab}>
-        <TabsList className="grid w-full grid-cols-2">
+        <TabsList className="grid grid-cols-2 w-full">
           <TabsTrigger value="received" className="flex items-center space-x-2">
             <InboxIcon className="w-4 h-4" />
             <span>Received ({receivedInvitations.length})</span>
@@ -40,19 +30,20 @@ export function InvitationsSection() {
 
         <TabsContent value="received" className="mt-6">
           {receivedInvitations.length === 0 ? (
-            <div className="text-center py-12">
-              <div className="mx-auto w-24 h-24 bg-gray-100 rounded-full flex items-center justify-center mb-4">
+            <div className="py-12 text-center">
+              <div className="flex justify-center items-center bg-gray-100 mx-auto mb-4 rounded-full w-24 h-24">
                 <InboxIcon className="w-8 h-8 text-gray-400" />
               </div>
-              <h3 className="text-lg font-medium text-gray-900 mb-2">
+              <h3 className="mb-2 font-medium text-gray-900 text-lg">
                 No pending invitations
               </h3>
               <p className="text-gray-600">
-                When someone sends you a connection request, it will appear here.
+                When someone sends you a connection request, it will appear
+                here.
               </p>
             </div>
           ) : (
-            <div className="grid grid-cols-2 gap-2 sm:gap-4 lg:grid-cols-3 xl:grid-cols-4">
+            <div className="gap-2 sm:gap-4 grid grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
               {receivedInvitations.map((invitation) => (
                 <GlobalConnectionCard
                   key={`received-mobile-${invitation.id}`}
@@ -60,7 +51,7 @@ export function InvitationsSection() {
                   variant="invitation-received"
                   invitation={invitation}
                   compact={true}
-                  className="block sm:hidden"
+                  className="sm:hidden block"
                 />
               ))}
               {receivedInvitations.map((invitation) => (
@@ -79,11 +70,11 @@ export function InvitationsSection() {
 
         <TabsContent value="sent" className="mt-6">
           {sentInvitations.length === 0 ? (
-            <div className="text-center py-12">
-              <div className="mx-auto w-24 h-24 bg-gray-100 rounded-full flex items-center justify-center mb-4">
+            <div className="py-12 text-center">
+              <div className="flex justify-center items-center bg-gray-100 mx-auto mb-4 rounded-full w-24 h-24">
                 <SendIcon className="w-8 h-8 text-gray-400" />
               </div>
-              <h3 className="text-lg font-medium text-gray-900 mb-2">
+              <h3 className="mb-2 font-medium text-gray-900 text-lg">
                 No sent invitations
               </h3>
               <p className="text-gray-600">
@@ -91,7 +82,7 @@ export function InvitationsSection() {
               </p>
             </div>
           ) : (
-            <div className="grid grid-cols-2 gap-2 sm:gap-4 lg:grid-cols-3 xl:grid-cols-4">
+            <div className="gap-2 sm:gap-4 grid grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
               {sentInvitations.map((invitation) => (
                 <GlobalConnectionCard
                   key={`sent-mobile-${invitation.id}`}
@@ -99,7 +90,7 @@ export function InvitationsSection() {
                   variant="invitation-sent"
                   invitation={invitation}
                   compact={true}
-                  className="block sm:hidden"
+                  className="sm:hidden block"
                 />
               ))}
               {sentInvitations.map((invitation) => (

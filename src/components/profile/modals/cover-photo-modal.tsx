@@ -1,6 +1,7 @@
 'use client'
 
 import React, { useState, useRef } from 'react'
+import Image from 'next/image'
 import { motion } from 'framer-motion'
 import { Upload, Camera, X, Check } from 'lucide-react'
 import { Button } from '@/components/ui/button'
@@ -20,11 +21,11 @@ interface CoverPhotoModalProps {
   onSave: (file: File) => Promise<void>
 }
 
-export function CoverPhotoModal({ 
-  isOpen, 
-  onClose, 
+export function CoverPhotoModal({
+  isOpen,
+  onClose,
   currentCoverUrl,
-  onSave 
+  onSave,
 }: CoverPhotoModalProps) {
   const [selectedFile, setSelectedFile] = useState<File | null>(null)
   const [previewUrl, setPreviewUrl] = useState<string | null>(null)
@@ -48,7 +49,7 @@ export function CoverPhotoModal({
     }
 
     setSelectedFile(file)
-    
+
     // Create preview URL
     const url = URL.createObjectURL(file)
     setPreviewUrl(url)
@@ -58,7 +59,7 @@ export function CoverPhotoModal({
     if (!selectedFile) return
 
     setIsUploading(true)
-    
+
     try {
       await onSave(selectedFile)
       toast.success('Cover photo updated successfully!')
@@ -93,38 +94,41 @@ export function CoverPhotoModal({
         <DialogHeader>
           <DialogTitle>Update Cover Photo</DialogTitle>
           <DialogDescription>
-            Upload a new cover photo for your profile. Recommended size: 1200x400px
+            Upload a new cover photo for your profile. Recommended size:
+            1200x400px
           </DialogDescription>
         </DialogHeader>
 
         <div className="space-y-6">
           {/* Current/Preview Image */}
-          <div className="relative h-48 bg-gray-100 rounded-lg overflow-hidden">
+          <div className="relative bg-gray-100 rounded-lg h-48 overflow-hidden">
             {previewUrl ? (
-              <img
+              <Image
                 src={previewUrl}
                 alt="Cover preview"
-                className="w-full h-full object-cover"
+                fill
+                className="object-cover"
               />
             ) : currentCoverUrl ? (
-              <img
+              <Image
                 src={currentCoverUrl}
                 alt="Current cover"
-                className="w-full h-full object-cover"
+                fill
+                className="object-cover"
               />
             ) : (
-              <div className="w-full h-full bg-gradient-to-br from-orange-400 via-orange-500 to-orange-600" />
+              <div className="bg-gradient-to-br from-orange-400 via-orange-500 to-orange-600 w-full h-full" />
             )}
-            
+
             {/* Upload overlay */}
-            <div className="absolute inset-0 bg-black/40 flex items-center justify-center opacity-0 hover:opacity-100 transition-opacity">
+            <div className="absolute inset-0 flex justify-center items-center bg-black/40 opacity-0 hover:opacity-100 transition-opacity">
               <Button
                 variant="secondary"
                 size="sm"
                 onClick={triggerFileInput}
                 className="bg-white/90 hover:bg-white text-gray-900"
               >
-                <Camera className="h-4 w-4 mr-2" />
+                <Camera className="mr-2 w-4 h-4" />
                 Change Photo
               </Button>
             </div>
@@ -144,13 +148,13 @@ export function CoverPhotoModal({
             onClick={triggerFileInput}
             whileHover={{ scale: 1.02 }}
             whileTap={{ scale: 0.98 }}
-            className="border-2 border-dashed border-gray-300 rounded-lg p-8 text-center cursor-pointer hover:border-orange-400 hover:bg-orange-50 transition-colors"
+            className="hover:bg-orange-50 p-8 border-2 border-gray-300 hover:border-orange-400 border-dashed rounded-lg text-center transition-colors cursor-pointer"
           >
-            <Upload className="h-12 w-12 text-gray-400 mx-auto mb-4" />
-            <h3 className="text-lg font-medium text-gray-900 mb-2">
+            <Upload className="mx-auto mb-4 w-12 h-12 text-gray-400" />
+            <h3 className="mb-2 font-medium text-gray-900 text-lg">
               Choose a new cover photo
             </h3>
-            <p className="text-sm text-gray-500">
+            <p className="text-gray-500 text-sm">
               PNG, JPG, GIF up to 5MB. Recommended: 1200x400px
             </p>
           </motion.div>
@@ -160,15 +164,15 @@ export function CoverPhotoModal({
             <motion.div
               initial={{ opacity: 0, y: 10 }}
               animate={{ opacity: 1, y: 0 }}
-              className="bg-green-50 border border-green-200 rounded-lg p-4 flex items-center justify-between"
+              className="flex justify-between items-center bg-green-50 p-4 border border-green-200 rounded-lg"
             >
               <div className="flex items-center space-x-2">
-                <Check className="h-5 w-5 text-green-600" />
+                <Check className="w-5 h-5 text-green-600" />
                 <div>
-                  <p className="text-sm font-medium text-green-800">
+                  <p className="font-medium text-green-800 text-sm">
                     {selectedFile.name}
                   </p>
-                  <p className="text-xs text-green-600">
+                  <p className="text-green-600 text-xs">
                     {(selectedFile.size / 1024 / 1024).toFixed(2)} MB
                   </p>
                 </div>
@@ -183,15 +187,15 @@ export function CoverPhotoModal({
                     setPreviewUrl(null)
                   }
                 }}
-                className="text-green-600 hover:text-green-700 hover:bg-green-100"
+                className="hover:bg-green-100 text-green-600 hover:text-green-700"
               >
-                <X className="h-4 w-4" />
+                <X className="w-4 h-4" />
               </Button>
             </motion.div>
           )}
 
           {/* Action Buttons */}
-          <div className="flex items-center justify-end space-x-3 pt-4 border-t">
+          <div className="flex justify-end items-center space-x-3 pt-4 border-t">
             <Button
               variant="outline"
               onClick={handleClose}
@@ -206,7 +210,7 @@ export function CoverPhotoModal({
             >
               {isUploading ? (
                 <>
-                  <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2" />
+                  <div className="mr-2 border-white border-b-2 rounded-full w-4 h-4 animate-spin" />
                   Uploading...
                 </>
               ) : (

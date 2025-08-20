@@ -30,7 +30,7 @@ export default async function AuthenticatedLayout({
   return (
     <>
       <Navbar />
-      <main className="bg-background min-h-screen">{children}</main>
+      <main className="bg-background">{children}</main>
     </>
   )
 }

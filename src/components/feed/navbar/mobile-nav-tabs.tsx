@@ -36,10 +36,9 @@ interface MobileNavTabsProps {
 }
 
 const navigation = [
-  { name: 'Dashboard', href: '#dashboard' },
-  { name: 'Team', href: '#team' },
-  { name: 'Projects', href: '#projects' },
-  { name: 'Calendar', href: '#calendar' },
+  { name: 'Dashboard', href: '/dashboard' },
+  { name: 'Connections', href: '/connections' },
+  { name: 'Collaborations', href: '/collaborations' },
 ] as const
 
 export function MobileNavTabs({ mobileMenuOpen }: MobileNavTabsProps) {
@@ -76,16 +75,14 @@ export function MobileNavTabs({ mobileMenuOpen }: MobileNavTabsProps) {
             />
           </div>
           <div className="ml-3">
-            <div className="font-medium text-gray-800 text-base">
-              Tom Cook
-            </div>
+            <div className="font-medium text-gray-800 text-base">Tom Cook</div>
             <div className="font-medium text-gray-500 text-sm">
               tom@example.com
             </div>
           </div>
           <button
             type="button"
-            className="flex-shrink-0 bg-white ml-auto p-1 rounded-full focus:outline-none focus:ring-2 focus:ring-[hsl(25_95%_65%)] focus:ring-offset-2 text-gray-400 hover:text-gray-500"
+            className="flex-shrink-0 bg-white ml-auto p-1 rounded-full focus:outline-none focus:ring-[hsl(25_95%_65%)] focus:ring-2 focus:ring-offset-2 text-gray-400 hover:text-gray-500"
           >
             <span className="sr-only">View notifications</span>
             <Bell className="w-6 h-6" aria-hidden="true" />

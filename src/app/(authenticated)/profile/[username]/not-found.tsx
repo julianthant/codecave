@@ -5,7 +5,7 @@ import { User, ArrowLeft } from 'lucide-react'
 
 export default function ProfileNotFound() {
   return (
-    <div className="flex justify-center items-center bg-gray-50 px-4 min-h-screen">
+    <div className="flex justify-center items-center bg-gray-50 px-4 min-h-[calc(100vh-65px)]">
       <Card className="w-full max-w-md">
         <CardContent className="p-8 text-center">
           <div className="flex justify-center mb-6">

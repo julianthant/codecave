@@ -68,7 +68,7 @@ export function ConnectionsContainer() {
   return (
     <div className="grid grid-cols-1 gap-8 lg:grid-cols-12">
       {/* Content Area */}
-      <div className="lg:col-span-9">
+      <div className="lg:col-span-9 pb-20 lg:pb-0">
         {/* Professional Tab Navigation */}
         <ConnectionsTabs
           tabs={connectionsTabs}
@@ -80,8 +80,8 @@ export function ConnectionsContainer() {
         {getActiveComponent()}
       </div>
 
-      {/* Sidebar */}
-      <div className="lg:col-span-3">
+      {/* Sidebar - Hidden on mobile */}
+      <div className="hidden lg:block lg:col-span-3">
         <div className="lg:sticky lg:top-8">
           <ConnectionsSidebar />
         </div>

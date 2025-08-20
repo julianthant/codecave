@@ -19,11 +19,16 @@ interface ConnectionsTabsProps {
 
 export function ConnectionsTabs({ tabs, activeTab, onTabChange, className }: ConnectionsTabsProps) {
   return (
-    <div className={cn("w-full mb-8", className)}>
+    <div className={cn(
+      "w-full mb-0 lg:mb-8",
+      "fixed bottom-0 left-0 right-0 z-50 lg:static lg:bottom-auto",
+      "pb-safe",
+      className
+    )}>
       {/* Tab Navigation Card */}
-      <div className="bg-white rounded-lg border border-gray-200 shadow-sm overflow-hidden">
-        <div className="flex">
-          {tabs.map((tab, index) => {
+      <div className="bg-white border-t border-gray-200 lg:rounded-lg lg:border lg:shadow-sm overflow-hidden lg:shadow-lg">
+        <div className="grid grid-cols-5 lg:flex">
+          {tabs.map((tab) => {
             const Icon = tab.icon
             const isActive = activeTab === tab.value
             
@@ -32,33 +37,48 @@ export function ConnectionsTabs({ tabs, activeTab, onTabChange, className }: Con
                 key={tab.value}
                 onClick={() => onTabChange(tab.value)}
                 className={cn(
-                  "relative flex-1 px-4 py-4 flex items-center justify-center space-x-2 transition-all duration-200",
-                  "hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-orange-500 focus:ring-inset",
+                  // Mobile: vertical layout with better touch targets, Desktop: horizontal layout
+                  "relative flex flex-col items-center justify-center py-3 px-2 lg:flex-row lg:flex-1 lg:px-4 lg:py-4 lg:space-x-2",
+                  "transition-all duration-200",
+                  "hover:bg-gray-50 focus:outline-none active:bg-gray-100",
                   "text-sm font-medium",
                   isActive 
-                    ? "text-gray-900 bg-gray-50/50" 
-                    : "text-gray-600 hover:text-gray-900",
-                  // Add border between tabs (except last)
-                  index < tabs.length - 1 && "border-r border-gray-200"
+                    ? "text-orange-600 bg-gray-50/50 lg:text-gray-900" 
+                    : "text-gray-600 hover:text-gray-900"
                 )}
               >
-                {/* Tab Content */}
+                {/* Tab Icon */}
                 <Icon className={cn(
-                  "w-4 h-4 transition-colors",
+                  "w-5 h-5 lg:w-4 lg:h-4 transition-colors mb-1 lg:mb-0",
                   isActive ? "text-orange-600" : "text-gray-500"
                 )} />
                 
-                {/* Desktop Label */}
-                <span className="hidden sm:block">{tab.label}</span>
-                
-                {/* Mobile Label */}
-                <span className="block sm:hidden text-xs">{tab.label}</span>
+                {/* Tab Label - Always Visible */}
+                <span className={cn(
+                  "text-[11px] leading-tight lg:text-sm",
+                  "block" // Always show labels
+                )}>
+                  {tab.label}
+                </span>
 
-                {/* Active Bottom Border */}
+                {/* Active Bottom Border - Desktop only */}
                 {isActive && (
                   <motion.div
-                    className="absolute bottom-0 left-0 right-0 h-0.5 bg-orange-500"
+                    className="absolute bottom-0 left-0 right-0 h-0.5 bg-orange-500 hidden lg:block"
                     layoutId="activeTabBorder"
+                    transition={{ 
+                      type: "spring", 
+                      stiffness: 500, 
+                      damping: 30 
+                    }}
+                  />
+                )}
+
+                {/* Active Top Border - Mobile only */}
+                {isActive && (
+                  <motion.div
+                    className="absolute top-0 left-0 right-0 h-0.5 bg-orange-500 lg:hidden"
+                    layoutId="activeTabBorderMobile"
                     transition={{ 
                       type: "spring", 
                       stiffness: 500, 

@@ -3,7 +3,7 @@ import { Card, CardContent } from '@/components/ui/card'
 
 export default function ProfileLoading() {
   return (
-    <div className="bg-gray-50 min-h-screen">
+    <div className="bg-gray-50 min-h-[calc(100vh-65px)]">
       {/* Cover Image Skeleton */}
       <div className="bg-gray-200 h-48 sm:h-64 animate-pulse" />
 

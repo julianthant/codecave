@@ -5,7 +5,6 @@ import { motion } from 'framer-motion'
 import {
   Calendar as CalendarIcon,
   Clock,
-  User,
   MessageSquare,
   Check,
   Coffee,
@@ -26,13 +25,7 @@ import {
   DialogHeader,
   DialogTitle,
 } from '@/components/ui/dialog'
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from '@/components/ui/select'
+
 import { Badge } from '@/components/ui/badge'
 import { toast } from 'sonner'
 
@@ -243,7 +236,7 @@ export function BookingModal({
             <div>
               <h3 className="mb-2 font-medium text-lg">Choose Session Type</h3>
               <p className="mb-4 text-gray-600 text-sm">
-                Select the type of session you'd like to book
+                Select the type of session you&apos;d like to book
               </p>
             </div>
 
@@ -387,7 +380,8 @@ export function BookingModal({
             <div>
               <h3 className="mb-2 font-medium text-lg">Additional Details</h3>
               <p className="mb-4 text-gray-600 text-sm">
-                Share any specific topics or questions you'd like to discuss
+                Share any specific topics or questions you&apos;d like to
+                discuss
               </p>
             </div>
 

@@ -14,7 +14,7 @@ export default function ConnectionsError({
   reset,
 }: ConnectionsErrorProps) {
   return (
-    <div className="bg-gray-50 min-h-screen">
+    <div className="bg-gray-50 min-h-[calc(100vh-65px)]">
       <div className="mx-auto px-4 sm:px-6 lg:px-8 py-8 max-w-7xl">
         <div className="flex justify-center items-center min-h-[400px]">
           <Card className="w-full max-w-md">

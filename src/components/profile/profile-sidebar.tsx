@@ -6,7 +6,6 @@ import {
   Users,
   FileText,
   Folder,
-  TrendingUp,
   Calendar,
   Coffee,
   Zap,

@@ -1,12 +1,12 @@
 'use client'
 
 import React, { useState } from 'react'
-import Image from 'next/image'
 import { useRouter } from 'next/navigation'
 import { motion } from 'framer-motion'
 import { Card, CardContent } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
+import { Avatar, AvatarFallback } from '@/components/ui/avatar'
 import { 
   UserPlus, 
   UserCheck, 
@@ -20,6 +20,31 @@ import {
 } from 'lucide-react'
 import { ConnectionUser, ConnectionInvitation } from '@/types/connections'
 import { cn } from '@/lib/utils'
+
+// Helper functions for avatar initials and colors
+const getInitials = (name: string): string => {
+  return name
+    .split(' ')
+    .map(word => word[0])
+    .join('')
+    .toUpperCase()
+    .slice(0, 2)
+}
+
+const getAvatarColor = (username: string): string => {
+  const colors = [
+    'bg-orange-500',
+    'bg-blue-500',
+    'bg-green-500',
+    'bg-purple-500',
+    'bg-pink-500',
+    'bg-yellow-500',
+    'bg-indigo-500',
+    'bg-red-500'
+  ]
+  const hash = username.split('').reduce((acc, char) => acc + char.charCodeAt(0), 0)
+  return colors[hash % colors.length]
+}
 
 type CardVariant = 
   | 'discover' 
@@ -66,7 +91,7 @@ export function GlobalConnectionCard({
 }: GlobalConnectionCardProps) {
   const router = useRouter()
   const [isPrimaryLoading, setIsPrimaryLoading] = useState(false)
-  const [isSecondaryLoading, setIsSecondaryLoading] = useState(false)
+  const [isSecondaryLoading] = useState(false)
   const [actionState, setActionState] = useState<'default' | 'success' | 'following'>('default')
 
   // Default actions based on variant
@@ -144,7 +169,7 @@ export function GlobalConnectionCard({
   const finalPrimaryAction = primaryAction || defaultActions.primary
   const finalSecondaryAction = secondaryAction || defaultActions.secondary
 
-  function handleConnect(userId: string) {
+  function handleConnect() {
     setIsPrimaryLoading(true)
     setTimeout(() => {
       setIsPrimaryLoading(false)
@@ -152,7 +177,7 @@ export function GlobalConnectionCard({
     }, 1000)
   }
 
-  function handleFollowBack(userId: string) {
+  function handleFollowBack() {
     setIsPrimaryLoading(true)
     setTimeout(() => {
       setIsPrimaryLoading(false)
@@ -191,8 +216,6 @@ export function GlobalConnectionCard({
     return `${Math.floor(diffInDays / 7)}w ago`
   }
 
-  const avatarSize = compact ? 32 : 40
-
   return (
     <motion.div
       whileHover={{ y: -2, scale: 1.02 }}
@@ -207,13 +230,18 @@ export function GlobalConnectionCard({
           {/* User Header */}
           <div className="flex items-start space-x-3">
             <div className="relative flex-shrink-0">
-              <Image
-                src={user.avatarUrl || '/default-avatar.png'}
-                alt={user.displayName}
-                width={avatarSize}
-                height={avatarSize}
-                className="rounded-full object-cover"
-              />
+              <Avatar className={cn(
+                "rounded-full",
+                compact ? "w-8 h-8" : "w-10 h-10"
+              )}>
+                <AvatarFallback className={cn(
+                  "text-white font-semibold",
+                  getAvatarColor(user.username),
+                  compact ? "text-xs" : "text-sm"
+                )}>
+                  {getInitials(user.displayName)}
+                </AvatarFallback>
+              </Avatar>
               {user.availableForCollab && (
                 <div className={cn(
                   "absolute bg-green-500 border-2 border-white rounded-full",
@@ -238,30 +266,6 @@ export function GlobalConnectionCard({
                 @{user.username}
               </p>
               
-              {/* Location and mutual connections */}
-              <div className={cn(
-                "flex items-center space-x-3 mt-1 text-gray-500",
-                compact ? "text-[10px]" : "text-[10px]"
-              )}>
-                {user.location && (
-                  <div className="flex items-center space-x-1">
-                    <MapPin className="w-2.5 h-2.5" />
-                    <span>{user.location.split(',')[0]}</span>
-                  </div>
-                )}
-                {user.mutualConnections && user.mutualConnections > 0 && (
-                  <div className="flex items-center space-x-1">
-                    <Users className="w-2.5 h-2.5" />
-                    <span>{user.mutualConnections} mutual</span>
-                  </div>
-                )}
-                {invitation && (
-                  <div className="flex items-center space-x-1">
-                    <Clock className="w-2.5 h-2.5" />
-                    <span>{formatTimeAgo(invitation.sentAt)}</span>
-                  </div>
-                )}
-              </div>
             </div>
           </div>
 
@@ -275,40 +279,60 @@ export function GlobalConnectionCard({
             </p>
           )}
 
-          {/* Invitation Message */}
-          {invitation?.message && (
-            <div className="bg-gray-50 rounded-md p-2 border-l-2 border-orange-200">
-              <p className="text-xs text-gray-700 italic line-clamp-2">
-                &quot;{invitation.message}&quot;
-              </p>
-            </div>
-          )}
-
           {/* Skills */}
           <div className="flex flex-wrap gap-1">
-            {user.skills.slice(0, 2).map((skill) => (
+            {user.skills.slice(0, 3).map((skill) => (
               <Badge
                 key={skill}
                 variant="outline"
-                className={cn(
-                  "bg-gray-50 text-gray-700 border-gray-200",
-                  compact ? "text-[9px] px-1.5 py-0.5" : "text-[10px] px-2 py-0.5"
-                )}
+                className="bg-gray-50 text-gray-700 border-gray-200 text-xs px-2 py-0.5"
               >
                 {skill}
               </Badge>
             ))}
-            {user.skills.length > 2 && (
+            {user.skills.length > 3 && (
               <Badge
                 variant="outline"
-                className={cn(
-                  "bg-gray-50 text-gray-600 border-gray-200",
-                  compact ? "text-[9px] px-1.5 py-0.5" : "text-[10px] px-2 py-0.5"
-                )}
+                className="bg-gray-50 text-gray-600 border-gray-200 text-xs px-2 py-0.5"
               >
-                +{user.skills.length - 2}
+                +{user.skills.length - 3}
               </Badge>
             )}
+          </div>
+
+          {/* Metadata Footer */}
+          <div className="mt-3 pt-3 border-t border-gray-100">
+            <div className="flex items-center justify-between text-xs text-gray-600">
+              <div className="flex items-center gap-3">
+                {/* For Discover/Connection/Network cards */}
+                {(variant === 'discover' || variant === 'connection' || variant === 'follower' || variant === 'following') && (
+                  <>
+                    {user.location && (
+                      <div className="flex items-center gap-1">
+                        <MapPin className="w-3 h-3 flex-shrink-0" />
+                        <span className="max-w-[100px] truncate">
+                          {user.location.split(',')[0]}
+                        </span>
+                      </div>
+                    )}
+                    {user.mutualConnections && user.mutualConnections > 0 && (
+                      <div className="flex items-center gap-1">
+                        <Users className="w-3 h-3 flex-shrink-0" />
+                        <span>{user.mutualConnections}</span>
+                      </div>
+                    )}
+                  </>
+                )}
+              </div>
+              
+              {/* For Invitation cards - time display */}
+              {(variant === 'invitation-received' || variant === 'invitation-sent') && invitation && (
+                <div className="flex items-center gap-1">
+                  <Clock className="w-3 h-3 flex-shrink-0" />
+                  <span className="text-xs">{formatTimeAgo(invitation.sentAt)}</span>
+                </div>
+              )}
+            </div>
           </div>
 
           {/* Actions */}
