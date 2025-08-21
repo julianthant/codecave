@@ -1,380 +1,430 @@
-# Lib Directory (`src/lib/`)
+# Lib Rules (`src/lib/`)
 
-## Overview
+**STRICT REQUIREMENTS**: Follow these exact patterns for ALL generic utility functions.
 
-This directory contains core utility functions and helper libraries for **CodeCave**. It serves as the foundation for common operations used throughout the application.
+## Purpose Rules (CRITICAL)
 
-## Architecture Pattern
-
-- **Pure Functions**: Stateless utility functions without side effects
-- **Type Safety**: Full TypeScript support with proper typing
-- **Tree Shaking**: Modular exports for optimal bundle size
-- **Reusability**: Functions designed for use across multiple components
-- **Performance**: Optimized implementations for common operations
-
-## Core Utilities (`utils.ts`)
-
-### Class Name Utilities
-
-#### `cn()` Function
-
-**Purpose**: Combines and merges CSS class names intelligently using `clsx` and `tailwind-merge`.
-
+### Lib vs Utils Separation (EXACT)
 ```typescript
-function cn(...inputs: ClassValue[]): string
+// ✅ LIB: Generic, reusable anywhere
+export function formatDate(date: Date): string {}
+export function cn(...classes: string[]): string {}
+export function truncate(text: string, length: number): string {}
+
+// ❌ NEVER in LIB: Business logic, domain-specific code
+export function validateCodeCavePost(post: Post) {} // Belongs in /utils
+export function formatSupabaseError(error: Error) {} // Belongs in /utils
+export function calculatePostReadingTime(blocks: Block[]) {} // Belongs in /utils
 ```
 
-**Key Features**:
+### Required Purpose (EXACT)
+- **Core utilities ONLY**: Basic functions any React app could use
+- **NO business logic**: Domain-specific code belongs in `/utils`
+- **NO external integrations**: API clients belong in `/utils`
+- **NO framework coupling**: Keep independent of CodeCave specifics
 
-- Handles conditional classes with `clsx`
-- Merges conflicting Tailwind classes with `tailwind-merge`
-- Removes duplicate classes
-- Handles falsy values gracefully
+## File Organization (REQUIRED)
 
-**Usage Examples**:
-
-```typescript
-// Basic usage
-cn('px-4', 'py-2', 'bg-blue-500')
-// → "px-4 py-2 bg-blue-500"
-
-// Conditional classes
-cn('base-class', {
-  'active-class': isActive,
-  'disabled-class': isDisabled
-})
-
-// Tailwind class merging (conflicting classes resolved)
-cn('px-2 px-4 py-1 py-2')
-// → "px-4 py-2" (later classes override earlier ones)
-
-// Component pattern
-<button className={cn(
-  'base-button-classes',
-  variant === 'primary' && 'primary-classes',
-  size === 'large' && 'large-classes',
-  className // Allow external class override
-)}>
+```
+lib/
+├── utils.ts              # REQUIRED: Core utilities ONLY
+└── constants.ts          # ALLOWED: Generic constants
 ```
 
-**Why This Matters**: Essential for building flexible, composable UI components where class conflicts need intelligent resolution.
+### NEVER Create:
+- Multiple utility files (`date-utils.ts`, `string-utils.ts`)
+- Domain-specific files (`post-lib.ts`, `user-lib.ts`)
+- Business logic files (`validation.ts`, `api.ts`)
 
-### Date Formatting Utilities
+## Core Utilities (REQUIRED FUNCTIONS)
 
-#### `formatDate()` Function
-
-**Purpose**: Formats dates into human-readable strings.
-
+### Class Name Utility (CRITICAL)
 ```typescript
-function formatDate(date: string | Date): string
+import { clsx, type ClassValue } from 'clsx'
+import { twMerge } from 'tailwind-merge'
+
+export function cn(...inputs: ClassValue[]): string {
+  return twMerge(clsx(inputs))
+}
 ```
 
-**Format**: "Month Day, Year" (e.g., "January 15, 2024")
-
-**Usage**:
-
+**Usage Rules (ALWAYS)**:
 ```typescript
-formatDate(new Date())
-// → "January 15, 2024"
+// ✅ CORRECT: Use cn() for all className combinations
+<div className={cn(
+  'base-classes',
+  condition && 'conditional-class',
+  variant === 'primary' && 'primary-variant',
+  className // Allow prop override
+)} />
 
-formatDate('2024-01-15T10:30:00Z')
-// → "January 15, 2024"
+// ❌ NEVER: Template literals or string concatenation
+<div className={`base-classes ${condition ? 'active' : ''}`} />
+<div className={'base-classes ' + additionalClass} />
 ```
 
-#### `formatTimeAgo()` Function
-
-**Purpose**: Converts dates to relative time strings (time ago format).
-
+### Date Utilities (REQUIRED FUNCTIONS)
 ```typescript
-function formatTimeAgo(date: string | Date): string
-```
-
-**Time Ranges**:
-
-- `< 1 minute`: "just now"
-- `< 1 hour`: "Xm ago"
-- `< 1 day`: "Xh ago"
-- `< 1 month`: "Xd ago"
-- `≥ 1 month`: Falls back to `formatDate()`
-
-**Usage**:
-
-```typescript
-formatTimeAgo(new Date(Date.now() - 30000))
-// → "just now"
-
-formatTimeAgo(new Date(Date.now() - 300000))
-// → "5m ago"
-
-formatTimeAgo(new Date(Date.now() - 7200000))
-// → "2h ago"
-```
-
-**Perfect For**: Social media feeds, comments, activity timelines.
-
-### String Manipulation Utilities
-
-#### `slugify()` Function
-
-**Purpose**: Converts strings into URL-friendly slugs.
-
-```typescript
-function slugify(text: string): string
-```
-
-**Transformations**:
-
-- Converts to lowercase
-- Removes special characters (keeps alphanumeric, spaces, hyphens)
-- Replaces spaces/underscores with hyphens
-- Removes leading/trailing hyphens
-- Collapses multiple consecutive hyphens
-
-**Usage**:
-
-```typescript
-slugify('Hello World! This is a Test')
-// → "hello-world-this-is-a-test"
-
-slugify('React.js & TypeScript Guide')
-// → "reactjs-typescript-guide"
-
-slugify('  Special---Characters!!!  ')
-// → "special-characters"
-```
-
-#### `generateSlug()` Function
-
-**Purpose**: Creates unique slugs by combining `slugify()` with timestamps.
-
-```typescript
-function generateSlug(title: string): string
-```
-
-**Format**: `{slugified-title}-{timestamp-in-base36}`
-
-**Usage**:
-
-```typescript
-generateSlug('My Blog Post')
-// → "my-blog-post-km8zr2x" (timestamp varies)
-```
-
-**Use Case**: Generating unique URLs for posts, projects, or any content that needs guaranteed uniqueness.
-
-#### `truncate()` Function
-
-**Purpose**: Truncates text to specified length with ellipsis.
-
-```typescript
-function truncate(text: string, length: number): string
-```
-
-**Behavior**:
-
-- Returns original text if within length limit
-- Truncates and adds "..." if exceeds limit
-- Clean cut without word breaking
-
-**Usage**:
-
-```typescript
-truncate('This is a very long text that needs truncation', 20)
-// → "This is a very long..."
-
-truncate('Short text', 50)
-// → "Short text" (unchanged)
-```
-
-## Development Guidelines
-
-### Adding New Utilities
-
-#### Function Design Principles
-
-1. **Pure Functions**: No side effects, same input = same output
-2. **Single Responsibility**: Each function does one thing well
-3. **Type Safety**: Proper TypeScript types for parameters and returns
-4. **Edge Case Handling**: Handle null, undefined, empty strings gracefully
-5. **Performance**: Consider efficiency for frequently used functions
-
-#### Naming Conventions
-
-- Use descriptive, verb-based names: `formatDate`, `slugify`, `truncate`
-- Prefer full words over abbreviations: `formatTimeAgo` vs `fmtTimeAgo`
-- Group related functions with consistent prefixes when logical
-
-#### Example New Utility
-
-```typescript
-/**
- * Validates email format using regex
- * @param email - Email string to validate
- * @returns Boolean indicating if email is valid
- */
-export function isValidEmail(email: string): boolean {
-  const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
-  return emailRegex.test(email.trim())
+export function formatDate(date: string | Date): string {
+  const dateObj = typeof date === 'string' ? new Date(date) : date
+  
+  return dateObj.toLocaleDateString('en-US', {
+    year: 'numeric',
+    month: 'long',
+    day: 'numeric'
+  })
 }
 
-/**
- * Generates random color from predefined palette
- * @param seed - Optional seed for consistent color generation
- * @returns Hex color string
- */
-export function generateAvatarColor(seed?: string): string {
-  const colors = ['#FF6B6B', '#4ECDC4', '#45B7D1', '#96CEB4', '#FFEAA7']
+export function formatTimeAgo(date: string | Date): string {
+  const now = new Date()
+  const dateObj = typeof date === 'string' ? new Date(date) : date
+  const diffInSeconds = Math.floor((now.getTime() - dateObj.getTime()) / 1000)
+  
+  if (diffInSeconds < 60) return 'just now'
+  if (diffInSeconds < 3600) return `${Math.floor(diffInSeconds / 60)}m ago`
+  if (diffInSeconds < 86400) return `${Math.floor(diffInSeconds / 3600)}h ago`
+  if (diffInSeconds < 2592000) return `${Math.floor(diffInSeconds / 86400)}d ago`
+  
+  return formatDate(dateObj)
+}
 
-  if (seed) {
-    // Generate consistent color based on seed
-    const hash = seed.split('').reduce((a, b) => {
-      a = (a << 5) - a + b.charCodeAt(0)
-      return a & a
-    }, 0)
-    return colors[Math.abs(hash) % colors.length]
+export function isValidDate(date: unknown): date is Date {
+  return date instanceof Date && !isNaN(date.getTime())
+}
+```
+
+### String Utilities (REQUIRED FUNCTIONS)
+```typescript
+export function slugify(text: string): string {
+  return text
+    .toLowerCase()
+    .replace(/[^a-z0-9\s-]/g, '')
+    .trim()
+    .replace(/\s+/g, '-')
+    .replace(/-+/g, '-')
+    .replace(/^-|-$/g, '')
+}
+
+export function generateSlug(title: string): string {
+  const slug = slugify(title)
+  const timestamp = Date.now().toString(36)
+  return slug ? `${slug}-${timestamp}` : timestamp
+}
+
+export function truncate(text: string, length: number): string {
+  if (text.length <= length) return text
+  return text.slice(0, length).replace(/\s+\S*$/, '') + '...'
+}
+
+export function capitalize(text: string): string {
+  return text.charAt(0).toUpperCase() + text.slice(1).toLowerCase()
+}
+
+export function isEmpty(value: unknown): boolean {
+  if (value === null || value === undefined) return true
+  if (typeof value === 'string') return value.trim().length === 0
+  if (Array.isArray(value)) return value.length === 0
+  if (typeof value === 'object') return Object.keys(value).length === 0
+  return false
+}
+```
+
+### Number Utilities (REQUIRED FUNCTIONS)
+```typescript
+export function formatNumber(num: number): string {
+  if (num >= 1000000) return `${(num / 1000000).toFixed(1)}M`
+  if (num >= 1000) return `${(num / 1000).toFixed(1)}K`
+  return num.toString()
+}
+
+export function clamp(value: number, min: number, max: number): number {
+  return Math.min(Math.max(value, min), max)
+}
+
+export function randomBetween(min: number, max: number): number {
+  return Math.random() * (max - min) + min
+}
+```
+
+### Array Utilities (REQUIRED FUNCTIONS)
+```typescript
+export function unique<T>(array: T[]): T[] {
+  return [...new Set(array)]
+}
+
+export function chunk<T>(array: T[], size: number): T[][] {
+  const chunks: T[][] = []
+  for (let i = 0; i < array.length; i += size) {
+    chunks.push(array.slice(i, i + size))
   }
+  return chunks
+}
 
-  return colors[Math.floor(Math.random() * colors.length)]
+export function shuffle<T>(array: T[]): T[] {
+  const shuffled = [...array]
+  for (let i = shuffled.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1))
+    ;[shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]]
+  }
+  return shuffled
 }
 ```
 
-### Usage Patterns
+## Function Rules (CRITICAL)
 
-#### Component Integration
-
+### Pure Function Requirements (REQUIRED)
 ```typescript
+// ✅ CORRECT: Pure function
+export function formatDate(date: Date): string {
+  // Same input always produces same output
+  // No side effects
+  return date.toLocaleDateString()
+}
+
+// ❌ NEVER: Side effects
+export function formatDate(date: Date): string {
+  console.log('Formatting date') // Side effect
+  localStorage.setItem('lastDate', date.toString()) // Side effect
+  return date.toLocaleDateString()
+}
+
+// ❌ NEVER: External dependencies
+export function formatUserDate(date: Date): string {
+  const userSettings = getUserSettings() // External dependency
+  return date.toLocaleDateString(userSettings.locale)
+}
+```
+
+### TypeScript Requirements (REQUIRED)
+```typescript
+// ✅ CORRECT: Full typing
+export function processItems<T>(
+  items: T[],
+  processor: (item: T) => T
+): T[] {
+  return items.map(processor)
+}
+
+// ✅ CORRECT: Input validation
+export function truncate(text: string, length: number): string {
+  if (typeof text !== 'string') {
+    throw new Error('Text must be a string')
+  }
+  if (length < 0) {
+    throw new Error('Length must be non-negative')
+  }
+  
+  return text.length <= length ? text : text.slice(0, length) + '...'
+}
+
+// ❌ NEVER: Missing types
+export function processItems(items: any, processor: any): any {
+  return items.map(processor)
+}
+```
+
+### Error Handling (REQUIRED)
+```typescript
+// ✅ CORRECT: Graceful error handling
+export function safeJsonParse<T>(json: string, fallback: T): T {
+  try {
+    return JSON.parse(json)
+  } catch {
+    return fallback
+  }
+}
+
+export function formatDate(date: string | Date): string {
+  try {
+    const dateObj = typeof date === 'string' ? new Date(date) : date
+    
+    if (!isValidDate(dateObj)) {
+      return 'Invalid date'
+    }
+    
+    return dateObj.toLocaleDateString()
+  } catch {
+    return 'Invalid date'
+  }
+}
+```
+
+## Integration Rules (STRICT)
+
+### Component Usage (REQUIRED)
+```typescript
+// ✅ CORRECT: Import and use lib utilities
 import { cn, formatTimeAgo, truncate } from '@/lib/utils'
 
-function PostCard({ post, className }) {
+export function Card({ title, date, description, className }: CardProps) {
   return (
     <div className={cn(
-      'post-card-base-classes',
+      'rounded-lg border bg-card p-6',
       className
     )}>
-      <h3>{truncate(post.title, 60)}</h3>
-      <p className="text-sm text-gray-500">
-        {formatTimeAgo(post.createdAt)}
+      <h3>{truncate(title, 50)}</h3>
+      <p className="text-sm text-muted-foreground">
+        {formatTimeAgo(date)}
       </p>
+      <p>{description}</p>
     </div>
   )
 }
-```
 
-#### API Integration
-
-```typescript
-import { generateSlug, slugify } from '@/lib/utils'
-
-// Creating a new post
-async function createPost(title: string, content: string) {
-  const slug = generateSlug(title)
-
-  return await api.posts.create({
-    title,
-    slug,
-    content,
-  })
+// ❌ NEVER: Business logic in components
+export function PostCard({ post }: PostCardProps) {
+  // Don't validate business rules here - use /utils
+  const validation = validateCodeCavePost(post) // Wrong
 }
 ```
 
-### Performance Considerations
-
-#### Memoization for Expensive Operations
-
+### Performance Requirements (CRITICAL)
 ```typescript
+// ✅ CORRECT: Memoize expensive operations
 import { useMemo } from 'react'
+import { slugify, formatTimeAgo } from '@/lib/utils'
 
-function ExpensiveComponent({ data }) {
-  const processedData = useMemo(() => {
-    return data.map(item => ({
+function ItemList({ items }: { items: Item[] }) {
+  const processedItems = useMemo(() => {
+    return items.map(item => ({
       ...item,
       slug: slugify(item.title),
       timeAgo: formatTimeAgo(item.date)
     }))
-  }, [data])
-
-  return <div>{/* Render processed data */}</div>
+  }, [items])
+  
+  return <div>{/* Render items */}</div>
 }
 ```
 
-#### Bundle Size Optimization
+## Forbidden Patterns
 
-- Export functions individually for tree shaking
-- Keep utility functions small and focused
-- Avoid importing large external libraries for simple operations
-
-### Testing Strategy
-
-#### Unit Testing Example
-
+### ❌ NEVER Do These:
 ```typescript
-import { slugify, formatTimeAgo, cn } from './utils'
+// ❌ Business logic in lib
+export function validatePost(post: Post) {} // Belongs in /utils
 
-describe('utils', () => {
-  describe('slugify', () => {
-    it('should convert text to URL-friendly slug', () => {
-      expect(slugify('Hello World!')).toBe('hello-world')
+// ❌ External service integration
+export function createSupabaseClient() {} // Belongs in /utils
+
+// ❌ Domain-specific constants
+export const POST_TYPES = ['article', 'snippet'] // Belongs in /utils
+
+// ❌ Framework coupling
+export function useCodeCaveAuth() {} // Belongs in /hooks
+
+// ❌ Side effects
+export function logEvent(event: string) {
+  console.log(event) // Side effect
+  analytics.track(event) // Side effect
+}
+
+// ❌ Mutable state
+let cachedValue: string
+export function getCachedValue() {
+  return cachedValue // Mutable state
+}
+
+// ❌ Environment dependencies
+export function getApiUrl() {
+  return process.env.NEXT_PUBLIC_API_URL // Environment coupling
+}
+```
+
+### ❌ Wrong File Organization:
+```
+lib/
+├── date-utils.ts         # Too specific, put in utils.ts
+├── post-helpers.ts       # Business logic, belongs in /utils
+├── api-utils.ts          # External integration, belongs in /utils
+└── codecave-lib.ts       # Domain coupling, wrong purpose
+```
+
+## Constants (ALLOWED)
+```typescript
+// lib/constants.ts
+
+// ✅ ALLOWED: Generic constants
+export const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
+export const URL_REGEX = /^https?:\/\/.+/
+export const PHONE_REGEX = /^\+?[\d\s\-\(\)]+$/
+
+export const COMMON_TIMEZONES = [
+  'UTC',
+  'America/New_York',
+  'America/Los_Angeles',
+  'Europe/London',
+  'Asia/Tokyo'
+] as const
+
+export const HTTP_STATUS_CODES = {
+  OK: 200,
+  CREATED: 201,
+  BAD_REQUEST: 400,
+  UNAUTHORIZED: 401,
+  FORBIDDEN: 403,
+  NOT_FOUND: 404,
+  INTERNAL_SERVER_ERROR: 500
+} as const
+
+// ❌ NEVER: Business-specific constants
+export const CODECAVE_POST_TYPES = ['article', 'snippet'] // Belongs in /utils
+export const SUPABASE_TABLES = ['users', 'posts'] // Belongs in /utils
+```
+
+## Testing Rules (REQUIRED)
+
+### Test Structure (EXACT PATTERN)
+```typescript
+import { cn, formatDate, slugify, truncate } from './utils'
+
+describe('lib/utils', () => {
+  describe('cn', () => {
+    it('should merge classes correctly', () => {
+      expect(cn('class1', 'class2')).toBe('class1 class2')
     })
-
-    it('should handle special characters', () => {
-      expect(slugify('React & TypeScript')).toBe('react-typescript')
+    
+    it('should handle conditional classes', () => {
+      expect(cn('base', false && 'hidden')).toBe('base')
+    })
+    
+    it('should resolve Tailwind conflicts', () => {
+      expect(cn('px-2', 'px-4')).toBe('px-4')
     })
   })
-
-  describe('formatTimeAgo', () => {
-    it('should return "just now" for recent times', () => {
-      const recent = new Date(Date.now() - 30000)
-      expect(formatTimeAgo(recent)).toBe('just now')
+  
+  describe('formatDate', () => {
+    it('should format dates consistently', () => {
+      const date = new Date('2024-01-15')
+      expect(formatDate(date)).toBe('January 15, 2024')
+    })
+    
+    it('should handle invalid dates', () => {
+      expect(formatDate('invalid')).toBe('Invalid date')
+    })
+  })
+  
+  describe('slugify', () => {
+    it('should create URL-friendly slugs', () => {
+      expect(slugify('Hello World!')).toBe('hello-world')
+    })
+    
+    it('should handle special characters', () => {
+      expect(slugify('React & TypeScript')).toBe('react-typescript')
     })
   })
 })
 ```
 
-## Future Expansion
+## CRITICAL REQUIREMENTS
 
-### Potential Additions
-
-- **Validation utilities**: Email, URL, phone number validation
-- **Number formatting**: Currency, file sizes, percentages
-- **Color utilities**: Hex to RGB, color palette generation
-- **Text processing**: Markdown parsing, syntax highlighting helpers
-- **API utilities**: Request/response formatters, error handling
-- **Local storage**: Type-safe localStorage wrappers
-
-### Organization Strategy
-
-As the utility library grows, consider organizing into subdirectories:
-
-```
-lib/
-├── utils.ts (current core utilities)
-├── validation/
-│   ├── email.ts
-│   ├── forms.ts
-│   └── index.ts
-├── formatting/
-│   ├── numbers.ts
-│   ├── dates.ts
-│   └── index.ts
-└── api/
-    ├── transforms.ts
-    ├── errors.ts
-    └── index.ts
-```
-
-## Key Dependencies
-
-- **clsx**: Conditional class name utility
-- **tailwind-merge**: Intelligent Tailwind CSS class merging
-- **TypeScript**: Type safety and developer experience
-
-## Notes for Claude
-
-- `cn()` is the most critical utility - used in virtually every component for class management
-- Always use `cn()` instead of template literals for combining classes in components
-- Date utilities are used throughout the app for user-generated content timestamps
-- String utilities are essential for content creation and URL generation
-- Keep utilities pure and stateless - no side effects or external dependencies
-- When adding new utilities, consider if they belong in this file or should be in a more specific location
-- Test edge cases thoroughly, especially for string manipulation functions
-- Consider performance implications for utilities used in render loops
+1. **ALWAYS** keep functions pure with no side effects
+2. **ALWAYS** use generic, reusable functions only
+3. **ALWAYS** use `cn()` for all className combinations
+4. **ALWAYS** handle edge cases and invalid inputs gracefully
+5. **ALWAYS** include proper TypeScript types
+6. **ALWAYS** test all utilities thoroughly
+7. **NEVER** include business logic or domain-specific code
+8. **NEVER** integrate with external services or APIs
+9. **NEVER** use environment variables or external state
+10. **NEVER** create multiple utility files - keep everything in `utils.ts`

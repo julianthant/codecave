@@ -31,6 +31,86 @@ function getRelativeTime(date: Date): string {
   return years === 1 ? '1 year ago' : `${years} years ago`
 }
 
+export async function PATCH(
+  request: NextRequest,
+  { params }: { params: Promise<{ username: string }> }
+) {
+  try {
+    const { username } = await params
+
+    // Validate username format
+    if (!username || typeof username !== 'string') {
+      return NextResponse.json(
+        { error: 'Invalid username parameter' },
+        { status: 400 }
+      )
+    }
+
+    // Get current user for auth context
+    const supabase = await createClient()
+    const { data: { user } } = await supabase.auth.getUser()
+    
+    if (!user) {
+      return NextResponse.json(
+        { error: 'Authentication required' },
+        { status: 401 }
+      )
+    }
+
+    // Find the profile to update
+    const profile = await dbService.profiles.findByUsername(username)
+    
+    if (!profile) {
+      return NextResponse.json(
+        { error: 'Profile not found' },
+        { status: 404 }
+      )
+    }
+
+    // Check if user owns this profile
+    if (profile.id !== user.id) {
+      return NextResponse.json(
+        { error: 'Unauthorized to update this profile' },
+        { status: 403 }
+      )
+    }
+
+    // Parse request body
+    const body = await request.json()
+    
+    // Validate allowed fields
+    const allowedFields = ['bio', 'displayName', 'avatarUrl', 'githubUsername', 'twitterUsername', 'discordUsername', 'linkedinUrl', 'location', 'portfolioUrl', 'tagline']
+    const updates: Record<string, unknown> = {}
+    
+    for (const [key, value] of Object.entries(body)) {
+      if (allowedFields.includes(key)) {
+        updates[key] = value
+      }
+    }
+
+    if (Object.keys(updates).length === 0) {
+      return NextResponse.json(
+        { error: 'No valid fields to update' },
+        { status: 400 }
+      )
+    }
+
+    // Update the profile
+    const updatedProfile = await dbService.profiles.update(profile.id, updates)
+
+    return NextResponse.json({
+      success: true,
+      profile: updatedProfile
+    })
+  } catch (error) {
+    console.error('Error updating profile:', error)
+    return NextResponse.json(
+      { error: 'Internal server error' },
+      { status: 500 }
+    )
+  }
+}
+
 export async function GET(
   request: NextRequest,
   { params }: { params: Promise<{ username: string }> }

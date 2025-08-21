@@ -1,6 +1,6 @@
 'use client'
 
-import React from 'react'
+import React, { useState } from 'react'
 import { motion } from 'framer-motion'
 import { 
   Github, 
@@ -11,30 +11,77 @@ import {
   Globe,
   Lock,
   Code,
-  FolderOpen
+  FolderOpen,
+  Plus,
+  Edit3,
+  Trash2,
+  MoreHorizontal
 } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
+import { 
+  DropdownMenu, 
+  DropdownMenuContent, 
+  DropdownMenuItem, 
+  DropdownMenuTrigger 
+} from '@/components/ui/dropdown-menu'
+import { ProjectEditModal } from './modals/project-edit-modal'
+import { useProjects, useDeleteProject } from '@/hooks/use-projects'
+import { toast } from 'sonner'
+import type { Project } from '@/db/schema'
 
-interface ProjectData {
-  id: string
-  name: string
-  description: string
-  technologies: string[]
-  githubUrl?: string
-  liveUrl?: string
-  stars: number
-  forks: number
-  isPrivate: boolean
-  lastUpdated: string
-  language: string
+// Helper function to get relative time
+function getRelativeTime(date: Date): string {
+  const now = new Date()
+  const diffMs = now.getTime() - date.getTime()
+  const diffDays = Math.floor(diffMs / (1000 * 60 * 60 * 24))
+  
+  if (diffDays === 0) {
+    const diffHours = Math.floor(diffMs / (1000 * 60 * 60))
+    if (diffHours === 0) {
+      const diffMinutes = Math.floor(diffMs / (1000 * 60))
+      return diffMinutes <= 1 ? 'just now' : `${diffMinutes} minutes ago`
+    }
+    return diffHours === 1 ? '1 hour ago' : `${diffHours} hours ago`
+  }
+  
+  if (diffDays === 1) return '1 day ago'
+  if (diffDays < 7) return `${diffDays} days ago`
+  if (diffDays < 30) {
+    const weeks = Math.floor(diffDays / 7)
+    return weeks === 1 ? '1 week ago' : `${weeks} weeks ago`
+  }
+  if (diffDays < 365) {
+    const months = Math.floor(diffDays / 30)
+    return months === 1 ? '1 month ago' : `${months} months ago`
+  }
+  const years = Math.floor(diffDays / 365)
+  return years === 1 ? '1 year ago' : `${years} years ago`
 }
 
 interface ProjectsListProps {
-  projects: ProjectData[]
+  isOwnProfile?: boolean
 }
 
-export function ProjectsList({ projects }: ProjectsListProps) {
+export function ProjectsList({ isOwnProfile = false }: ProjectsListProps) {
+  const [isCreateModalOpen, setIsCreateModalOpen] = useState(false)
+  const [editingProject, setEditingProject] = useState<Project | undefined>()
+  
+  // Use the projects hook to fetch real data
+  const { data: projects = [], isLoading, error } = useProjects(!isOwnProfile) // Include private only for own profile
+  const deleteProject = useDeleteProject()
+
+  const handleDeleteProject = async (project: Project) => {
+    if (window.confirm(`Are you sure you want to delete "${project.name}"? This action cannot be undone.`)) {
+      try {
+        await deleteProject.mutateAsync(project.id)
+        toast.success('Project deleted successfully!')
+      } catch (error) {
+        console.error('Failed to delete project:', error)
+        toast.error('Failed to delete project. Please try again.')
+      }
+    }
+  }
   const containerVariants = {
     hidden: { opacity: 0 },
     visible: {
@@ -56,7 +103,7 @@ export function ProjectsList({ projects }: ProjectsListProps) {
     },
   }
 
-  const ProjectCard = ({ project }: { project: ProjectData }) => {
+  const ProjectCard = ({ project }: { project: Project }) => {
     return (
       <motion.div
         variants={itemVariants}
@@ -77,6 +124,33 @@ export function ProjectsList({ projects }: ProjectsListProps) {
             
             {/* Action buttons - responsive */}
             <div className="flex items-center space-x-1 ml-4 flex-shrink-0">
+              {/* Edit/Delete Menu for own profile */}
+              {isOwnProfile && (
+                <DropdownMenu>
+                  <DropdownMenuTrigger asChild>
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      className="h-8 w-8 p-0 text-gray-400 hover:text-gray-600"
+                    >
+                      <MoreHorizontal className="h-4 w-4" />
+                    </Button>
+                  </DropdownMenuTrigger>
+                  <DropdownMenuContent align="end">
+                    <DropdownMenuItem onClick={() => setEditingProject(project)}>
+                      <Edit3 className="h-4 w-4 mr-2" />
+                      Edit Project
+                    </DropdownMenuItem>
+                    <DropdownMenuItem 
+                      onClick={() => handleDeleteProject(project)}
+                      className="text-red-600 focus:text-red-600"
+                    >
+                      <Trash2 className="h-4 w-4 mr-2" />
+                      Delete Project
+                    </DropdownMenuItem>
+                  </DropdownMenuContent>
+                </DropdownMenu>
+              )}
               {project.githubUrl && (
                 <Button
                   variant="outline"
@@ -150,7 +224,7 @@ export function ProjectsList({ projects }: ProjectsListProps) {
 
           {/* Technologies */}
           <div className="flex flex-wrap gap-2 mb-4">
-            {project.technologies.map((tech, index) => (
+            {project.technologies?.map((tech, index) => (
               <Badge 
                 key={index} 
                 variant="secondary" 
@@ -184,7 +258,7 @@ export function ProjectsList({ projects }: ProjectsListProps) {
             
             <div className="flex items-center space-x-1 text-xs text-gray-500">
               <Calendar className="h-3 w-3" />
-              <span>Updated {project.lastUpdated}</span>
+              <span>Updated {getRelativeTime(new Date(project.updatedAt))}</span>
             </div>
           </div>
         </div>
@@ -192,7 +266,8 @@ export function ProjectsList({ projects }: ProjectsListProps) {
     )
   }
 
-  if (projects.length === 0) {
+  // Show loading state
+  if (isLoading) {
     return (
       <div className="bg-white rounded-lg shadow-sm border border-gray-200">
         <div className="px-6 py-4 border-b border-gray-200">
@@ -202,9 +277,75 @@ export function ProjectsList({ projects }: ProjectsListProps) {
           </div>
         </div>
         <div className="p-8 text-center">
+          <div className="animate-pulse">
+            <div className="h-12 w-12 bg-gray-200 rounded-full mx-auto mb-4"></div>
+            <div className="h-4 bg-gray-200 rounded w-32 mx-auto mb-2"></div>
+            <div className="h-3 bg-gray-200 rounded w-48 mx-auto"></div>
+          </div>
+        </div>
+      </div>
+    )
+  }
+
+  // Show error state
+  if (error) {
+    return (
+      <div className="bg-white rounded-lg shadow-sm border border-gray-200">
+        <div className="px-6 py-4 border-b border-gray-200">
+          <div className="flex items-center space-x-2">
+            <FolderOpen className="h-5 w-5 text-gray-600" />
+            <h2 className="text-lg font-semibold text-gray-900">Projects</h2>
+          </div>
+        </div>
+        <div className="p-8 text-center">
+          <Code className="h-12 w-12 text-red-400 mx-auto mb-4" />
+          <h3 className="text-lg font-medium text-gray-900 mb-2">Error Loading Projects</h3>
+          <p className="text-gray-500">There was an error loading projects. Please try again.</p>
+        </div>
+      </div>
+    )
+  }
+
+  if (projects.length === 0) {
+    return (
+      <div className="bg-white rounded-lg shadow-sm border border-gray-200">
+        <div className="px-6 py-4 border-b border-gray-200">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center space-x-2">
+              <FolderOpen className="h-5 w-5 text-gray-600" />
+              <h2 className="text-lg font-semibold text-gray-900">Projects</h2>
+            </div>
+            {isOwnProfile && (
+              <Button 
+                variant="outline" 
+                size="sm"
+                onClick={() => setIsCreateModalOpen(true)}
+              >
+                <Plus className="h-4 w-4 mr-1" />
+                Add Project
+              </Button>
+            )}
+          </div>
+        </div>
+        <div className="p-8 text-center">
           <Code className="h-12 w-12 text-gray-400 mx-auto mb-4" />
           <h3 className="text-lg font-medium text-gray-900 mb-2">No Projects</h3>
-          <p className="text-gray-500">No projects have been shared yet.</p>
+          <p className="text-gray-500 mb-4">
+            {isOwnProfile 
+              ? "Share your amazing projects with the community" 
+              : "This user hasn't shared any projects yet"
+            }
+          </p>
+          {isOwnProfile && (
+            <Button 
+              variant="outline" 
+              size="sm"
+              onClick={() => setIsCreateModalOpen(true)}
+            >
+              <Plus className="h-4 w-4 mr-1" />
+              Create Your First Project
+            </Button>
+          )}
         </div>
       </div>
     )
@@ -222,6 +363,16 @@ export function ProjectsList({ projects }: ProjectsListProps) {
               {projects.length} {projects.length === 1 ? 'project' : 'projects'}
             </Badge>
           </div>
+          {isOwnProfile && (
+            <Button 
+              variant="outline" 
+              size="sm"
+              onClick={() => setIsCreateModalOpen(true)}
+            >
+              <Plus className="h-4 w-4 mr-1" />
+              Add Project
+            </Button>
+          )}
         </div>
       </div>
 
@@ -238,6 +389,18 @@ export function ProjectsList({ projects }: ProjectsListProps) {
           ))}
         </motion.div>
       </div>
+
+      {/* Project Modals */}
+      <ProjectEditModal
+        isOpen={isCreateModalOpen}
+        onClose={() => setIsCreateModalOpen(false)}
+      />
+      
+      <ProjectEditModal
+        isOpen={!!editingProject}
+        onClose={() => setEditingProject(undefined)}
+        project={editingProject}
+      />
     </div>
   )
 }

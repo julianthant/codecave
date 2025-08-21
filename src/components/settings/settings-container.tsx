@@ -3,9 +3,10 @@
 import React, { useState } from 'react'
 import { motion } from 'framer-motion'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
-import { User, Code, Settings as SettingsIcon, Shield } from 'lucide-react'
+import { User, Code, Settings as SettingsIcon, Shield, Users } from 'lucide-react'
 import { ProfileSettings } from './profile-settings'
 import { DeveloperSettings } from './developer-settings'
+import { CollaborationSettings } from './collaboration-settings'
 import { PreferencesSettings } from './preferences-settings'
 import { AccountSettings } from './account-settings'
 
@@ -21,6 +22,12 @@ const settingsTabs = [
     label: 'Developer',
     icon: Code,
     component: DeveloperSettings,
+  },
+  {
+    value: 'collaboration',
+    label: 'Collaboration',
+    icon: Users,
+    component: CollaborationSettings,
   },
   {
     value: 'preferences',
@@ -70,7 +77,7 @@ export function SettingsContainer() {
       <div className="lg:col-span-3">
         <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
           {/* Mobile Tab List */}
-          <TabsList className="grid w-full grid-cols-4 lg:hidden mb-8">
+          <TabsList className="grid w-full grid-cols-5 lg:hidden mb-8">
             {settingsTabs.map((tab) => {
               const Icon = tab.icon
               return (

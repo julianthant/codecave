@@ -63,8 +63,8 @@ export function useProfile(username: string) {
     enabled: Boolean(username),
     staleTime: 5 * 60 * 1000, // 5 minutes
     retry: (failureCount, error) => {
-      // Don't retry 404 errors
-      if (error.message === 'Profile not found') {
+      // Don't retry 404 errors or server errors
+      if (error.message === 'Profile not found' || error.message.includes('Failed to fetch profile')) {
         return false
       }
       return failureCount < 3

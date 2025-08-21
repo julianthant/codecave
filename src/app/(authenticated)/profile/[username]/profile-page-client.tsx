@@ -6,7 +6,6 @@ import { ProfileSummary } from '@/components/profile/profile-summary'
 import { ProjectsList } from '@/components/profile/projects-list'
 import { ContentStream } from '@/components/profile/content-stream'
 import { SkillsMatrix } from '@/components/profile/skills-matrix'
-import { ConnectSection } from '@/components/profile/connect-section'
 import { ProfileSidebar } from '@/components/profile/profile-sidebar'
 import { LoadingSpinner } from '@/components/ui/LoadingSpinner'
 
@@ -44,7 +43,7 @@ export function ProfilePageClient({ username }: ProfilePageClientProps) {
     return null
   }
 
-  const { profile, userSettings, posts, projects, stats, isOwnProfile } = data
+  const { profile, userSettings, posts, stats, isOwnProfile } = data
 
   return (
     <div className="bg-gray-50 min-h-[calc(100vh-65px)]">
@@ -69,26 +68,21 @@ export function ProfilePageClient({ username }: ProfilePageClientProps) {
             />
 
             {/* All Projects */}
-            {projects && projects.length > 0 && (
-              <ProjectsList projects={projects} />
-            )}
+            <ProjectsList 
+              isOwnProfile={isOwnProfile}
+            />
 
             {/* Skills Matrix */}
-            {userSettings && (
-              <SkillsMatrix userSettings={userSettings} />
-            )}
+            <SkillsMatrix 
+              profile={profile}
+              userSettings={userSettings} 
+              isOwnProfile={isOwnProfile}
+            />
 
             {/* Content Stream */}
             {posts && posts.length > 0 && (
               <ContentStream posts={posts} profile={profile} />
             )}
-
-            {/* Connect Section */}
-            <ConnectSection
-              profile={profile}
-              userSettings={userSettings}
-              isOwnProfile={isOwnProfile}
-            />
           </div>
 
           {/* Sidebar - Fixed */}

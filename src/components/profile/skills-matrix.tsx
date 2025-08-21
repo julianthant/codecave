@@ -1,6 +1,6 @@
 'use client'
 
-import React, { useMemo } from 'react'
+import React, { useMemo, useState } from 'react'
 import { motion } from 'framer-motion'
 import {
   Code,
@@ -11,12 +11,17 @@ import {
   Smartphone,
   Brain,
   BookOpen,
+  Edit3,
 } from 'lucide-react'
+import { Button } from '@/components/ui/button'
+import { SkillsEditModal } from './modals/skills-edit-modal'
 
-import type { UserSettings } from '@/db/schema'
+import type { UserSettings, Profile } from '@/db/schema'
 
 interface SkillsMatrixProps {
+  profile: Profile
   userSettings?: UserSettings
+  isOwnProfile?: boolean
 }
 
 interface SkillCategory {
@@ -29,97 +34,40 @@ interface SkillCategory {
 
 interface SkillData {
   name: string
-  yearsExperience: number
+  years: number
   isLearning?: boolean
 }
 
-export function SkillsMatrix({}: SkillsMatrixProps) {
-  // Mock skill data - in real app, this would come from userSettings or database
-  const skillCategories: SkillCategory[] = useMemo(
-    () => [
-      {
-        id: 'frontend',
-        name: 'Frontend',
-        icon: Palette,
-        color: 'bg-blue-500',
-        skills: [
-          { name: 'React', yearsExperience: 4 },
-          { name: 'TypeScript', yearsExperience: 3 },
-          { name: 'Next.js', yearsExperience: 2 },
-          { name: 'TailwindCSS', yearsExperience: 2 },
-          { name: 'Vue.js', yearsExperience: 1 },
-          { name: 'Svelte', yearsExperience: 0.5, isLearning: true },
-        ],
-      },
-      {
-        id: 'backend',
-        name: 'Backend',
-        icon: Server,
-        color: 'bg-green-500',
-        skills: [
-          { name: 'Node.js', yearsExperience: 3 },
-          { name: 'Python', yearsExperience: 2 },
-          { name: 'Go', yearsExperience: 1 },
-          { name: 'Express', yearsExperience: 3 },
-          { name: 'FastAPI', yearsExperience: 1 },
-          { name: 'Rust', yearsExperience: 0.5, isLearning: true },
-        ],
-      },
-      {
-        id: 'database',
-        name: 'Database',
-        icon: Database,
-        color: 'bg-purple-500',
-        skills: [
-          { name: 'PostgreSQL', yearsExperience: 3 },
-          { name: 'MongoDB', yearsExperience: 2 },
-          { name: 'Redis', yearsExperience: 2 },
-          { name: 'Supabase', yearsExperience: 1 },
-          { name: 'Prisma', yearsExperience: 2 },
-          { name: 'GraphQL', yearsExperience: 1 },
-        ],
-      },
-      {
-        id: 'cloud',
-        name: 'Cloud & DevOps',
-        icon: Cloud,
-        color: 'bg-orange-500',
-        skills: [
-          { name: 'Docker', yearsExperience: 3 },
-          { name: 'AWS', yearsExperience: 2 },
-          { name: 'Vercel', yearsExperience: 2 },
-          { name: 'GitHub Actions', yearsExperience: 2 },
-          { name: 'Kubernetes', yearsExperience: 1, isLearning: true },
-          { name: 'Terraform', yearsExperience: 0.5, isLearning: true },
-        ],
-      },
-      {
-        id: 'mobile',
-        name: 'Mobile',
-        icon: Smartphone,
-        color: 'bg-indigo-500',
-        skills: [
-          { name: 'React Native', yearsExperience: 1 },
-          { name: 'Expo', yearsExperience: 1 },
-          { name: 'Swift', yearsExperience: 0.5, isLearning: true },
-          { name: 'Flutter', yearsExperience: 0.5, isLearning: true },
-        ],
-      },
-      {
-        id: 'ai',
-        name: 'AI & ML',
-        icon: Brain,
-        color: 'bg-pink-500',
-        skills: [
-          { name: 'OpenAI API', yearsExperience: 1 },
-          { name: 'LangChain', yearsExperience: 1 },
-          { name: 'Vector Databases', yearsExperience: 0.5, isLearning: true },
-          { name: 'TensorFlow', yearsExperience: 0.5, isLearning: true },
-        ],
-      },
-    ],
-    []
-  )
+type SkillsDataStructure = Record<string, Record<string, SkillData>>
+
+export function SkillsMatrix({ profile, userSettings, isOwnProfile = false }: SkillsMatrixProps) {
+  const [isSkillsEditOpen, setIsSkillsEditOpen] = useState(false)
+
+  // Transform userSettings.skillsData into component format
+  const skillCategories: SkillCategory[] = useMemo(() => {
+    const baseCategories = [
+      { id: 'frontend', name: 'Frontend', icon: Palette, color: 'bg-blue-500' },
+      { id: 'backend', name: 'Backend', icon: Server, color: 'bg-green-500' },
+      { id: 'database', name: 'Database', icon: Database, color: 'bg-purple-500' },
+      { id: 'cloud', name: 'Cloud & DevOps', icon: Cloud, color: 'bg-orange-500' },
+      { id: 'mobile', name: 'Mobile', icon: Smartphone, color: 'bg-indigo-500' },
+      { id: 'ai', name: 'AI & ML', icon: Brain, color: 'bg-pink-500' },
+    ]
+
+    // Get skills data from userSettings
+    const skillsData = userSettings?.skillsData as SkillsDataStructure | undefined
+
+    return baseCategories.map(category => ({
+      ...category,
+      skills: skillsData?.[category.id] 
+        ? Object.entries(skillsData[category.id]).map(([skillName, skill]) => ({
+            name: skill.name || skillName, // Use skill.name if available, otherwise fallback to key
+            years: skill.years,
+            isLearning: skill.isLearning
+          }))
+        : []
+    })).filter(category => category.skills.length > 0) // Only show categories with skills
+  }, [userSettings?.skillsData])
 
   const allSkills = skillCategories.flatMap((category) =>
     category.skills.map((skill) => ({
@@ -129,15 +77,88 @@ export function SkillsMatrix({}: SkillsMatrixProps) {
     }))
   )
 
+  // Show empty state if no skills
+  if (skillCategories.length === 0) {
+    return (
+      <div className="bg-white shadow-sm border border-gray-200 rounded-lg">
+        {/* Header */}
+        <div className="px-6 py-4 border-gray-200 border-b">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center space-x-2">
+              <Code className="w-5 h-5 text-gray-600" />
+              <h2 className="font-semibold text-gray-900 text-lg">
+                Skills & Technologies
+              </h2>
+            </div>
+            {isOwnProfile && (
+              <Button 
+                variant="outline" 
+                size="sm"
+                onClick={() => setIsSkillsEditOpen(true)}
+              >
+                <Edit3 className="h-4 w-4 mr-1" />
+                Add Skills
+              </Button>
+            )}
+          </div>
+        </div>
+
+        {/* Empty state */}
+        <div className="p-8 text-center">
+          <Code className="h-12 w-12 text-gray-400 mx-auto mb-4" />
+          <h3 className="text-lg font-medium text-gray-900 mb-2">No Skills Added</h3>
+          <p className="text-gray-500 mb-4">
+            {isOwnProfile 
+              ? "Add your technical skills and expertise to showcase your abilities" 
+              : "This user hasn't added their skills yet"
+            }
+          </p>
+          {isOwnProfile && (
+            <Button 
+              variant="outline" 
+              size="sm"
+              onClick={() => setIsSkillsEditOpen(true)}
+            >
+              <Edit3 className="h-4 w-4 mr-1" />
+              Add Skills
+            </Button>
+          )}
+        </div>
+
+        {/* Skills Edit Modal */}
+        {isOwnProfile && (
+          <SkillsEditModal
+            isOpen={isSkillsEditOpen}
+            onClose={() => setIsSkillsEditOpen(false)}
+            profile={profile}
+            userSettings={userSettings}
+          />
+        )}
+      </div>
+    )
+  }
+
   return (
     <div className="bg-white shadow-sm border border-gray-200 rounded-lg">
       {/* Header */}
       <div className="px-6 py-4 border-gray-200 border-b">
-        <div className="flex items-center space-x-2">
-          <Code className="w-5 h-5 text-gray-600" />
-          <h2 className="font-semibold text-gray-900 text-lg">
-            Skills & Technologies
-          </h2>
+        <div className="flex items-center justify-between">
+          <div className="flex items-center space-x-2">
+            <Code className="w-5 h-5 text-gray-600" />
+            <h2 className="font-semibold text-gray-900 text-lg">
+              Skills & Technologies
+            </h2>
+          </div>
+          {isOwnProfile && (
+            <Button 
+              variant="outline" 
+              size="sm"
+              onClick={() => setIsSkillsEditOpen(true)}
+            >
+              <Edit3 className="h-4 w-4 mr-1" />
+              Edit
+            </Button>
+          )}
         </div>
         <p className="mt-1 text-gray-500 text-sm">
           Technologies and skills with years of experience
@@ -185,7 +206,7 @@ export function SkillsMatrix({}: SkillsMatrixProps) {
                         <BookOpen className="w-3 h-3 text-green-600" />
                       )}
                       <span className="text-gray-500 text-xs">
-                        ({skill.yearsExperience}y)
+                        ({skill.years}y)
                       </span>
                     </div>
                   ))}
@@ -206,6 +227,16 @@ export function SkillsMatrix({}: SkillsMatrixProps) {
           <span className="text-xs">Continuously expanding skillset</span>
         </div>
       </div>
+
+      {/* Skills Edit Modal */}
+      {isOwnProfile && (
+        <SkillsEditModal
+          isOpen={isSkillsEditOpen}
+          onClose={() => setIsSkillsEditOpen(false)}
+          profile={profile}
+          userSettings={userSettings}
+        />
+      )}
     </div>
   )
 }

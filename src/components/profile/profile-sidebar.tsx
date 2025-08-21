@@ -15,6 +15,7 @@ import {
 } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
+import { ConnectCard } from './connect-card'
 import type { Profile, UserSettings } from '@/db/schema'
 
 interface ProfileSidebarProps {
@@ -38,6 +39,13 @@ export function ProfileSidebar({
 }: ProfileSidebarProps) {
   return (
     <div className="space-y-6">
+      {/* Connect Card */}
+      <ConnectCard
+        profile={profile}
+        userSettings={userSettings}
+        isOwnProfile={isOwnProfile}
+      />
+
       {/* Quick Stats Card */}
       <motion.div
         initial={{ opacity: 0, y: 20 }}

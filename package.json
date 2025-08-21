@@ -10,10 +10,11 @@
     "lint:fix": "next lint --fix",
     "format": "prettier --write \"**/*.{js,jsx,ts,tsx,md,json}\"",
     "type-check": "tsc --noEmit",
-    "db:generate": "drizzle-kit generate",
-    "db:migrate": "drizzle-kit migrate",
     "db:push": "drizzle-kit push",
+    "db:push:prod": "drizzle-kit push --verbose",
+    "db:pull": "drizzle-kit pull",
     "db:studio": "drizzle-kit studio",
+    "db:check": "drizzle-kit check",
     "db:drop": "drizzle-kit drop"
   },
   "dependencies": {
@@ -44,6 +45,7 @@
     "date-fns": "^4.1.0",
     "drizzle-kit": "^0.31.4",
     "drizzle-orm": "^0.44.4",
+    "drizzle-zod": "^0.8.3",
     "framer-motion": "^12.23.12",
     "google-one-tap": "^1.0.6",
     "immer": "^10.1.1",

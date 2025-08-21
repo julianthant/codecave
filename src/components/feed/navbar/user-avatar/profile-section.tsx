@@ -10,15 +10,15 @@ import { useAuth } from '@/hooks/use-auth'
 
 export function ProfileSection() {
   const { profile } = useAuth()
-  
+
   return (
     <DropdownMenuGroup>
       <DropdownMenuLabel className="px-4 py-2 font-medium text-gray-500 text-xs uppercase tracking-wider">
         Profile
       </DropdownMenuLabel>
       <DropdownMenuItem className="px-4 py-2 cursor-pointer">
-        <Link 
-          href={profile?.username ? `/profile/${profile.username}` : '/profile'} 
+        <Link
+          href={`/profile/${profile?.username}`}
           className="flex items-center space-x-3 w-full"
         >
           <UserCircle className="w-4 h-4 text-gray-500" />

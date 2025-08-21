@@ -1,311 +1,341 @@
-# Database Directory (`src/db/`)
+# Database Rules (`src/db/`)
 
-## Overview
+**CRITICAL REQUIREMENTS**: Follow these exact patterns for all database operations.
 
-This directory contains the database configuration, schema definitions, and migrations for **CodeCave**. The application uses **Drizzle ORM** with **PostgreSQL** (via Supabase) for type-safe database operations.
+## Push-Based Schema Management (PRIMARY WORKFLOW)
 
-## Architecture Pattern
+CodeCave uses a **schema-first, push-based approach** for rapid development. TypeScript schema is the single source of truth.
 
-- **ORM**: Drizzle ORM for type-safe database operations
-- **Database**: PostgreSQL hosted on Supabase
-- **Migrations**: SQL-based with Drizzle Kit
-- **Schema**: Code-first schema definition with TypeScript
-- **Security**: Row Level Security (RLS) policies in Supabase
+### Core Principles
+- ✅ **Schema-First**: Define tables in TypeScript, push to database
+- ✅ **No Migration Files**: Direct schema synchronization
+- ✅ **Validation Included**: Zod schemas for all operations
+- ✅ **Serverless Optimized**: Connection reuse and prepared statements
 
-## File Structure
+## File Organization (REQUIRED)
 
-- `index.ts` - Database connection and query client setup
-- `schema.ts` - Complete database schema with tables and types
-- `migrations/` - SQL migration files and metadata
-
-## Database Schema Design
-
-### Core Tables
-
-#### `profiles` Table (Public Data)
-
-```typescript
-// Links to auth.users.id from Supabase Auth
-{
-  id: uuid(PK) // References auth.users.id
-  username: string(unique) // @username handle
-  displayName: string // Public display name
-  bio: text // Profile bio/description
-  avatarUrl: string // Profile picture URL
-
-  // Social links (all public)
-  githubUsername: string
-  twitterUsername: string
-  discordUsername: string
-  linkedinUrl: string
-
-  createdAt: timestamp
-  updatedAt: timestamp
-}
+```
+src/db/
+├── schema/                    # MODULAR: Schema definitions split by domain
+│   ├── validation/           # ZOD: Validation schemas for API safety
+│   │   ├── profiles.validation.ts
+│   │   ├── posts.validation.ts
+│   │   ├── connections.validation.ts
+│   │   ├── collaborations.validation.ts
+│   │   ├── notifications.validation.ts
+│   │   ├── projects.validation.ts
+│   │   └── index.ts          # Re-exports all validations
+│   ├── enums.ts              # All enum definitions
+│   ├── helpers.ts            # Common column helpers (timestamps, etc.)
+│   ├── profiles.ts           # Profile and user settings tables
+│   ├── posts.ts              # Posts and post engagement tables
+│   ├── connections.ts        # Connections and invitations
+│   ├── collaborations.ts     # Collaborations and applications
+│   ├── notifications.ts      # Notifications table
+│   └── projects.ts           # Projects table
+├── schema.ts                 # REQUIRED: Main schema re-exports + validations
+├── index.ts                  # REQUIRED: Serverless-optimized database client
+└── migrations.archive/       # HISTORICAL: Old migration files (reference only)
 ```
 
-**Access**: Publicly readable, owner can update
+## Development Workflow (CRITICAL)
 
-#### `user_settings` Table (Private Data)
+### Primary Commands
+```bash
+# Schema Development
+pnpm db:push        # Push schema changes to database (PRIMARY)
+pnpm db:push:prod   # Push to production with verbose output
+pnpm db:studio      # Open Drizzle Studio UI for inspection
 
-```typescript
-// Private user configuration and preferences
-{
-  id: uuid (PK) // References auth.users.id
-
-  // Developer profile (private)
-  skills: string[] // Technical skills array
-  languages: string[] // Programming languages
-  experienceLevel: enum // student|junior|mid|senior|lead
-  availableForCollab: boolean // Open to collaboration
-
-  // App preferences
-  emailNotifications: boolean
-  theme: string // light|dark|system
-
-  // System fields
-  isPro: boolean // Premium subscription status
-
-  createdAt: timestamp
-  updatedAt: timestamp
-}
+# Schema Utilities
+pnpm db:pull        # Pull schema from database to TypeScript
+pnpm db:check       # Validate schema consistency
 ```
 
-**Access**: Only owner can read/write
+### Workflow Steps
+1. **Modify** schema files in `src/db/schema/`
+2. **Validate** types with `pnpm type-check`
+3. **Push** changes with `pnpm db:push`
+4. **Verify** in Drizzle Studio: `pnpm db:studio`
 
-#### `posts` Table (Content)
+## Schema + Validation Pattern (REQUIRED)
 
+### Table Definition (`schema/[domain].ts`)
 ```typescript
-// User-generated content with visibility controls
-{
-  id: uuid (PK)
-  authorId: uuid (FK -> profiles.id)
+import { pgTable, uuid, text } from 'drizzle-orm/pg-core'
+import { timestamps } from './helpers'
 
-  // Content
-  title: string
-  slug: string (unique) // URL-friendly identifier
-  content: jsonb // Rich content blocks (structured data)
-  excerpt: string // Short description
-
-  // Visibility & Status
-  visibility: enum // public|private|unlisted|followers
-  isPublished: boolean
-  isDraft: boolean
-
-  // Metadata
-  tags: string[] // Topic tags
-  readingTime: string // "5 min read"
-
-  // Engagement stats (updated by triggers)
-  viewCount: string
-  likeCount: string
-  commentCount: string
-
-  publishedAt: timestamp
-  createdAt: timestamp
-  updatedAt: timestamp
-}
-```
-
-**Access**: Based on visibility setting and author relationship
-
-### Database Enums
-
-- **`experience_level`**: `student`, `junior`, `mid`, `senior`, `lead`
-- **`post_visibility`**: `public`, `private`, `unlisted`, `followers`
-
-## Type System
-
-### Generated Types
-
-Drizzle automatically generates TypeScript types from schema:
-
-```typescript
-// Table types
-export type Profile = typeof profilesTable.$inferSelect
-export type NewProfile = typeof profilesTable.$inferInsert
-export type UpdateProfile = Partial<Omit<NewProfile, 'id' | 'createdAt'>>
-
-export type UserSettings = typeof userSettingsTable.$inferSelect
-export type NewUserSettings = typeof userSettingsTable.$inferInsert
-export type UpdateUserSettings = Partial<
-  Omit<NewUserSettings, 'id' | 'createdAt'>
->
-
-export type Post = typeof postsTable.$inferSelect
-export type NewPost = typeof postsTable.$inferInsert
-export type UpdatePost = Partial<Omit<NewPost, 'id' | 'createdAt'>>
-```
-
-### Composite Types
-
-```typescript
-// Combined user data for API responses
-export type UserWithProfile = Profile & {
-  settings?: UserSettings
-}
-```
-
-## Database Connection (`index.ts`)
-
-### Drizzle Setup
-
-- Configures PostgreSQL connection via Supabase
-- Sets up query client with proper typing
-- Exports database instance for use throughout application
-
-### Usage Pattern
-
-```typescript
-import { db } from '@/db'
-import { profilesTable } from '@/db/schema'
-
-// Type-safe queries
-const profiles = await db.select().from(profilesTable)
-```
-
-## Migrations System
-
-### Migration Files (`migrations/`)
-
-- **SQL Files**: `0000_*.sql`, `0001_*.sql` - Sequential migration scripts
-- **Metadata**: `meta/` folder contains migration tracking and snapshots
-- **Journal**: `_journal.json` tracks applied migrations
-
-### Migration Workflow
-
-1. Modify `schema.ts` with new tables/columns
-2. Run `drizzle-kit generate` to create migration
-3. Review generated SQL in `migrations/`
-4. Run `drizzle-kit migrate` to apply to database
-
-### Example Migration Structure
-
-```sql
--- 0000_quick_golden_guardian.sql
-CREATE TABLE IF NOT EXISTS "profiles" (
-  "id" uuid PRIMARY KEY NOT NULL,
-  "username" text NOT NULL,
-  "display_name" text,
-  -- ... rest of table definition
-);
-```
-
-## Security Model
-
-### Supabase RLS (Row Level Security)
-
-Database security is enforced at the PostgreSQL level via Supabase:
-
-#### Profiles Table
-
-- **SELECT**: Public read access to all profiles
-- **INSERT**: Only authenticated users can create their own profile
-- **UPDATE**: Users can only update their own profile
-- **DELETE**: Users can only delete their own profile
-
-#### User Settings Table
-
-- **SELECT**: Only owner can read their settings
-- **INSERT/UPDATE/DELETE**: Only owner can modify their settings
-
-#### Posts Table
-
-- **SELECT**: Based on visibility setting and user relationship
-- **INSERT**: Authenticated users can create posts
-- **UPDATE/DELETE**: Only post author can modify
-
-### Authentication Integration
-
-- Database `id` fields reference `auth.users.id` from Supabase Auth
-- All operations respect user authentication state
-- API routes handle additional business logic validation
-
-## Development Guidelines
-
-### Schema Changes
-
-1. **Always create migrations** - Never modify database directly
-2. **Test migrations** on development database first
-3. **Backup before production** migrations
-4. **Consider data migration** for breaking changes
-
-### Query Patterns
-
-```typescript
-// Use Drizzle's query builder for type safety
-const userWithPosts = await db
-  .select()
-  .from(profilesTable)
-  .where(eq(profilesTable.username, username))
-  .leftJoin(postsTable, eq(postsTable.authorId, profilesTable.id))
-```
-
-### Type Safety
-
-- Always use generated types from schema
-- Leverage Drizzle's `$inferSelect` and `$inferInsert`
-- Create composite types for complex API responses
-
-### Performance Considerations
-
-- Add database indexes for frequently queried columns
-- Use proper joins instead of N+1 queries
-- Implement pagination for large result sets
-- Consider database connection pooling
-
-## Key Dependencies
-
-- **Drizzle ORM**: Type-safe database operations
-- **Drizzle Kit**: Migration and schema management
-- **PostgreSQL**: Primary database engine
-- **Supabase**: Database hosting and authentication
-- **@supabase/supabase-js**: Database client
-
-## Common Operations
-
-### User Profile Operations
-
-```typescript
-// Create profile after auth signup
-const newProfile = await db.insert(profilesTable).values({
-  id: user.id,
-  username: username,
-  displayName: displayName,
+export const tableName = pgTable('table_name', {
+  id: uuid('id').primaryKey().notNull(),
+  title: text('title').notNull(),
+  ...timestamps,
 })
 
-// Update profile
-await db
-  .update(profilesTable)
-  .set({ bio: newBio })
-  .where(eq(profilesTable.id, userId))
+// ALWAYS export inferred types
+export type TableName = typeof tableName.$inferSelect
+export type NewTableName = typeof tableName.$inferInsert
+export type UpdateTableName = Partial<Omit<NewTableName, 'id' | 'createdAt'>>
 ```
 
-### Post Operations
+### Validation Schema (`schema/validation/[domain].validation.ts`)
+```typescript
+import { createInsertSchema, createSelectSchema, createUpdateSchema } from 'drizzle-zod'
+import { z } from 'zod'
+import { tableName } from '../[domain]'
+
+// Drizzle-Zod generated schemas
+export const tableSelectSchema = createSelectSchema(tableName)
+export const tableInsertSchema = createInsertSchema(tableName, {
+  title: (schema) => schema
+    .min(1, 'Title is required')
+    .max(100, 'Title must be at most 100 characters'),
+})
+export const tableUpdateSchema = createUpdateSchema(tableName, {
+  title: (schema) => schema
+    .min(1, 'Title is required') 
+    .max(100, 'Title must be at most 100 characters'),
+})
+
+// API-specific schemas
+export const createTableSchema = z.object({
+  title: z.string().min(1).max(100),
+  // ... other fields
+})
+
+// Type exports
+export type TableSelect = z.infer<typeof tableSelectSchema>
+export type TableInsert = z.infer<typeof tableInsertSchema>
+export type CreateTable = z.infer<typeof createTableSchema>
+```
+
+## API Route Integration (REQUIRED)
+
+### Standard API Route Pattern
+```typescript
+import { NextRequest, NextResponse } from 'next/server'
+import { handleApiError, validateApiInput, ErrorResponses, createSuccessResponse } from '@/utils/api-errors'
+import { createTableSchema, tableSelectSchema } from '@/db/schema'
+import { dbService } from '@/services/database'
+
+export const POST = handleApiError(async (request: NextRequest) => {
+  // Validate input with Zod
+  const validatedData = validateApiInput(createTableSchema, await request.json())
+  
+  // Database operation
+  const result = await dbService.table.create(validatedData)
+  
+  // Validate output (optional but recommended)
+  const validatedResult = tableSelectSchema.parse(result)
+  
+  return createSuccessResponse(validatedResult, 'Created successfully')
+})
+```
+
+### Error Handling
+```typescript
+// Automatic error handling with handleApiError wrapper
+export const POST = handleApiError(async (request: NextRequest) => {
+  // Any thrown ZodError is automatically formatted
+  const data = validateApiInput(schema, body)
+  
+  // Database errors are caught and formatted
+  const result = await dbService.operation(data)
+  
+  return createSuccessResponse(result)
+})
+
+// Manual error responses
+if (!authorized) {
+  return ErrorResponses.forbidden('Access denied')
+}
+if (!found) {
+  return ErrorResponses.notFound('Resource', id)
+}
+```
+
+## Serverless Optimization (CRITICAL)
+
+### Connection Management (`db/index.ts`)
+```typescript
+// Connection and db instance outside function scope for reuse
+let client: postgres.Sql | undefined
+let db: ReturnType<typeof drizzle> | undefined
+
+// Automatic initialization for serverless environments
+if (typeof process !== 'undefined' && process.env.NODE_ENV !== 'test') {
+  try {
+    initializeConnection()
+  } catch (error) {
+    console.warn('Database initialization deferred')
+  }
+}
+
+// Prepared statement caching
+export function getPreparedStatement<T>(key: string, statement: () => T): T {
+  if (!preparedStatements.has(key)) {
+    preparedStatements.set(key, statement())
+  }
+  return preparedStatements.get(key)
+}
+```
+
+### API Route Optimization
+```typescript
+// Use prepared statements for frequently called queries
+const statement = getPreparedStatement('find-user-by-id', () =>
+  db.select().from(users).where(eq(users.id, placeholder('id'))).prepare()
+)
+const user = await statement.execute({ id: userId })
+```
+
+## Validation Best Practices (REQUIRED)
+
+### Input Validation
+```typescript
+// ✅ ALWAYS validate API inputs
+const validatedData = validateApiInput(createPostSchema, body)
+
+// ✅ Custom validation with refinements
+export const createPostSchema = z.object({
+  title: z.string().min(1).max(200),
+  slug: z.string().min(3).regex(/^[a-z0-9-]+$/),
+  content: z.object({
+    blocks: z.array(contentBlockSchema).min(1),
+  }),
+}).refine((data) => data.slug !== 'admin', {
+  message: 'Slug cannot be "admin"',
+  path: ['slug'],
+})
+```
+
+### Output Validation
+```typescript
+// ✅ Validate database responses for type safety
+const result = await dbService.posts.create(data)
+const validatedResult = postSelectSchema.parse(result)
+return createSuccessResponse(validatedResult)
+```
+
+### Query Parameter Validation
+```typescript
+export const postQuerySchema = z.object({
+  page: z.coerce.number().min(1).default(1),
+  limit: z.coerce.number().min(1).max(50).default(10),
+  type: z.enum(['article', 'snippet']).optional(),
+})
+
+// In API route
+const query = validateApiInput(postQuerySchema, Object.fromEntries(request.nextUrl.searchParams))
+```
+
+## Domain Organization (EXACT STRUCTURE)
+
+### Profiles Domain (`schema/profiles.ts` + `schema/validation/profiles.validation.ts`)
+- `profilesTable` - Public user data
+- `userSettingsTable` - Private user configuration
+- Validation: Profile CRUD, settings updates, user data merging
+
+### Posts Domain (`schema/posts.ts` + `schema/validation/posts.validation.ts`)
+- `postsTable` - Content posts
+- `postLikesTable`, `postBookmarksTable`, `postCommentsTable`, `postRepostsTable`
+- Validation: Content creation, engagement actions, rich content blocks
+
+### Connections Domain (`schema/connections.ts` + `schema/validation/connections.validation.ts`)
+- `connectionsTable` - Following/followers
+- `connectionInvitationsTable` - Follow requests
+- Validation: Social interactions, invitation flows
+
+### Collaborations Domain (`schema/collaborations.ts` + `schema/validation/collaborations.validation.ts`)
+- `collaborationsTable` - Project opportunities
+- `collaborationApplicationsTable`, `collaborationSavesTable`
+- Validation: Opportunity creation, application flows
+
+### Notifications Domain (`schema/notifications.ts` + `schema/validation/notifications.validation.ts`)
+- `notificationsTable` - User notifications
+- Validation: Notification creation, typed notification data
+
+### Projects Domain (`schema/projects.ts` + `schema/validation/projects.validation.ts`)
+- `projectsTable` - Portfolio projects
+- Validation: Project CRUD, GitHub integration
+
+## Configuration (`drizzle.config.ts`)
 
 ```typescript
-// Fetch user posts with engagement
-const posts = await db
-  .select()
-  .from(postsTable)
-  .where(eq(postsTable.authorId, userId))
-  .orderBy(desc(postsTable.createdAt))
+export default defineConfig({
+  schema: "./src/db/schema",        // Points to schema folder
+  dialect: "postgresql",
+  dbCredentials: { url: process.env.DATABASE_URL! },
+  
+  // Push-based configuration (no migrations)
+  verbose: true,
+  strict: true,
+  
+  introspect: {
+    casing: 'camel',               // Convert snake_case when pulling
+  },
+})
 ```
 
-## Future Considerations
+## CRITICAL RULES
 
-- **Analytics tables**: For tracking user engagement and platform metrics
-- **Collaboration tables**: For project collaboration features
-- **Notification system**: For real-time user notifications
-- **Search optimization**: Full-text search capabilities
-- **Media storage**: Integration with Supabase Storage for file uploads
+1. **ALWAYS** use `pnpm db:push` as primary workflow
+2. **ALWAYS** validate API inputs/outputs with Zod schemas
+3. **ALWAYS** use `handleApiError` wrapper for API routes
+4. **ALWAYS** define both table schema AND validation schema
+5. **NEVER** edit `migrations.archive/` (historical reference only)
+6. **NEVER** use `any` types - leverage Zod inference
+7. **NEVER** skip input validation in API routes
+8. **ALWAYS** use prepared statements for repeated queries
+9. **ALWAYS** test schema changes with `pnpm db:push` first
+10. **ALWAYS** use `createSuccessResponse` and `ErrorResponses` helpers
 
-## Notes for Claude
+## Error Handling Patterns
 
-- This database uses Drizzle ORM for type-safe operations - always use the generated types
-- Security is handled by Supabase RLS policies, not application-level checks
-- Schema changes require migrations - never modify the database directly
-- The separation between `profiles` (public) and `user_settings` (private) is intentional for privacy
-- All user IDs reference Supabase Auth's `auth.users.id` field
-- Posts use JSONB content for flexible rich text storage
-- Migration files are auto-generated and should not be manually edited
+```typescript
+// ✅ CORRECT: Comprehensive error handling
+export const POST = handleApiError(async (request: NextRequest) => {
+  const data = validateApiInput(schema, await request.json())
+  const result = await dbService.create(data)
+  return createSuccessResponse(result)
+})
+
+// ❌ WRONG: Manual try/catch (use handleApiError instead)
+export async function POST(request: NextRequest) {
+  try {
+    // ... manual error handling
+  } catch (error) {
+    return NextResponse.json({ error: 'Something went wrong' })
+  }
+}
+```
+
+## Performance Guidelines
+
+### Connection Optimization
+- Connection reuse across function invocations
+- Single connection pool for serverless
+- Prepared statement caching for frequent queries
+
+### Query Optimization  
+- Use specific field selection over `select()`
+- Implement proper indexes in schema
+- Use `limit()` for paginated queries
+- Leverage joins over N+1 queries
+
+### Validation Optimization
+- Cache compiled Zod schemas when possible
+- Use partial validation for updates
+- Validate at API boundary, trust internally
+
+## Migration from File-Based Approach
+
+If converting from migration files to push-based:
+
+1. ✅ Archive existing migrations: `mv migrations migrations.archive`
+2. ✅ Update `drizzle.config.ts` (remove `out` property)
+3. ✅ Add validation schemas for all tables
+4. ✅ Update API routes to use validation
+5. ✅ Run `pnpm db:push` to sync schema
+6. ✅ Test all functionality with new validation
+
+The schema will be synchronized directly from TypeScript definitions, providing faster development cycles and better type safety.

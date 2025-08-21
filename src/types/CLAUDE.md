@@ -1,29 +1,35 @@
-# Types Directory (`src/types/`)
+# Type Rules (`src/types/`)
 
-## Overview
+**STRICT REQUIREMENTS**: Follow these exact patterns for ALL TypeScript type definitions.
 
-This directory contains **TypeScript type definitions** for **CodeCave**, providing type safety and developer experience across the application. Types are organized by domain and exported from a central index file.
+## File Organization (REQUIRED)
 
-## Architecture Pattern
+```
+types/
+├── index.ts              # REQUIRED: Central export ONLY
+├── feature-types.ts      # Domain-specific types
+├── dashboard-types.ts    # ✅ Correct
+├── post-types.ts         # ✅ Correct
+└── api-types.ts          # ✅ Correct
+```
 
-- **Domain-Driven**: Types organized by business domain (posts, dashboard, users)
-- **Database Integration**: Re-exports database types for consistency
-- **Type Safety**: Comprehensive typing for all data structures
-- **Composition**: Complex types built from simpler primitives
-- **API Integration**: Types for API requests and responses
+### Naming Conventions (EXACT)
+- Files: `feature-types.ts` 
+- Interfaces/Types: `PascalCase`
+- Generics: Single uppercase letter (`T`, `K`, `V`)
+- Union types: `PascalCase` (e.g., `PostType`, `BlockType`)
 
-## Type Organization
+### NEVER Use:
+- `featureTypes.ts`, `Feature-Types.ts`
+- `types.ts` (multiple domains in one file)
+- `snake_case`, `camelCase` for interface names
+- `any` or `unknown` without specific reason
 
-### Index File (`index.ts`)
+## Index File Rules (CRITICAL)
 
-#### Purpose
-
-Central export hub that re-exports database types and defines application-specific types.
-
-#### Key Exports
-
+### Required Structure (EXACT)
 ```typescript
-// Database types (from Drizzle schema)
+// SECTION 1: Database type re-exports (ALWAYS FIRST)
 export type {
   Profile,
   NewProfile,
@@ -31,10 +37,14 @@ export type {
   UserSettings,
   NewUserSettings,
   UpdateUserSettings,
-  UserWithProfile,
 } from '@/db'
 
-// Application types
+// SECTION 2: Domain type re-exports (ALPHABETICAL)
+export type * from './api-types'
+export type * from './dashboard-types'
+export type * from './post-types'
+
+// SECTION 3: Application-specific types (MINIMAL)
 export interface UpdateUserData {
   displayName?: string
   bio?: string
@@ -50,416 +60,233 @@ export interface UpdateUserData {
 }
 ```
 
-#### API Response Types
-
+### NEVER in Index File:
 ```typescript
-export interface ApiResponse<T = unknown> {
-  data?: T
-  error?: string
-  message?: string
-}
+// ❌ Complex type definitions (move to domain files)
+export interface ComplexPostData { /* ... */ }
 
-export interface PaginatedResponse<T> {
-  data: T[]
-  count: number
-  page: number
-  has_more: boolean
-}
+// ❌ Database type redefinition
+export interface Profile { /* ... */ } // Use database types
+
+// ❌ Implementation details
+export interface InternalHelperType { /* ... */ }
 ```
 
-### Dashboard Types (`dashboard.ts`)
+## Type Definition Patterns (EXACT)
 
-#### Purpose
-
-Complete type system for dashboard analytics, metrics, and data visualization components.
-
-#### Core Metrics
-
+### Interface Template (REQUIRED)
 ```typescript
-export interface DashboardMetrics {
-  totalViews: number
-  followers: number
-  totalPosts: number
-  engagementRate: number
-}
-
-export interface MetricChange {
-  value: number
-  type: 'increase' | 'decrease' | 'neutral'
-  label: string
-}
-```
-
-#### Chart Data Types
-
-```typescript
-export interface ActivityDataPoint {
-  date: string // ISO date string
-  views: number
-  likes: number
-  comments: number
-}
-
-export interface EngagementMetric {
-  date: string // ISO date string
-  engagement: number
-  reach: number
-}
-```
-
-#### Component Props
-
-```typescript
-export interface DashboardCardProps {
-  title: string
-  value: string | number
-  change?: MetricChange
-  icon?: LucideIcon
-  className?: string
-}
-
-export interface DashboardChartsProps {
-  activityData: ActivityDataPoint[]
-  engagementData: EngagementMetric[]
-  loading?: boolean
-}
-```
-
-#### Progress Tracking
-
-```typescript
-export interface ProgressGoal {
-  id: string
-  title: string
-  description: string
-  current: number
-  target: number
-  icon: LucideIcon
-  color: string
-  unit?: string // "posts", "followers", etc.
-}
-```
-
-### Post Types (`post-types.ts`)
-
-#### Purpose
-
-Comprehensive type system for CodeCave's rich content creation platform with multiple post types and block-based content.
-
-#### Content Blocks
-
-The platform uses a block-based content system similar to Notion or modern CMSs:
-
-```typescript
-export type BlockType =
-  | 'text' // Rich text content
-  | 'code' // Syntax-highlighted code
-  | 'image' // Images with captions
-  | 'prompt' // AI prompts and examples
-  | 'math' // Mathematical formulas
-  | 'svg' // SVG graphics
-  | 'markdown' // Markdown content
-  | 'terminal' // Terminal sessions
-
-// Base block interface
-export interface BaseBlock {
-  id: string
-  type: BlockType
-  order: number
-}
-```
-
-#### Specific Block Types
-
-```typescript
-// Code blocks with syntax highlighting
-export interface CodeBlock extends BaseBlock {
-  type: 'code'
-  content: {
-    code: string
-    language: string
-    filename?: string
-    showLineNumbers?: boolean
-  }
-}
-
-// AI prompt blocks for sharing prompts
-export interface PromptBlock extends BaseBlock {
-  type: 'prompt'
-  content: {
-    prompt: string
-    model?: string
-    temperature?: number
-    maxTokens?: number
-    systemPrompt?: string
-    examples?: Array<{
-      input: string
-      output: string
-    }>
-  }
-}
-
-// Terminal command sessions
-export interface TerminalBlock extends BaseBlock {
-  type: 'terminal'
-  content: {
-    commands: Array<{
-      input: string
-      output?: string
-      type?: 'command' | 'output' | 'error'
-    }>
-    cwd?: string
-    title?: string
-  }
-}
-```
-
-#### Post Types
-
-CodeCave supports multiple post formats:
-
-```typescript
-export type PostType =
-  | 'article' // Long-form technical articles
-  | 'snippet' // Code snippets and solutions
-  | 'showcase' // Project showcases and demos
-  | 'discussion' // Community discussions
-
-// Article posts - comprehensive technical content
-export interface ArticlePost extends BasePost {
-  type: 'article'
-  subtitle?: string
-  reading_time?: number
-  featured_image?: string
-  published_at?: string
-  status: 'draft' | 'published' | 'archived'
-}
-
-// Snippet posts - focused code sharing
-export interface SnippetPost extends BasePost {
-  type: 'snippet'
-  language: string
-  difficulty?: 'beginner' | 'intermediate' | 'advanced'
-  category?: string
-  problem_source?: string
-  solution_approach?: string
-}
-
-// Showcase posts - project demonstrations
-export interface ShowcasePost extends BasePost {
-  type: 'showcase'
-  demo_url?: string
-  github_url?: string
-  tech_stack: string[]
-  project_status: 'in-progress' | 'completed' | 'maintained'
-  screenshots?: Array<{
-    url: string
-    caption?: string
-  }>
-}
-```
-
-#### Author and User Types
-
-```typescript
-export interface Author {
-  id: string
-  username: string
-  display_name: string
-  avatar_url?: string | null
-  leetcode_rank?: string
-  is_verified?: boolean
-  is_admin?: boolean
-  reputation_score?: number
-  daily_streak?: number
-}
-```
-
-#### Post Interaction Types
-
-```typescript
-export interface PostInteraction {
-  post_id: string
-  user_id: string
-  type: 'like' | 'bookmark' | 'view' | 'share' | 'comment'
-  created_at: string
-  metadata?: Record<string, unknown>
-}
-
-export interface Comment {
-  id: string
-  post_id: string
-  parent_id?: string // For nested comments
-  author: Author
-  content: string
-  created_at: string
-  updated_at: string
-  likes_count: number
-  is_liked?: boolean
-  replies?: Comment[]
-}
-```
-
-#### Filtering and Search
-
-```typescript
-export interface PostFilters {
-  type?: PostType | PostType[]
-  tags?: string[]
-  author_id?: string
-  difficulty?: string
-  language?: string
-  category?: string
-  date_range?: {
-    start: string
-    end: string
-  }
-  sort_by?: 'created_at' | 'likes_count' | 'views_count' | 'comments_count'
-  sort_order?: 'asc' | 'desc'
-}
-```
-
-## Type Design Patterns
-
-### Database Integration
-
-Types seamlessly integrate with the database schema:
-
-```typescript
-// Re-export database types for consistency
-export type { Profile, UserSettings } from '@/db'
-
-// Extend database types for UI needs
-export interface UserWithProfile extends Profile {
-  settings?: UserSettings
-}
-
-// API operation types derived from database types
-export type UpdateUserData = Partial<
-  Pick<Profile, 'displayName' | 'bio' | 'avatarUrl' | 'githubUsername'>
->
-```
-
-### Generic Types for Reusability
-
-```typescript
-// Generic API response wrapper
-export interface ApiResponse<T = unknown> {
-  data?: T
-  error?: string
-  message?: string
-}
-
-// Usage examples
-type UserResponse = ApiResponse<Profile>
-type PostsResponse = ApiResponse<Post[]>
-type MetricsResponse = ApiResponse<DashboardMetrics>
-```
-
-### Discriminated Unions
-
-```typescript
-// Post types use discriminated unions for type safety
-export type Post = ArticlePost | SnippetPost | ShowcasePost | DiscussionPost
-
-// TypeScript can narrow types based on discriminant
-function renderPost(post: Post) {
-  switch (post.type) {
-    case 'article':
-      // post is now ArticlePost
-      return <ArticleRenderer post={post} />
-    case 'snippet':
-      // post is now SnippetPost
-      return <SnippetRenderer post={post} />
-    // ... etc
-  }
-}
-```
-
-### Optional and Partial Types
-
-```typescript
-// Creation types omit system fields
-export interface CreatePostData {
-  type: PostType
-  title: string
-  blocks: Omit<Block, 'id' | 'order'>[]
-  tags: string[]
-  description?: string
-}
-
-// Update types make fields optional
-export interface UpdatePostData extends Partial<CreatePostData> {
-  id: string // ID is required for updates
-}
-```
-
-## Development Guidelines
-
-### Adding New Types
-
-#### File Organization
-
-```typescript
-// For domain-specific types, create new files
-// types/feature-name.ts
-
-export interface FeatureData {
-  // Type definition
-}
-
-// Re-export from index.ts
-export type { FeatureData } from './feature-name'
-```
-
-#### Naming Conventions
-
-- **Interfaces**: PascalCase (`UserProfile`, `PostData`)
-- **Types**: PascalCase (`PostType`, `BlockType`)
-- **Enums**: PascalCase with descriptive names
-- **Generic**: Single uppercase letter (`T`, `K`, `V`)
-
-#### Type Composition
-
-```typescript
-// Build complex types from simple ones
-interface BaseEntity {
+// Base interfaces
+export interface BaseEntity {
   id: string
   createdAt: string
   updatedAt: string
 }
 
-interface User extends BaseEntity {
-  email: string
-  username: string
+// Specific interfaces extending base
+export interface FeatureData extends BaseEntity {
+  name: string
+  description: string
+  isActive: boolean
+  metadata: Record<string, unknown>
 }
 
-interface Post extends BaseEntity {
+// Related operation types
+export type NewFeatureData = Omit<FeatureData, 'id' | 'createdAt' | 'updatedAt'>
+export type UpdateFeatureData = Partial<NewFeatureData> & { id: string }
+```
+
+### Discriminated Unions (REQUIRED PATTERN)
+```typescript
+// Union types with discriminant
+export type PostType = 'article' | 'snippet' | 'showcase' | 'discussion'
+
+export interface BasePost {
+  id: string
+  type: PostType
   title: string
-  authorId: string
-  content: Block[]
+  author: Author
+  createdAt: string
+}
+
+export interface ArticlePost extends BasePost {
+  type: 'article'
+  subtitle?: string
+  readingTime?: number
+  featuredImage?: string
+}
+
+export interface SnippetPost extends BasePost {
+  type: 'snippet'
+  language: string
+  difficulty: 'beginner' | 'intermediate' | 'advanced'
+}
+
+// Union export (REQUIRED)
+export type Post = ArticlePost | SnippetPost | ShowcasePost | DiscussionPost
+```
+
+### Generic Types (REQUIRED PATTERN)
+```typescript
+// API response wrapper (ALWAYS USE)
+export interface ApiResponse<T = unknown> {
+  data?: T
+  error?: string
+  message?: string
+  success: boolean
+}
+
+// Paginated response (REQUIRED FOR LISTS)
+export interface PaginatedResponse<T> {
+  data: T[]
+  count: number
+  page: number
+  pageSize: number
+  hasMore: boolean
+}
+
+// Form types (REQUIRED PATTERN)
+export interface FormState<T> {
+  data: T
+  errors: Partial<Record<keyof T, string>>
+  isSubmitting: boolean
+  isDirty: boolean
 }
 ```
 
-### Type Safety Best Practices
+## Component Prop Types (REQUIRED)
 
-#### Strict Typing
-
+### Component Interface Pattern (EXACT)
 ```typescript
-// ❌ Avoid any
-function processData(data: any) {}
+// Base props interface
+interface BaseComponentProps {
+  className?: string
+  children?: React.ReactNode
+}
 
-// ✅ Use specific types
-function processData(data: PostData) {}
+// Specific component props
+export interface FeatureCardProps extends BaseComponentProps {
+  feature: FeatureData
+  onEdit?: (id: string) => void
+  onDelete?: (id: string) => void
+  isLoading?: boolean
+}
 
-// ✅ Use generics for flexibility
-function processData<T extends BaseEntity>(data: T): T {}
+// Event handler types (REQUIRED)
+export type FeatureCardHandler = (feature: FeatureData) => void
+export type FeatureCardAsyncHandler = (feature: FeatureData) => Promise<void>
 ```
 
-#### Type Guards
-
+### Hook Types (REQUIRED PATTERN)
 ```typescript
-// Type guards for runtime type checking
+// Hook parameter interfaces
+export interface UseFeatureOptions {
+  enabled?: boolean
+  refetchInterval?: number
+  onSuccess?: (data: FeatureData) => void
+  onError?: (error: Error) => void
+}
+
+// Hook return interfaces
+export interface UseFeatureReturn {
+  data: FeatureData | null
+  isLoading: boolean
+  error: Error | null
+  refetch: () => void
+  isSuccess: boolean
+}
+```
+
+## Store Integration (CRITICAL)
+
+### Store State Types (REQUIRED)
+```typescript
+// Store state interface
+export interface FeatureStoreState {
+  // Data properties
+  items: FeatureData[]
+  currentItem: FeatureData | null
+  
+  // Status properties
+  isLoading: boolean
+  error: string | null
+  
+  // Pagination
+  pagination: {
+    page: number
+    pageSize: number
+    total: number
+    hasMore: boolean
+  }
+}
+
+// Store actions interface
+export interface FeatureStoreActions {
+  // Data actions
+  setItems: (items: FeatureData[]) => void
+  setCurrentItem: (item: FeatureData | null) => void
+  
+  // Async actions
+  fetchItems: () => Promise<void>
+  createItem: (data: NewFeatureData) => Promise<void>
+  updateItem: (id: string, data: UpdateFeatureData) => Promise<void>
+  deleteItem: (id: string) => Promise<void>
+  
+  // State actions
+  setLoading: (loading: boolean) => void
+  setError: (error: string | null) => void
+  reset: () => void
+}
+
+// Combined store type
+export type FeatureStore = FeatureStoreState & FeatureStoreActions
+```
+
+## Database Integration Rules (CRITICAL)
+
+### Database Type Usage (REQUIRED)
+```typescript
+// ✅ CORRECT: Re-export database types
+export type { Profile, UserSettings } from '@/db'
+
+// ✅ CORRECT: Extend database types for UI
+export interface UserWithSettings extends Profile {
+  settings?: UserSettings
+}
+
+// ✅ CORRECT: Derive operation types
+export type UpdateUserRequest = Partial<Pick<Profile, 'displayName' | 'bio' | 'avatarUrl'>>
+
+// ❌ NEVER: Redefine database types
+export interface Profile {
+  id: string
+  username: string
+  // ... DON'T DO THIS
+}
+```
+
+### Field Naming Rules (CRITICAL)
+```typescript
+// Database schema uses snake_case
+// TypeScript interfaces use camelCase
+// Drizzle handles conversion automatically
+
+// ✅ CORRECT: Use database types directly
+const user: Profile = {
+  id: '123',
+  displayName: 'John', // camelCase in TypeScript
+  avatarUrl: 'url',    // camelCase in TypeScript
+}
+
+// Database stores as:
+// display_name, avatar_url (snake_case)
+```
+
+## Type Guard Rules (REQUIRED)
+
+### Type Guard Implementation (EXACT PATTERN)
+```typescript
+// Type guards for discriminated unions
 export function isArticlePost(post: Post): post is ArticlePost {
   return post.type === 'article'
 }
@@ -468,129 +295,146 @@ export function isCodeBlock(block: Block): block is CodeBlock {
   return block.type === 'code'
 }
 
-// Usage
-if (isArticlePost(post)) {
-  // post is now ArticlePost
-  console.log(post.reading_time)
-}
-```
-
-#### Utility Types
-
-```typescript
-// Use TypeScript utility types
-type PostKeys = keyof Post
-type PartialPost = Partial<Post>
-type RequiredPost = Required<Post>
-type PostTitle = Pick<Post, 'title'>
-type PostWithoutId = Omit<Post, 'id'>
-```
-
-### Integration Patterns
-
-#### With Components
-
-```typescript
-// Component props with proper typing
-interface PostCardProps {
-  post: Post
-  onLike?: (postId: string) => void
-  onBookmark?: (postId: string) => void
-  className?: string
+// Runtime type checking
+export function isValidEmail(value: unknown): value is string {
+  return typeof value === 'string' && /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value)
 }
 
-function PostCard({ post, onLike, onBookmark, className }: PostCardProps) {
-  // TypeScript knows exact shape of post
-  return (
-    <div className={className}>
-      <h3>{post.title}</h3>
-      <p>By {post.author.display_name}</p>
-    </div>
+// Array type guards
+export function isPostArray(value: unknown): value is Post[] {
+  return Array.isArray(value) && value.every(item => 
+    typeof item === 'object' && item !== null && 'type' in item
   )
 }
 ```
 
-#### With API Routes
+## Utility Type Usage (REQUIRED)
 
+### Standard Utility Types (ALWAYS USE)
 ```typescript
-// API route typing
-import { NextRequest, NextResponse } from 'next/server'
-import { ApiResponse, Post } from '@/types'
+// ✅ CORRECT: Use TypeScript utility types
+export type PostKeys = keyof Post
+export type PartialPost = Partial<Post>
+export type RequiredPost = Required<Post>
+export type PostTitle = Pick<Post, 'title' | 'author'>
+export type PostWithoutMeta = Omit<Post, 'createdAt' | 'updatedAt'>
 
-export async function GET(): Promise<NextResponse<ApiResponse<Post[]>>> {
-  try {
-    const posts = await fetchPosts()
-    return NextResponse.json({ data: posts })
-  } catch (error) {
-    return NextResponse.json({ error: 'Failed to fetch posts' })
-  }
-}
+// ✅ CORRECT: Custom utility types
+export type Optional<T, K extends keyof T> = Omit<T, K> & Partial<Pick<T, K>>
+export type WithId<T> = T & { id: string }
+export type Timestamp = { createdAt: string; updatedAt: string }
 ```
 
-#### With Forms
+## API Integration (REQUIRED PATTERNS)
 
+### Request/Response Types (EXACT PATTERN)
 ```typescript
-// Form data types
-interface PostFormData {
+// API endpoint types
+export interface CreatePostRequest {
   title: string
-  content: string
+  content: Block[]
   tags: string[]
   type: PostType
 }
 
-// React Hook Form integration
-import { useForm } from 'react-hook-form'
+export interface CreatePostResponse extends ApiResponse<Post> {
+  data: Post
+}
 
-function PostForm() {
-  const { register, handleSubmit } = useForm<PostFormData>()
+// API error types
+export interface ApiError {
+  code: string
+  message: string
+  details?: Record<string, unknown>
+}
 
-  const onSubmit = (data: PostFormData) => {
-    // data is fully typed
-    createPost(data)
-  }
+// API pagination
+export interface ApiPaginationParams {
+  page: number
+  pageSize: number
+  sortBy?: string
+  sortOrder?: 'asc' | 'desc'
 }
 ```
 
-## Future Considerations
+## Forbidden Patterns
 
-### Potential Type Additions
-
-- **Real-time types**: WebSocket message types
-- **Analytics types**: Detailed engagement tracking
-- **Collaboration types**: Project collaboration structures
-- **Notification types**: System notification schemas
-- **Search types**: Advanced search and indexing types
-
-### Type Validation
-
+### ❌ NEVER Do These:
 ```typescript
-// Runtime validation with libraries like Zod
-import { z } from 'zod'
+// ❌ Using any type
+export interface BadInterface {
+  data: any // Use specific types
+}
 
-const PostSchema = z.object({
-  title: z.string().min(1).max(200),
-  content: z.array(z.any()),
-  tags: z.array(z.string()).max(10),
-})
+// ❌ Redefining database types
+export interface Profile {
+  id: string
+  name: string // Should use database types
+}
 
-type ValidatedPost = z.infer<typeof PostSchema>
+// ❌ Complex logic in type definitions
+export type ComplexType<T> = T extends string 
+  ? T extends `${infer U}${'_'}${infer V}` 
+    ? U extends 'valid' 
+      ? V 
+      : never 
+    : never 
+  : never // Too complex
+
+// ❌ Mixing naming conventions
+export interface user_profile { // Use PascalCase
+  user_name: string // Use camelCase
+}
+
+// ❌ Non-descriptive generic names
+export interface DataContainer<A, B, C, D> { // Use descriptive names
+  stuff: A
+}
+
+// ❌ Deeply nested generics
+export type DeepGeneric<T extends Record<string, Record<string, unknown>>> = {
+  [K in keyof T]: T[K] extends Record<string, infer U> ? U : never
+} // Too complex
 ```
 
-## Key Dependencies
+### ❌ Wrong File Organization:
+```
+types/
+├── Types.ts              # Wrong capitalization
+├── feature.types.ts      # Wrong separator
+├── featureTypes.ts       # Wrong naming
+├── index.tsx             # Wrong extension
+└── all-types.ts          # Multiple domains
+```
 
-- **TypeScript**: Core type system
-- **Drizzle ORM**: Database type generation
-- **Lucide React**: Icon type definitions
-- **React**: Component prop types
+## Testing Integration (REQUIRED)
 
-## Notes for Claude
+### Test Type Definitions (EXACT PATTERN)
+```typescript
+// Mock data types
+export interface MockFeatureData extends FeatureData {
+  __isMock: true
+}
 
-- Always use the types defined in this directory for consistency
-- `index.ts` is the main export - import types from `@/types` not individual files
-- Database types are re-exported here for convenience
-- Post types are complex but well-structured - understand the block system
-- Dashboard types are comprehensive for analytics features
-- Use discriminated unions (like `Post` type) for type safety with different variants
-- When adding new features, define types first to guide implementation
-- Types should match database schema where applicable
-- Use TypeScript utility types for common operations like `Partial`, `Pick`, `Omit`
+// Test utility types
+export type TestApiResponse<T> = Omit<ApiResponse<T>, 'success'> & {
+  success: true
+  __testData: true
+}
+
+// Factory function types
+export type FeatureDataFactory = (overrides?: Partial<FeatureData>) => FeatureData
+```
+
+## CRITICAL REQUIREMENTS
+
+1. **ALWAYS** import types from `@/types`, NEVER from individual files
+2. **ALWAYS** re-export database types from `@/db`, NEVER redefine them
+3. **ALWAYS** use PascalCase for interfaces and types
+4. **ALWAYS** use discriminated unions for variant types
+5. **ALWAYS** define operation types (Create, Update, Delete) for entities
+6. **ALWAYS** include proper generic constraints
+7. **NEVER** use `any` type unless absolutely necessary
+8. **NEVER** define database schema types in this directory
+9. **NEVER** mix naming conventions (camelCase vs snake_case)
+10. **NEVER** create deeply nested or overly complex utility types

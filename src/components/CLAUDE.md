@@ -1,259 +1,358 @@
-# Components Directory (`src/components/`)
-
-## Overview
-
-This directory contains all React components for **CodeCave**, organized by feature domain. Components follow a modular architecture with clear separation between UI primitives, feature-specific components, and layout components.
-
-## Architecture Pattern
-
-- **Component Design**: Functional components with TypeScript
-- **Styling**: Tailwind CSS with custom CSS variables
-- **State Management**: Props drilling, Zustand stores, and TanStack Query
-- **UI Library**: Custom component library in `ui/` folder
-- **Accessibility**: Focus on semantic HTML and ARIA attributes
-
-## Directory Structure
-
-### Feature-Based Organization
-
-- `auth/` - Authentication and user management components
-- `dashboard/` - Analytics dashboard and metrics components
-- `feed/` - Content feed and navigation components
-- `landing/` - Marketing and landing page components
-- `onboarding/` - User onboarding flow components
-- `profile/` - User profile display and management
-- `settings/` - User preferences and configuration
-- `ui/` - Reusable UI primitives and design system
-
-## Detailed Component Breakdown
-
-### Authentication (`auth/`)
-
-- **`auth-button.tsx`**: Primary authentication CTA button
-- **`auth-guard.tsx`**: Route protection wrapper component
-- **`auth-modal.tsx`**: Sign-in/sign-up modal dialog
-- **`sign-in-drawer.tsx`**: Mobile-friendly sign-in drawer
-- **`user-menu.tsx`**: Authenticated user dropdown menu
-
-**Usage Pattern**: Import auth components for protected routes and user management flows.
-
-### Dashboard (`dashboard/`)
-
-Analytics and metrics components for user dashboard:
-
-- **`activity-chart.tsx`**: User activity visualization
-- **`dashboard-charts.tsx`**: Collection of chart components
-- **`dashboard-header.tsx`**: Dashboard page header with actions
-- **`dashboard-metrics.tsx`**: Key performance metrics display
-- **`dashboard-sidebar.tsx`**: Dashboard navigation sidebar
-- **`engagement-chart.tsx`**: User engagement analytics
-- **`metric-card.tsx`**: Individual metric display card
-- **`progress-indicators.tsx`**: Progress bars and completion status
-- **`quick-actions.tsx`**: Frequently used action buttons
-- **`recent-posts.tsx`**: Latest user posts widget
-- **`top-posts.tsx`**: Most popular posts widget
-
-**Data Dependencies**: Uses TanStack Query for real-time dashboard data.
-
-### Feed (`feed/`)
-
-Main application navigation and content feed:
-
-- **`navbar/`**: Complete navigation system
-  - **`navbar.tsx`**: Main navigation container
-  - **`desktop-nav.tsx`**: Desktop navigation layout
-  - **`mobile-menu.tsx`**: Mobile hamburger menu
-  - **`mobile-nav-tabs.tsx`**: Mobile bottom navigation
-  - **`notification-icon.tsx`**: Notification bell with badge
-  - **`search-bar.tsx`**: Global search functionality
-  - **`sign-in-button.tsx`**: Authentication CTA in nav
-  - **`user-avatar/`**: User profile dropdown system
-    - **`user-avatar.tsx`**: Avatar with dropdown trigger
-    - **`account-section.tsx`**: Account management links
-    - **`developer-section.tsx`**: Developer tools and settings
-    - **`preferences-section.tsx`**: User preference shortcuts
-    - **`profile-section.tsx`**: Profile navigation links
-    - **`social-section.tsx`**: Social media connections
-    - **`user-info-section.tsx`**: User details display
-
-**Navigation State**: Managed by `useSidebarStore` for responsive behavior.
-
-### Landing (`landing/`)
-
-Marketing and landing page components:
-
-- **`animated-group.tsx`**: Animated UI element groups
-- **`features.tsx`**: Product features showcase
-- **`footer.tsx`**: Site footer with links and info
-- **`header.tsx`**: Landing page header/hero
-- **`hero.tsx`**: Main hero section with CTA
-- **`revolution.tsx`**: Brand messaging component
-- **`text-effect.tsx`**: Animated text effects
-
-**Design Focus**: High-impact visuals and clear value propositions.
-
-### Onboarding (`onboarding/`)
-
-New user onboarding experience:
-
-- **`notification.tsx`**: Onboarding step notifications
-- **`onboarding-form.tsx`**: Multi-step onboarding form
-
-**Flow Management**: Integrates with `/onboarding` page and API routes.
-
-### Profile (`profile/`)
-
-Comprehensive user profile system:
-
-- **`activity-timeline.tsx`**: User activity feed
-- **`code-intro.tsx`**: Developer code showcase
-- **`connect-section.tsx`**: Social connections and collaboration
-- **`content-card-footer.tsx`**: Post/project card actions
-- **`content-stream.tsx`**: User content feed
-- **`featured-grid.tsx`**: Featured projects grid
-- **`inline-comments.tsx`**: Comment system for posts
-- **`profile-hero.tsx`**: Profile header with cover photo
-- **`profile-post.tsx`**: Individual post display
-- **`profile-project.tsx`**: Project showcase component
-- **`profile-sidebar.tsx`**: Profile navigation and info
-- **`profile-stats.tsx`**: User statistics display
-- **`profile-summary.tsx`**: Brief profile overview
-- **`projects-list.tsx`**: List of user projects
-- **`skill-badge.tsx`**: Individual skill tag
-- **`skills-matrix.tsx`**: Skills and expertise display
-
-**Modal System**:
-
-- **`modals/booking-modal.tsx`**: Collaboration booking
-- **`modals/comments-drawer.tsx`**: Comments sidebar
-- **`modals/cover-photo-modal.tsx`**: Cover photo upload
-
-**Data Integration**: Uses Supabase for profile data and real-time updates.
-
-### Settings (`settings/`)
-
-User configuration and preferences:
-
-- **`account-settings.tsx`**: Account management (email, password)
-- **`developer-settings.tsx`**: Developer-specific preferences
-- **`preferences-settings.tsx`**: App preferences and notifications
-- **`profile-settings.tsx`**: Public profile information
-- **`settings-container.tsx`**: Settings page layout wrapper
-
-**Form Handling**: Integrates with user settings API and validation.
-
-### UI Library (`ui/`)
-
-Reusable design system components:
-
-**Form Components**:
-
-- `button.tsx`, `input.tsx`, `textarea.tsx`, `checkbox.tsx`
-- `select.tsx`, `switch.tsx`, `label.tsx`
-- `TagInput.tsx` - Multi-tag input component
-
-**Layout Components**:
-
-- `card.tsx`, `dialog.tsx`, `drawer.tsx`, `popover.tsx`
-- `scroll-area.tsx`, `tabs.tsx`, `divider.tsx`
-
-**Navigation Components**:
-
-- `dropdown-menu.tsx`, `hover-button.tsx`
-
-**Feedback Components**:
-
-- `avatar.tsx`, `UserAvatar.tsx`, `badge.tsx`
-- `skeleton.tsx`, `PostSkeleton.tsx`, `LoadingSpinner.tsx`
-- `sonner.tsx` (Toast notifications), `Tooltip.tsx`
-
-**Specialized Components**:
-
-- `calendar.tsx`, `logo.tsx`, `project-card.tsx`
-- `invitation.tsx`
-
-**Design System**: All components use Tailwind CSS with consistent spacing, colors, and typography scales.
-
-## Component Patterns
-
-### State Management
-
-- **Props**: For simple parent-child communication
-- **Zustand Stores**: For complex state (auth, feed, sidebar)
-- **TanStack Query**: For server state and caching
-- **React Hook Form**: For form state and validation
-
-### TypeScript Usage
-
-- All components are fully typed with TypeScript
-- Props interfaces defined for each component
-- Generic components for reusability
-- Strict type checking enabled
-
-### Responsive Design
-
-- Mobile-first approach with Tailwind breakpoints
-- Dedicated mobile components where needed
-- Progressive enhancement for desktop features
-
-### Accessibility
-
-- Semantic HTML elements
-- ARIA attributes for screen readers
-- Keyboard navigation support
-- Focus management for modals/drawers
-
-## Development Guidelines
-
-### Creating New Components
-
-1. Choose appropriate feature folder or `ui/` for reusable components
-2. Use TypeScript with proper prop typing
-3. Follow Tailwind CSS patterns for styling
-4. Include accessibility attributes
-5. Add loading and error states where applicable
-
-### Component Naming
-
-- PascalCase for component files and exports
-- Descriptive names that indicate purpose
-- Group related components in folders
-
-### Testing Approach
-
-- Components should be testable in isolation
-- Use React Testing Library patterns
-- Mock external dependencies (Supabase, stores)
-
-### Performance Considerations
-
-- Use React.memo for expensive re-renders
-- Lazy load heavy components
-- Optimize images with Next.js Image component
-- Implement proper loading states
-
-## Key Dependencies
-
-- **React**: UI library with hooks
-- **TypeScript**: Type safety and developer experience
-- **Tailwind CSS**: Utility-first styling
-- **Radix UI**: Accessible component primitives (via ui components)
-- **Lucide React**: Icon library
-- **React Hook Form**: Form state management
-- **TanStack Query**: Server state management
-
-## Common Patterns
-
-- Compound components for complex UI (e.g., Card.Header, Card.Content)
-- Render props for flexible component composition
-- Custom hooks for component logic extraction
-- Context providers for feature-specific state
-
-## Notes for Claude
-
-- This is a comprehensive component library organized by feature domain
-- UI components in `/ui` are the foundation - modify these carefully as they're used throughout the app
-- Profile components are particularly complex and handle multiple user states
-- Dashboard components integrate with analytics data from the backend
-- All components should maintain consistency with the established design system
-- When adding new components, consider reusability and place in appropriate folder
+# Component Rules (`src/components/`)
+
+**STRICT ORGANIZATION**: Follow these exact patterns for component creation and organization.
+
+## Directory Structure (REQUIRED)
+
+```
+src/components/
+├── ui/                  # Base design system (DO NOT MODIFY without cause)
+├── [feature]/           # Feature-based components
+│   ├── shared/          # Shared within feature
+│   ├── sections/        # Page sections
+│   └── modals/          # Feature-specific modals
+└── [feature]/           # Additional features
+```
+
+### Feature Folders (EXACT NAMES)
+- `auth/` - Authentication flows
+- `collaborations/` - Collaboration features  
+- `connections/` - User networking
+- `dashboard/` - Analytics and metrics
+- `feed/` - Main navigation and content
+- `landing/` - Marketing pages
+- `onboarding/` - User setup flow
+- `profile/` - User profiles and showcases
+- `settings/` - User preferences
+
+## File Naming Convention (EXACT)
+
+### Component Files
+- **Format**: `kebab-case.tsx` (e.g., `user-avatar.tsx`)
+- **Export**: `PascalCase` (e.g., `export default UserAvatar`)
+
+### Organization Suffixes
+- `-container.tsx` - Main feature wrapper (e.g., `connections-container.tsx`)
+- `-section.tsx` - Page sections (e.g., `profile-section.tsx`) 
+- `-modal.tsx` - Modal dialogs (e.g., `booking-modal.tsx`)
+- `-drawer.tsx` - Slide-out panels (e.g., `comments-drawer.tsx`)
+- `-card.tsx` - Card components (e.g., `connection-card.tsx`)
+- `-sidebar.tsx` - Navigation sidebars (e.g., `feed-sidebar.tsx`)
+
+### Subfolder Organization
+```
+feature/
+├── feature-container.tsx    # Main wrapper
+├── shared/                  # Reusable within feature
+│   ├── feature-card.tsx
+│   └── feature-tabs.tsx
+├── sections/               # Page sections
+│   ├── main-section.tsx
+│   └── sidebar-section.tsx
+└── modals/                 # Feature modals
+    └── create-modal.tsx
+```
+
+## Component Type Rules
+
+### Server Components (DEFAULT)
+**WHEN TO USE:**
+- Static UI without interactivity
+- Data display components
+- Layout components
+- SEO-critical components
+
+**PATTERN:**
+```typescript
+import { ComponentProps } from '@/types'
+
+export default function ServerComponent({ data }: ComponentProps) {
+  return (
+    <div className="container">
+      <h1>{data.title}</h1>
+      {/* Static content */}
+    </div>
+  )
+}
+```
+
+### Client Components ('use client' REQUIRED)
+**WHEN TO USE:**
+- Event handlers (onClick, onChange, etc.)
+- State management (useState, useEffect)
+- Browser APIs (localStorage, window)
+- Interactive UI elements
+- Zustand store usage
+- React Query usage
+
+**PATTERN:**
+```typescript
+'use client'
+
+import { useState } from 'react'
+import { useStore } from '@/stores/store-name'
+
+interface Props {
+  title: string
+  onAction?: () => void
+}
+
+export default function ClientComponent({ title, onAction }: Props) {
+  const [isOpen, setIsOpen] = useState(false)
+  const { data } = useStore()
+
+  return (
+    <button onClick={() => setIsOpen(!isOpen)}>
+      {title}
+    </button>
+  )
+}
+```
+
+## Required Component Patterns
+
+### Props Interface (ALWAYS REQUIRED)
+```typescript
+interface ComponentNameProps {
+  // Required props (no ?)
+  title: string
+  data: DataType
+  
+  // Optional props (with ?)
+  className?: string
+  onAction?: () => void
+  
+  // Children (when applicable)
+  children?: React.ReactNode
+}
+
+export default function ComponentName({ 
+  title, 
+  data, 
+  className,
+  onAction 
+}: ComponentNameProps) {
+  // Component logic
+}
+```
+
+### Import Organization (EXACT ORDER)
+```typescript
+'use client' // If client component (first line)
+
+// 1. React imports
+import React, { useState, useEffect } from 'react'
+
+// 2. Next.js imports
+import { useRouter } from 'next/navigation'
+import Image from 'next/image'
+
+// 3. External libraries
+import { motion } from 'framer-motion'
+import { useQuery } from '@tanstack/react-query'
+
+// 4. UI components (alphabetical)
+import { Button } from '@/components/ui/button'
+import { Card } from '@/components/ui/card'
+
+// 5. Feature components
+import { UserAvatar } from '@/components/feed/navbar/user-avatar'
+
+// 6. Icons (grouped)
+import { Plus, Edit, Trash } from 'lucide-react'
+
+// 7. Utils and stores
+import { cn } from '@/lib/utils'
+import { useAuthStore } from '@/stores/auth'
+
+// 8. Types
+import { User, Post } from '@/types'
+```
+
+### State Management Integration
+
+#### Zustand Store Usage
+```typescript
+'use client'
+
+import { useAuthStore } from '@/stores/auth'
+import { useFeedStore } from '@/stores/feed'
+
+export default function StateComponent() {
+  // Get state and actions
+  const { user, setUser } = useAuthStore()
+  const { algorithm, setAlgorithm } = useFeedStore()
+  
+  // Component logic
+}
+```
+
+#### React Query Usage  
+```typescript
+'use client'
+
+import { useQuery, useMutation } from '@tanstack/react-query'
+
+export default function DataComponent() {
+  const { data, isLoading, error } = useQuery({
+    queryKey: ['posts'],
+    queryFn: () => fetch('/api/posts').then(res => res.json())
+  })
+
+  const mutation = useMutation({
+    mutationFn: (newPost) => fetch('/api/posts', {
+      method: 'POST',
+      body: JSON.stringify(newPost)
+    })
+  })
+}
+```
+
+## UI Component Extension Rules
+
+### Extending Base UI Components
+```typescript
+import { Button } from '@/components/ui/button'
+import { Card, CardContent, CardHeader } from '@/components/ui/card'
+import { cn } from '@/lib/utils'
+
+interface CustomButtonProps {
+  variant?: 'primary' | 'secondary'
+  size?: 'sm' | 'lg'
+  className?: string
+  children: React.ReactNode
+}
+
+export default function CustomButton({ 
+  variant = 'primary', 
+  className,
+  children,
+  ...props 
+}: CustomButtonProps) {
+  return (
+    <Button
+      className={cn(
+        'custom-styles',
+        variant === 'primary' && 'bg-blue-600',
+        className
+      )}
+      {...props}
+    >
+      {children}
+    </Button>
+  )
+}
+```
+
+### Compound Component Pattern
+```typescript
+interface FeatureCardProps {
+  children: React.ReactNode
+  className?: string
+}
+
+interface FeatureCardHeaderProps {
+  title: string
+  actions?: React.ReactNode
+}
+
+interface FeatureCardContentProps {
+  children: React.ReactNode
+}
+
+function FeatureCard({ children, className }: FeatureCardProps) {
+  return (
+    <Card className={cn('feature-card', className)}>
+      {children}
+    </Card>
+  )
+}
+
+function FeatureCardHeader({ title, actions }: FeatureCardHeaderProps) {
+  return (
+    <CardHeader className="flex-row items-center justify-between">
+      <h3 className="font-semibold">{title}</h3>
+      {actions}
+    </CardHeader>
+  )
+}
+
+function FeatureCardContent({ children }: FeatureCardContentProps) {
+  return <CardContent>{children}</CardContent>
+}
+
+// Export as compound component
+FeatureCard.Header = FeatureCardHeader
+FeatureCard.Content = FeatureCardContent
+
+export default FeatureCard
+```
+
+## Responsive Design Rules
+
+### Mobile-First Breakpoints
+```typescript
+<div className={cn(
+  // Mobile (default)
+  'flex flex-col p-4',
+  // Tablet
+  'md:flex-row md:p-6',
+  // Desktop  
+  'lg:p-8 xl:max-w-7xl'
+)}>
+```
+
+### Conditional Mobile Components
+```typescript
+'use client'
+
+import { useMediaQuery } from '@/hooks/use-media-query'
+
+export default function ResponsiveComponent() {
+  const isMobile = useMediaQuery('(max-width: 768px)')
+  
+  if (isMobile) {
+    return <MobileComponent />
+  }
+  
+  return <DesktopComponent />
+}
+```
+
+## CRITICAL RULES
+
+1. **ALWAYS**: Use exact directory structure and naming
+2. **ALWAYS**: Add proper TypeScript interfaces for props
+3. **ALWAYS**: Follow import order exactly
+4. **ALWAYS**: Use 'use client' for interactive components
+5. **NEVER**: Modify `/ui` components without understanding impact
+6. **ALWAYS**: Use compound components for complex UI
+7. **ALWAYS**: Include className prop for customization
+8. **ALWAYS**: Use proper state management patterns
+
+## Component Categories by Purpose
+
+### Container Components
+- End with `-container.tsx`
+- Handle data fetching and state
+- Delegate rendering to child components
+
+### Section Components
+- End with `-section.tsx`  
+- Represent page sections or areas
+- Focus on layout and organization
+
+### Modal Components
+- End with `-modal.tsx` or `-drawer.tsx`
+- Handle overlay interactions
+- Always include close functionality
+
+### Card Components
+- End with `-card.tsx`
+- Display discrete pieces of information
+- Should be composable and reusable
+
+### Navigation Components
+- Located in feature-specific folders
+- Handle routing and user flow
+- Integrate with authentication state

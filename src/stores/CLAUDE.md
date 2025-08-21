@@ -1,35 +1,164 @@
-# Stores Directory (`src/stores/`)
+# Store Rules (`src/stores/`)
 
-## Overview
+**STRICT REQUIREMENTS**: Follow these exact patterns for ALL Zustand stores.
 
-This directory contains **Zustand** state management stores for **CodeCave**. These stores provide reactive, global state that persists across component re-renders and can optionally persist to localStorage.
+## File Naming (REQUIRED)
 
-## Architecture Pattern
+```
+stores/
+├── feature-name.store.ts     # REQUIRED pattern
+├── auth.store.ts            # ✅ Correct
+├── feed.store.ts            # ✅ Correct  
+└── sidebar.store.ts         # ✅ Correct
+```
 
-- **Zustand**: Lightweight state management with minimal boilerplate
-- **TypeScript**: Full type safety with interfaces and proper typing
-- **Middleware**: Persistence, devtools, and immutability support
-- **Reactive**: Components automatically re-render when store state changes
-- **Composable**: Stores can be combined and used together
+### Naming Conventions (EXACT)
+- Files: `feature-name.store.ts`
+- Hooks: `useFeatureStore`
+- Actions: Verb-based (`setData`, `fetchData`, `resetState`)
+- State: Descriptive nouns (`isLoading`, `currentUser`, `filters`)
 
-## Store Inventory
+### NEVER Use:
+- `FeatureStore.ts`, `featureStore.ts`
+- `feature.store.js`, `feature-store.ts`
+- `useStore`, `useFeature` (missing "Store")
 
-### Authentication Store (`auth.store.ts`)
+## Store Template (EXACT PATTERN)
 
-#### Purpose
+### Required Middleware Stack
+```typescript
+import { create } from 'zustand'
+import { devtools, persist } from 'zustand/middleware'
+import { immer } from 'zustand/middleware/immer'
 
-Central authentication state management for user login status, profile data, and auth-related loading states.
+interface FeatureState {
+  // State properties
+  data: FeatureData | null
+  isLoading: boolean
+  error: string | null
+  
+  // Actions
+  setData: (data: FeatureData | null) => void
+  setLoading: (loading: boolean) => void
+  setError: (error: string | null) => void
+  resetState: () => void
+}
 
-#### State Interface
+export const useFeatureStore = create<FeatureState>()(
+  devtools(
+    persist(
+      immer((set, get) => ({
+        // Initial state
+        data: null,
+        isLoading: false,
+        error: null,
+        
+        // Actions using Immer
+        setData: (data) => set((state) => {
+          state.data = data
+          state.error = null
+        }),
+        
+        setLoading: (isLoading) => set((state) => {
+          state.isLoading = isLoading
+        }),
+        
+        setError: (error) => set((state) => {
+          state.error = error
+          state.isLoading = false
+        }),
+        
+        resetState: () => set((state) => {
+          state.data = null
+          state.isLoading = false
+          state.error = null
+        }),
+      })),
+      {
+        name: 'feature-storage',
+        partialize: (state) => ({ 
+          data: state.data 
+        }), // Only persist necessary fields
+      }
+    ),
+    { name: 'feature-store' }
+  )
+)
+```
 
+## Middleware Rules (CRITICAL)
+
+### Required Order (EXACT)
+1. **devtools** (outermost)
+2. **persist** (middle) 
+3. **immer** (innermost)
+
+### Persistence Configuration (REQUIRED)
+```typescript
+persist(
+  // Store implementation
+  immer((set, get) => ({ /* ... */ })),
+  {
+    name: 'unique-storage-key',           // REQUIRED: Must be unique
+    partialize: (state) => ({            // REQUIRED: Choose what to persist
+      persistedField: state.persistedField
+    }),
+  }
+)
+```
+
+### DevTools Configuration (REQUIRED)
+```typescript
+devtools(
+  // Store implementation
+  persist(/* ... */),
+  { name: 'store-name-devtools' }        // REQUIRED: Descriptive name
+)
+```
+
+## Performance Rules (CRITICAL)
+
+### Selective Subscriptions (ALWAYS)
+```typescript
+// ✅ CORRECT: Selective subscription
+const userName = useAuthStore(state => state.user?.name)
+const setUser = useAuthStore(state => state.setUser)
+
+// ✅ CORRECT: Multiple specific values  
+const { isLoading, error } = useFeatureStore(
+  state => ({ isLoading: state.isLoading, error: state.error }),
+  shallow // Import from 'zustand/shallow'
+)
+
+// ❌ NEVER: Full store subscription
+const store = useFeatureStore()
+```
+
+### Action Usage (REQUIRED)
+```typescript
+// ✅ CORRECT: Extract actions outside render
+const handleSubmit = () => {
+  const { setData, setLoading } = useFeatureStore.getState()
+  setLoading(true)
+  // ... async operation
+  setData(result)
+  setLoading(false)
+}
+
+// ❌ NEVER: Subscribe to actions
+const { data, setData } = useFeatureStore() // Causes unnecessary re-renders
+```
+
+## Required Store Types (EXACT)
+
+### Auth Store (MUST EXIST)
 ```typescript
 interface AuthState {
-  user: User | null // Supabase auth user object
-  profile: Profile | null // User profile from database
-  isLoading: boolean // Loading state during auth operations
-  isInitialized: boolean // Whether auth state has been initialized
-
-  // Actions
+  user: User | null
+  profile: Profile | null
+  isLoading: boolean
+  isInitialized: boolean
+  
   setUser: (user: User | null) => void
   setProfile: (profile: Profile | null) => void
   setLoading: (loading: boolean) => void
@@ -38,71 +167,13 @@ interface AuthState {
 }
 ```
 
-#### Key Features
-
-- **Persistence**: User data persists to localStorage (partial - only user object)
-- **Immer Integration**: Immutable state updates with simple syntax
-- **DevTools**: Redux DevTools integration for debugging
-- **Session Management**: Handles user sessions and profile data
-
-#### Usage Patterns
-
+### Feed Store (MUST EXIST)
 ```typescript
-import { useAuthStore } from '@/stores/auth.store'
-
-// In components
-function UserProfile() {
-  const { user, profile, isLoading, setProfile } = useAuthStore()
-
-  if (isLoading) return <LoadingSpinner />
-  if (!user) return <SignInPrompt />
-
-  return <ProfileDisplay profile={profile} />
-}
-
-// Actions
-const { setUser, reset, initialize } = useAuthStore.getState()
-setUser(newUser)  // Update user
-reset()           // Clear all auth state
-initialize()      // Mark as initialized
-```
-
-#### Persistence Strategy
-
-- Only `user` object persists to localStorage
-- `profile` and loading states are session-only
-- Storage key: `"auth-storage"`
-
-### Feed Store (`feed.store.ts`)
-
-#### Purpose
-
-Manages content feed state including algorithm selection, filtering options, and search functionality.
-
-#### State Interface
-
-```typescript
-export type FeedAlgorithm =
-  | 'algorithm' // Personalized algorithm
-  | 'following' // Following users only
-  | 'trending' // Trending content
-  | 'latest' // Chronological latest
-  | 'showcase' // Project showcases
-  | 'collaborations' // Collaboration opportunities
-
-export interface FeedFilters {
-  languages: string[] // Programming languages
-  tags: string[] // Content tags
-  postTypes: PostType[] // Article, snippet, showcase, discussion
-  timeRange?: '24h' | '7d' | '30d' | 'all'
-}
-
 interface FeedState {
-  algorithm: FeedAlgorithm
+  algorithm: 'algorithm' | 'following' | 'trending' | 'latest' | 'showcase' | 'collaborations'
   filters: FeedFilters
   searchQuery: string
-
-  // Actions
+  
   setAlgorithm: (algorithm: FeedAlgorithm) => void
   setFilters: (filters: Partial<FeedFilters>) => void
   setSearchQuery: (query: string) => void
@@ -110,421 +181,146 @@ interface FeedState {
 }
 ```
 
-#### Key Features
-
-- **Algorithm Selection**: Multiple feed algorithms for different content discovery
-- **Advanced Filtering**: Filter by languages, tags, post types, and time ranges
-- **Search Integration**: Global search query state
-- **Filter Reset**: Easy reset to default state
-- **DevTools**: Redux DevTools integration
-
-#### Usage Patterns
-
-```typescript
-import { useFeedStore } from '@/stores/feed.store'
-
-// Feed controls
-function FeedControls() {
-  const { algorithm, filters, setAlgorithm, setFilters } = useFeedStore()
-
-  return (
-    <div>
-      <AlgorithmSelector
-        current={algorithm}
-        onChange={setAlgorithm}
-      />
-      <FilterPanel
-        filters={filters}
-        onChange={setFilters}
-      />
-    </div>
-  )
-}
-
-// Search integration
-function SearchBar() {
-  const { searchQuery, setSearchQuery } = useFeedStore()
-
-  return (
-    <input
-      value={searchQuery}
-      onChange={(e) => setSearchQuery(e.target.value)}
-      placeholder="Search posts..."
-    />
-  )
-}
-```
-
-#### Filter Management
-
-```typescript
-// Partial filter updates (merges with existing filters)
-const { setFilters } = useFeedStore.getState()
-
-setFilters({ languages: ['javascript', 'typescript'] }) // Update languages only
-setFilters({ postTypes: ['article'] }) // Update post types only
-setFilters({ timeRange: '7d' }) // Update time range only
-
-// Reset all filters
-const { resetFilters } = useFeedStore.getState()
-resetFilters()
-```
-
-### Sidebar Store (`sidebar.store.ts`)
-
-#### Purpose
-
-Manages UI layout state for responsive sidebar behavior and content viewing modes.
-
-#### State Interface
-
+### UI Stores (REQUIRED PATTERN)
 ```typescript
 interface SidebarState {
-  isCollapsed: boolean // Sidebar collapsed state
-  isViewingPost: boolean // Whether viewing individual post
-
+  isCollapsed: boolean
+  isViewingPost: boolean
+  
   setCollapsed: (collapsed: boolean) => void
   setViewingPost: (viewing: boolean) => void
 }
 ```
 
-#### Key Features
-
-- **Persistence**: Sidebar preferences persist across sessions
-- **Responsive**: Controls sidebar behavior on different screen sizes
-- **View Mode**: Tracks when user is viewing individual content
-- **Storage**: Uses localStorage to remember user preferences
-
-#### Usage Patterns
+## Async Actions (REQUIRED PATTERN)
 
 ```typescript
-import { useSidebarStore } from '@/stores/sidebar.store'
-
-// Layout components
-function AppLayout({ children }) {
-  const { isCollapsed, isViewingPost, setCollapsed } = useSidebarStore()
-
-  return (
-    <div className="app-layout">
-      <Sidebar
-        collapsed={isCollapsed}
-        onToggle={setCollapsed}
-        hidden={isViewingPost}
-      />
-      <MainContent collapsed={isCollapsed}>
-        {children}
-      </MainContent>
-    </div>
-  )
-}
-
-// Post view
-function PostPage() {
-  const { setViewingPost } = useSidebarStore()
-
-  useEffect(() => {
-    setViewingPost(true)
-    return () => setViewingPost(false)
-  }, [setViewingPost])
-
-  return <PostContent />
-}
-```
-
-#### Responsive Behavior
-
-```typescript
-// Auto-collapse on mobile
-function useMobileCollapse() {
-  const { setCollapsed } = useSidebarStore()
-  const isMobile = useMediaQuery('(max-width: 768px)')
-
-  useEffect(() => {
-    if (isMobile) {
-      setCollapsed(true)
-    }
-  }, [isMobile, setCollapsed])
-}
-```
-
-### Post View Store (`postView.store.ts`)
-
-#### Purpose
-
-Manages state specific to individual post viewing, including comments, likes, and reading progress.
-
-**Note**: This store is referenced in the project structure but the file contents weren't examined. Based on the naming pattern, it likely contains:
-
-```typescript
-// Expected interface (inferred)
-interface PostViewState {
-  currentPost: Post | null
-  isLoading: boolean
-  comments: Comment[]
-  showComments: boolean
-  readingProgress: number
-
-  // Actions
-  setCurrentPost: (post: Post) => void
-  setComments: (comments: Comment[]) => void
-  toggleComments: () => void
-  updateProgress: (progress: number) => void
-}
-```
-
-## Store Design Patterns
-
-### Zustand Configuration
-
-All stores follow consistent configuration patterns:
-
-```typescript
-export const useStoreExample = create<StoreState>()(
-  devtools(
-    // Redux DevTools integration
-    persist(
-      // Optional: localStorage persistence
-      immer((set, get) => ({
-        // Immer for immutable updates
-        // Initial state
-        value: defaultValue,
-
-        // Actions using Immer
-        setValue: (newValue) =>
-          set((state) => {
-            state.value = newValue
-          }),
-
-        // Computed values using get()
-        getComputed: () => {
-          const state = get()
-          return computeFromState(state)
-        },
-      })),
-      {
-        name: 'store-name', // localStorage key
-        partialize: (state) => ({
-          // Choose what to persist
-          persistedField: state.persistedField,
-        }),
-      }
-    ),
-    {
-      name: 'store-devtools-name', // DevTools display name
-    }
-  )
-)
-```
-
-### Action Patterns
-
-#### Simple State Updates
-
-```typescript
-// Direct value setting
-setValue: (value) => set({ value })
-
-// Boolean toggles
-toggle: () => set((state) => ({ flag: !state.flag }))
-```
-
-#### Complex State Updates (with Immer)
-
-```typescript
-// Array operations
-addItem: (item) => set((state) => {
-  state.items.push(item)
-}),
-
-removeItem: (id) => set((state) => {
-  state.items = state.items.filter(item => item.id !== id)
-}),
-
-updateItem: (id, updates) => set((state) => {
-  const item = state.items.find(item => item.id === id)
-  if (item) {
-    Object.assign(item, updates)
-  }
-})
-```
-
-#### Async Actions
-
-```typescript
-// Async operations
+// ALWAYS handle loading and error states
 fetchData: async () => {
-  set({ isLoading: true })
+  set((state) => { 
+    state.isLoading = true 
+    state.error = null 
+  })
+  
   try {
     const data = await api.getData()
-    set({ data, isLoading: false })
+    set((state) => {
+      state.data = data
+      state.isLoading = false
+    })
   } catch (error) {
-    set({ error, isLoading: false })
+    set((state) => {
+      state.error = error.message
+      state.isLoading = false
+    })
   }
 }
 ```
 
-### Integration Patterns
+## Integration Rules (STRICT)
 
-#### With React Components
-
+### Component Usage (REQUIRED)
 ```typescript
-// Selective subscriptions (prevents unnecessary re-renders)
+// ✅ CORRECT: Selective subscriptions
 function Component() {
-  const value = useStore(state => state.value)          // Only re-render when value changes
-  const action = useStore(state => state.action)        // Actions don't cause re-renders
-
-  return <div onClick={action}>{value}</div>
-}
-
-// Multiple values
-function Component() {
-  const { value1, value2, action } = useStore(
-    state => ({
-      value1: state.value1,
-      value2: state.value2,
-      action: state.action
-    }),
-    shallow                     // Shallow comparison for object selection
-  )
+  const isLoading = useStore(state => state.isLoading)
+  const data = useStore(state => state.data)
+  const actions = useStore(state => ({ 
+    setData: state.setData,
+    reset: state.reset 
+  }))
+  
+  return <div>{/* Component JSX */}</div>
 }
 ```
 
-#### Store Composition
-
+### Store Composition (ALLOWED)
 ```typescript
-// Using multiple stores together
+// ✅ CORRECT: Multiple stores together
 function useComposedState() {
   const auth = useAuthStore()
-  const feed = useFeedStore()
+  const feed = useFeedStore() 
   const sidebar = useSidebarStore()
-
+  
   return {
     isReady: auth.isInitialized && !auth.isLoading,
     canViewFeed: auth.user !== null,
     layoutConfig: {
       sidebarCollapsed: sidebar.isCollapsed,
-      showPersonalized: auth.user !== null,
     },
   }
 }
 ```
 
-## Development Guidelines
+## Forbidden Patterns
 
-### Creating New Stores
-
-#### File Structure
-
+### ❌ NEVER Do These:
 ```typescript
-// stores/feature-name.store.ts
-import { create } from 'zustand'
-import { devtools, persist } from 'zustand/middleware'
-import { immer } from 'zustand/middleware/immer'
+// ❌ Wrong middleware order
+persist(devtools(immer(/* ... */)))
 
-// Types
-interface FeatureState {
-  // State properties
-  data: FeatureData[]
-  isLoading: boolean
+// ❌ Missing middleware
+create((set) => ({ /* ... */ }))
 
-  // Actions
-  setData: (data: FeatureData[]) => void
-  fetchData: () => Promise<void>
+// ❌ No type interface
+const useStore = create()(/* ... */)
+
+// ❌ Full store subscription
+const store = useFeatureStore()
+
+// ❌ Nested state mutations without Immer
+set(state => {
+  state.nested.property = value // Will mutate directly
+})
+
+// ❌ Missing partialize for persistence
+persist(/* ... */, { name: 'storage' }) // Will persist everything
+
+// ❌ Synchronous actions that should be async
+fetchData: () => {
+  const data = api.getData() // Should be async
+  set({ data })
 }
-
-// Store
-export const useFeatureStore = create<FeatureState>()(
-  devtools(
-    persist(
-      immer((set, get) => ({
-        // Implementation
-      })),
-      { name: 'feature-storage' }
-    ),
-    { name: 'feature-store' }
-  )
-)
 ```
 
-#### Naming Conventions
-
-- Store files: `feature-name.store.ts`
-- Store hooks: `useFeatureStore`
-- Action names: Verb-based (`setData`, `fetchData`, `resetState`)
-- State properties: Descriptive nouns (`isLoading`, `currentUser`, `filters`)
-
-#### Performance Considerations
-
-```typescript
-// ❌ Bad: Causes re-render on any store change
-const state = useStore()
-
-// ✅ Good: Only re-renders when specific values change
-const value = useStore((state) => state.specificValue)
-
-// ✅ Good: Use shallow comparison for objects
-const { val1, val2 } = useStore(
-  (state) => ({ val1: state.val1, val2: state.val2 }),
-  shallow
-)
+### ❌ Wrong File Organization:
+```
+stores/
+├── AuthStore.ts              # Wrong capitalization
+├── auth-store.ts             # Wrong separator  
+├── auth.ts                   # Missing .store
+├── authStore.ts              # Wrong naming
+└── stores.ts                 # Multiple stores in one file
 ```
 
-### Testing Strategies
+## Testing Rules (REQUIRED)
 
-#### Store Testing
-
+### Store Testing Pattern:
 ```typescript
-import { renderHook } from '@testing-library/react-hooks'
-import { useFeatureStore } from './feature.store'
+beforeEach(() => {
+  useFeatureStore.getState().resetState()
+})
 
-describe('FeatureStore', () => {
-  beforeEach(() => {
-    useFeatureStore.getState().reset() // Reset between tests
+test('should update state correctly', () => {
+  const { result } = renderHook(() => useFeatureStore())
+  
+  act(() => {
+    result.current.setData(testData)
   })
-
-  it('should update state correctly', () => {
-    const { result } = renderHook(() => useFeatureStore())
-
-    act(() => {
-      result.current.setValue('test')
-    })
-
-    expect(result.current.value).toBe('test')
-  })
+  
+  expect(result.current.data).toBe(testData)
 })
 ```
 
-#### Integration Testing
+## CRITICAL REQUIREMENTS
 
-```typescript
-// Test component integration with stores
-function TestComponent() {
-  const { value, setValue } = useFeatureStore()
-  return <button onClick={() => setValue('clicked')}>{value}</button>
-}
-
-test('component updates store', () => {
-  render(<TestComponent />)
-  fireEvent.click(screen.getByRole('button'))
-  expect(useFeatureStore.getState().value).toBe('clicked')
-})
-```
-
-## Key Dependencies
-
-- **Zustand**: Core state management library
-- **Zustand Middleware**: Persistence, devtools, and Immer integration
-- **Immer**: Immutable state updates with mutable syntax
-- **TypeScript**: Type safety and developer experience
-
-## Notes for Claude
-
-- Use stores for global state that needs to be shared across components
-- `useAuthStore` is the primary authentication state - always check this for user status
-- `useFeedStore` controls content discovery and filtering throughout the app
-- `useSidebarStore` manages layout state - important for responsive design
-- All stores have DevTools integration for debugging
-- Stores use Immer for easy immutable updates
-- Authentication and sidebar stores persist to localStorage
-- Use selective subscriptions to prevent unnecessary re-renders
-- When adding new stores, follow the established patterns for consistency
+1. **ALWAYS** use the exact middleware stack order: `devtools(persist(immer(...)))`
+2. **ALWAYS** define TypeScript interfaces for state and actions
+3. **ALWAYS** use selective subscriptions, NEVER full store subscriptions
+4. **ALWAYS** include `partialize` in persist configuration
+5. **ALWAYS** handle loading and error states for async actions
+6. **ALWAYS** use Immer for state mutations
+7. **NEVER** create stores without devtools integration
+8. **NEVER** persist sensitive data or functions
+9. **NEVER** use any/unknown types in store definitions
+10. **NEVER** mutate state directly without Immer

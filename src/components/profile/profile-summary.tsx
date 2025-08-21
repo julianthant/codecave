@@ -1,9 +1,10 @@
 'use client'
 
-import React from 'react'
+import React, { useState } from 'react'
 import { motion } from 'framer-motion'
 import { User, Edit3 } from 'lucide-react'
 import { Button } from '@/components/ui/button'
+import { BioEditModal } from './modals/bio-edit-modal'
 import type { Profile, UserSettings } from '@/db/schema'
 
 interface ProfileSummaryProps {
@@ -17,6 +18,8 @@ export function ProfileSummary({
   userSettings, 
   isOwnProfile = false 
 }: ProfileSummaryProps) {
+  const [isBioEditOpen, setIsBioEditOpen] = useState(false)
+
   return (
     <motion.div
       initial={{ opacity: 0, y: 20 }}
@@ -33,7 +36,11 @@ export function ProfileSummary({
           </div>
           
           {isOwnProfile && (
-            <Button variant="outline" size="sm">
+            <Button 
+              variant="outline" 
+              size="sm"
+              onClick={() => setIsBioEditOpen(true)}
+            >
               <Edit3 className="h-4 w-4 mr-1" />
               Edit
             </Button>
@@ -57,7 +64,11 @@ export function ProfileSummary({
               }
             </p>
             {isOwnProfile && (
-              <Button variant="outline" size="sm">
+              <Button 
+                variant="outline" 
+                size="sm"
+                onClick={() => setIsBioEditOpen(true)}
+              >
                 <Edit3 className="h-4 w-4 mr-1" />
                 Add Bio
               </Button>
@@ -65,6 +76,15 @@ export function ProfileSummary({
           </div>
         )}
       </div>
+
+      {/* Bio Edit Modal */}
+      {isOwnProfile && (
+        <BioEditModal
+          isOpen={isBioEditOpen}
+          onClose={() => setIsBioEditOpen(false)}
+          profile={profile}
+        />
+      )}
 
       {/* Footer with additional info */}
       {(userSettings?.experienceLevel || userSettings?.availableForCollab) && (

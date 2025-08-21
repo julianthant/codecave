@@ -32,6 +32,7 @@ yarn-error.log*
 
 # env files (can opt-in for committing if needed)
 .env*
+!.env.example
 
 # vercel
 .vercel
@@ -48,3 +49,25 @@ next-env.d.ts
 
 # playwright
 .playwright-mcp/
+
+# IDE files
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# OS generated files
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+
+# Drizzle migrations (using push-based approach)
+src/db/migrations/
+
+# Claude IDE local settings (keep global settings)
+.claude/settings.local.json

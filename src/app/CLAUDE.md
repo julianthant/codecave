@@ -1,162 +1,276 @@
-# App Directory (`src/app/`)
+# App Directory Rules (`src/app/`)
 
-## Overview
+**STRICT REQUIREMENTS**: Follow these exact patterns when creating files in the app directory.
 
-This directory contains the Next.js 13+ App Router structure for **CodeCave**, a developer community platform. It follows the file-system based routing pattern with route groups, dynamic routes, and API endpoints.
+## Route Organization
 
-## Architecture Pattern
+### Route Groups (REQUIRED)
+```
+src/app/
+├── (authenticated)/     # Protected routes - requires auth
+├── (public)/           # Public routes - no auth needed
+├── auth/               # Authentication flow
+├── api/                # API endpoints
+└── [feature]/          # Standalone features (feed, onboarding)
+```
 
-- **Framework**: Next.js 13+ App Router
-- **Routing**: File-system based with route groups
-- **Authentication**: Supabase Auth with middleware protection
-- **State Management**: Zustand stores + TanStack Query
-- **Styling**: Tailwind CSS with custom components
+### File Naming Convention (EXACT)
 
-## Directory Structure
+**Pages:**
+- `page.tsx` - Route component (REQUIRED for routes)
+- `layout.tsx` - Layout wrapper (optional, inherits from parent)
+- `loading.tsx` - Loading UI (REQUIRED for data-fetching pages)
+- `error.tsx` - Error boundary (REQUIRED for data-fetching pages)
+- `not-found.tsx` - 404 page (optional, for dynamic routes)
 
-### Route Groups
+**API Routes:**
+- `route.ts` - API handler with HTTP method exports
+- `[dynamic]/route.ts` - Dynamic API routes
 
-- `(authenticated)/` - Protected routes requiring user authentication
-- `(public)/` - Public marketing/landing pages
+## SSR/CSR Decision Matrix
 
-### Core Application Files
+### Server Components (DEFAULT - NO 'use client')
+**WHEN TO USE:**
+- Static pages with metadata
+- Data fetching from database
+- SEO-critical pages
+- Authentication checking
 
-- `layout.tsx` - Root layout with metadata, providers, and analytics
-- `page.tsx` - Landing page (/)
-- `providers.tsx` - React Query, auth, and toast providers
-- `globals.css` - Global styles and Tailwind imports
+**PATTERN:**
+```typescript
+import { Metadata } from 'next'
 
-## Detailed File Breakdown
+export const metadata: Metadata = {
+  title: 'Page Title | CodeCave',
+  description: 'Page description',
+}
 
-### Root Files
+export default function PageName() {
+  // Server-side logic
+  return <div>Content</div>
+}
+```
 
-- **`layout.tsx`**:
-  - Root layout component with comprehensive SEO metadata
-  - Includes Vercel Analytics and Speed Insights
-  - Sets up security headers and viewport configuration
-  - Wraps all pages with `Providers` component
+### Client Components ('use client' REQUIRED)
+**WHEN TO USE:**
+- Interactive UI (onClick, onChange, etc.)
+- Browser APIs (localStorage, window, etc.)
+- State management (useState, useEffect, etc.)
+- Event handlers
 
-- **`page.tsx`**:
-  - Main landing page component
-  - Entry point for non-authenticated users
+**PATTERN:**
+```typescript
+'use client'
 
-- **`providers.tsx`**:
-  - Client-side providers wrapper
-  - Sets up TanStack Query with 5-minute stale time
-  - Initializes Supabase auth state management
-  - Provides toast notifications via Sonner
-  - Includes React Query Devtools for development
+import { useState } from 'react'
 
-- **`globals.css`**:
-  - Global CSS imports and custom styles
-  - Tailwind CSS base, components, and utilities
+export default function ClientComponent() {
+  const [state, setState] = useState(false)
+  return <button onClick={() => setState(!state)}>Click</button>
+}
+```
 
-### Authentication Routes (`auth/`)
+## Required File Patterns
 
-- **`login/page.tsx`**: Login page with social auth options
-- **`callback/route.ts`**: OAuth callback handler for Supabase
-- **`signout/`**: Sign out functionality
+### Pages (`page.tsx`)
+```typescript
+import { Metadata } from 'next'
+
+export const metadata: Metadata = {
+  title: 'Feature Name | CodeCave',
+  description: 'Feature description for SEO',
+}
+
+export default function FeaturePage() {
+  return (
+    <div>
+      <h1>Feature Title</h1>
+      {/* Content */}
+    </div>
+  )
+}
+```
+
+### Layouts (`layout.tsx`)
+```typescript
+export default function FeatureLayout({
+  children,
+}: {
+  children: React.ReactNode
+}) {
+  return (
+    <div className="feature-layout">
+      {/* Layout-specific UI */}
+      {children}
+    </div>
+  )
+}
+```
+
+### Loading (`loading.tsx`)
+```typescript
+import { LoadingSpinner } from '@/components/ui/LoadingSpinner'
+
+export default function Loading() {
+  return (
+    <div className="flex items-center justify-center min-h-screen">
+      <LoadingSpinner />
+    </div>
+  )
+}
+```
+
+### Error (`error.tsx`)
+```typescript
+'use client'
+
+export default function Error({
+  error,
+  reset,
+}: {
+  error: Error & { digest?: string }
+  reset: () => void
+}) {
+  return (
+    <div className="error-container">
+      <h2>Something went wrong!</h2>
+      <button onClick={() => reset()}>Try again</button>
+    </div>
+  )
+}
+```
+
+### API Routes (`route.ts`)
+```typescript
+import { NextRequest, NextResponse } from 'next/server'
+
+export async function GET(request: NextRequest) {
+  try {
+    // Logic here
+    return NextResponse.json({ data: 'success' })
+  } catch (error) {
+    return NextResponse.json(
+      { error: 'Internal server error' },
+      { status: 500 }
+    )
+  }
+}
+
+export async function POST(request: NextRequest) {
+  // POST logic
+}
+```
+
+## Route Protection Rules
 
 ### Protected Routes (`(authenticated)/`)
-
-- **`layout.tsx`**: Authenticated layout with navigation
-- **`dashboard/`**: User dashboard with metrics and analytics
-  - `page.tsx`: Main dashboard view
-  - `loading.tsx`: Loading state
-  - `error.tsx`: Error boundary
-- **`profile/[username]/`**: Dynamic user profile pages
-  - `page.tsx`: Profile display
-  - `loading.tsx`: Profile loading state
-  - `not-found.tsx`: 404 for non-existent profiles
-- **`settings/page.tsx`**: User settings and preferences
+- **ALL FILES** require authentication
+- Middleware redirects unauthenticated users
+- **MUST HAVE**: loading.tsx, error.tsx for each page
 
 ### Public Routes (`(public)/`)
+- **NO AUTHENTICATION** required
+- Accessible to all users
+- **RECOMMENDED**: Add metadata for SEO
 
-- **`features/page.tsx`**: Product features showcase
-- **`premium/page.tsx`**: Premium subscription information
-- **`resources/page.tsx`**: Developer resources and documentation
-- **`error/page.tsx`**: Generic error page
+### Feature Routes (root level)
+- `/feed/` - Main app feed (requires auth)
+- `/onboarding/` - New user setup (requires auth)
+- `/instruments/` - Developer tools (auth optional)
 
-### API Routes (`api/`)
+## Data Fetching Patterns
 
-- **`posts/`**: Post management endpoints
-  - `route.ts`: CRUD operations for posts
-  - `[id]/route.ts`: Individual post operations
-  - `[id]/like/route.ts`: Post like functionality
-- **`users/onboarding/route.ts`**: User onboarding flow
+### Server-Side Data Fetching
+```typescript
+import { db } from '@/db'
+import { profiles } from '@/db/schema'
 
-### Application Pages
+export default async function ProfilePage({ 
+  params 
+}: { 
+  params: { username: string } 
+}) {
+  const profile = await db
+    .select()
+    .from(profiles)
+    .where(eq(profiles.username, params.username))
+    .limit(1)
 
-- **`feed/`**: Main content feed
-  - `layout.tsx`: Feed-specific layout
-  - `page.tsx`: Post feed display
-- **`onboarding/page.tsx`**: New user onboarding flow
-- **`instruments/page.tsx`**: Developer tools and utilities
+  if (!profile[0]) {
+    notFound()
+  }
 
-## Route Protection Strategy
-
-- Middleware (`src/middleware.ts`) handles route protection
-- `(authenticated)` group requires valid session
-- `(public)` group is accessible to all users
-- API routes have individual protection logic
-
-## State Management Integration
-
-- Auth state managed by `useAuthStore` (Zustand)
-- Profile data fetched and cached via TanStack Query
-- Real-time updates through Supabase subscriptions
-
-## Development Guidelines
-
-### Adding New Pages
-
-1. Choose appropriate route group (`(authenticated)` vs `(public)`)
-2. Create `page.tsx` with default export
-3. Add `loading.tsx` and `error.tsx` for better UX
-4. Update navigation components if needed
-
-### Adding New API Routes
-
-1. Create `route.ts` with named HTTP method exports
-2. Implement proper error handling
-3. Add authentication checks if needed
-4. Use TypeScript for request/response types
-
-### Layout Hierarchy
-
-```
-Root Layout (layout.tsx)
-├── Authenticated Layout ((authenticated)/layout.tsx)
-│   ├── Dashboard (dashboard/)
-│   ├── Profile (profile/[username]/)
-│   └── Settings (settings/)
-├── Feed Layout (feed/layout.tsx)
-│   └── Feed Page (feed/page.tsx)
-└── Public Pages ((public)/)
+  return <ProfileDisplay profile={profile[0]} />
+}
 ```
 
-## Key Dependencies
+### Client-Side Data Fetching
+```typescript
+'use client'
 
-- **Next.js**: App Router framework
-- **React**: UI library
-- **TanStack Query**: Server state management
-- **Supabase**: Authentication and database
-- **Zustand**: Client state management
-- **Tailwind CSS**: Styling
-- **Vercel**: Analytics and deployment
+import { useQuery } from '@tanstack/react-query'
 
-## Common Patterns
+export default function ClientDataPage() {
+  const { data, isLoading, error } = useQuery({
+    queryKey: ['posts'],
+    queryFn: () => fetch('/api/posts').then(res => res.json())
+  })
 
-- Error boundaries with custom error pages
-- Loading states for async operations
-- Dynamic imports for code splitting
-- Server and client component separation
-- Type-safe API routes with proper error handling
+  if (isLoading) return <LoadingSpinner />
+  if (error) return <div>Error loading data</div>
+  
+  return <div>{/* Render data */}</div>
+}
+```
 
-## Notes for Claude
+## CRITICAL RULES
 
-- This is a modern Next.js 13+ App Router application
-- Authentication is handled via Supabase with middleware protection
-- State management uses Zustand for client state and TanStack Query for server state
-- All new pages should follow the established patterns for consistency
-- API routes should implement proper error handling and type safety
+1. **ALWAYS**: Add `metadata` export to pages
+2. **ALWAYS**: Use `loading.tsx` for pages with data fetching
+3. **ALWAYS**: Use `error.tsx` for pages that can fail
+4. **NEVER**: Mix server and client logic in same component
+5. **ALWAYS**: Use proper route groups for organization
+6. **ALWAYS**: Follow exact file naming conventions
+7. **ALWAYS**: Use TypeScript with proper types
+
+## Import Rules
+
+```typescript
+// Correct import patterns
+import { ComponentName } from '@/components/feature/component-name'
+import { db } from '@/db'
+import { useStore } from '@/stores/store-name'
+import { NextRequest, NextResponse } from 'next/server'
+```
+
+## Authentication Integration
+
+```typescript
+// Server component auth check
+import { createClient } from '@/utils/supabase/server'
+import { redirect } from 'next/navigation'
+
+export default async function ProtectedPage() {
+  const supabase = createClient()
+  const { data: { user } } = await supabase.auth.getUser()
+  
+  if (!user) {
+    redirect('/auth/login')
+  }
+  
+  return <div>Protected content</div>
+}
+
+// Client component auth check
+'use client'
+import { useAuth } from '@/hooks/use-auth'
+
+export default function ClientProtectedPage() {
+  const { user, isLoading } = useAuth()
+  
+  if (isLoading) return <LoadingSpinner />
+  if (!user) return <div>Please log in</div>
+  
+  return <div>Protected content</div>
+}
+```
