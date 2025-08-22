@@ -18,8 +18,10 @@ import {
   Check, 
   X 
 } from 'lucide-react'
-import { ConnectionUser, ConnectionInvitation } from '@/types/connections'
+import { InvitationWithUser } from '@/types'
 import { cn } from '@/lib/utils'
+import { useSendInvitation, useRespondToInvitation, useWithdrawInvitation, useConnectionStatus } from '@/hooks/use-connections'
+import { toast } from 'sonner'
 
 // Helper functions for avatar initials and colors
 const getInitials = (name: string): string => {
@@ -70,14 +72,33 @@ interface SecondaryAction {
   loadingText?: string
 }
 
+interface BasicUser {
+  id: string
+  username: string
+  displayName: string | null
+  avatarUrl?: string | null | undefined
+  bio?: string | null
+  mutualConnections?: number
+  isFollowing?: boolean
+  followsYou?: boolean
+  skills?: string[]
+  location?: string | null
+  availableForCollab?: boolean
+}
+
 interface GlobalConnectionCardProps {
-  user: ConnectionUser
+  user: BasicUser
   variant: CardVariant
-  invitation?: ConnectionInvitation
+  invitation?: InvitationWithUser
   primaryAction?: PrimaryAction
   secondaryAction?: SecondaryAction
   className?: string
-  compact?: boolean // For mobile optimization
+  compact?: boolean
+  // Invitation handlers for backward compatibility
+  onAcceptInvitation?: () => void
+  onDeclineInvitation?: () => void
+  onCancelInvitation?: () => void
+  isProcessing?: boolean
 }
 
 export function GlobalConnectionCard({ 
@@ -87,23 +108,54 @@ export function GlobalConnectionCard({
   primaryAction,
   secondaryAction,
   className,
-  compact = false
+  compact = false,
+  onAcceptInvitation,
+  onDeclineInvitation,
+  onCancelInvitation,
+  isProcessing = false
 }: GlobalConnectionCardProps) {
   const router = useRouter()
   const [isPrimaryLoading, setIsPrimaryLoading] = useState(false)
   const [isSecondaryLoading] = useState(false)
   const [actionState, setActionState] = useState<'default' | 'success' | 'following'>('default')
 
+  // Connection hooks
+  const sendInvitation = useSendInvitation()
+  const respondToInvitation = useRespondToInvitation()
+  const withdrawInvitation = useWithdrawInvitation()
+  const connectionStatus = useConnectionStatus(user.id)
+
   // Default actions based on variant
   const getDefaultActions = (): { primary?: PrimaryAction, secondary?: SecondaryAction } => {
     switch (variant) {
       case 'discover':
-        return {
-          primary: {
-            label: 'Connect',
-            icon: UserPlus,
-            onClick: handleConnect,
-            loadingText: 'Connecting...'
+        // Use real connection status to determine button state
+        if (connectionStatus.status === 'pending_sent') {
+          return {
+            primary: {
+              label: 'Pending',
+              icon: Clock,
+              onClick: () => {}, // Disabled
+              variant: 'outline'
+            }
+          }
+        } else if (connectionStatus.status === 'connected') {
+          return {
+            primary: {
+              label: 'Connected',
+              icon: UserCheck,
+              onClick: () => {}, // Could add unfollow functionality
+              variant: 'outline'
+            }
+          }
+        } else {
+          return {
+            primary: {
+              label: 'Connect',
+              icon: UserPlus,
+              onClick: handleConnect,
+              loadingText: 'Sending...'
+            }
           }
         }
       case 'connection':
@@ -120,13 +172,13 @@ export function GlobalConnectionCard({
           primary: {
             label: 'Accept',
             icon: Check,
-            onClick: (userId) => console.log('Accept invitation:', userId),
+            onClick: () => handleAcceptInvitation(),
             loadingText: 'Accepting...'
           },
           secondary: {
             label: 'Decline',
             icon: X,
-            onClick: (userId) => console.log('Decline invitation:', userId),
+            onClick: () => handleDeclineInvitation(),
             variant: 'outline',
             loadingText: 'Declining...'
           }
@@ -136,7 +188,7 @@ export function GlobalConnectionCard({
           primary: {
             label: 'Withdraw',
             icon: X,
-            onClick: (userId) => console.log('Withdraw invitation:', userId),
+            onClick: () => handleWithdrawInvitation(),
             variant: 'outline',
             loadingText: 'Withdrawing...'
           }
@@ -169,12 +221,80 @@ export function GlobalConnectionCard({
   const finalPrimaryAction = primaryAction || defaultActions.primary
   const finalSecondaryAction = secondaryAction || defaultActions.secondary
 
-  function handleConnect() {
+  async function handleConnect() {
+    if (!user.username) return
+    
     setIsPrimaryLoading(true)
-    setTimeout(() => {
-      setIsPrimaryLoading(false)
+    try {
+      await sendInvitation.mutateAsync({
+        receiverUsername: user.username,
+        message: `Hi ${user.displayName || user.username}, I'd like to connect with you!`
+      })
       setActionState('success')
-    }, 1000)
+      toast.success('Connection request sent!')
+    } catch (error) {
+      console.error('Failed to send connection request:', error)
+      toast.error('Failed to send connection request')
+    } finally {
+      setIsPrimaryLoading(false)
+    }
+  }
+
+  async function handleAcceptInvitation() {
+    if (!invitation?.id) return
+    
+    setIsPrimaryLoading(true)
+    try {
+      await respondToInvitation.mutateAsync({
+        invitationId: invitation.id,
+        action: 'accept'
+      })
+      toast.success('Connection request accepted!')
+      // Call legacy handler if provided
+      onAcceptInvitation?.()
+    } catch (error) {
+      console.error('Failed to accept invitation:', error)
+      toast.error('Failed to accept invitation')
+    } finally {
+      setIsPrimaryLoading(false)
+    }
+  }
+
+  async function handleDeclineInvitation() {
+    if (!invitation?.id) return
+    
+    setIsPrimaryLoading(true)
+    try {
+      await respondToInvitation.mutateAsync({
+        invitationId: invitation.id,
+        action: 'decline'
+      })
+      toast.success('Connection request declined')
+      // Call legacy handler if provided
+      onDeclineInvitation?.()
+    } catch (error) {
+      console.error('Failed to decline invitation:', error)
+      toast.error('Failed to decline invitation')
+    } finally {
+      setIsPrimaryLoading(false)
+    }
+  }
+
+  async function handleWithdrawInvitation() {
+    if (!invitation?.id) return
+    
+    setIsPrimaryLoading(true)
+    try {
+      await withdrawInvitation.mutateAsync(invitation.id)
+      toast.success('Connection request withdrawn')
+      // Call legacy handler if provided
+      onCancelInvitation?.()
+    } catch (error) {
+      console.error('Failed to withdraw invitation:', error)
+      toast.error('Failed to withdraw invitation')
+    } finally {
+      setIsPrimaryLoading(false)
+    }
   }
 
   function handleFollowBack() {
@@ -239,7 +359,7 @@ export function GlobalConnectionCard({
                   getAvatarColor(user.username),
                   compact ? "text-xs" : "text-sm"
                 )}>
-                  {getInitials(user.displayName)}
+                  {getInitials(user.displayName || user.username)}
                 </AvatarFallback>
               </Avatar>
               {user.availableForCollab && (
@@ -279,26 +399,28 @@ export function GlobalConnectionCard({
             </p>
           )}
 
-          {/* Skills */}
-          <div className="flex flex-wrap gap-1">
-            {user.skills.slice(0, 3).map((skill) => (
-              <Badge
-                key={skill}
-                variant="outline"
-                className="bg-gray-50 text-gray-700 border-gray-200 text-xs px-2 py-0.5"
-              >
-                {skill}
-              </Badge>
-            ))}
-            {user.skills.length > 3 && (
-              <Badge
-                variant="outline"
-                className="bg-gray-50 text-gray-600 border-gray-200 text-xs px-2 py-0.5"
-              >
-                +{user.skills.length - 3}
-              </Badge>
-            )}
-          </div>
+          {/* Skills - Only show if available */}
+          {user.skills && user.skills.length > 0 && (
+            <div className="flex flex-wrap gap-1">
+              {user.skills.slice(0, 3).map((skill: string) => (
+                <Badge
+                  key={skill}
+                  variant="outline"
+                  className="bg-gray-50 text-gray-700 border-gray-200 text-xs px-2 py-0.5"
+                >
+                  {skill}
+                </Badge>
+              ))}
+              {user.skills.length > 3 && (
+                <Badge
+                  variant="outline"
+                  className="bg-gray-50 text-gray-600 border-gray-200 text-xs px-2 py-0.5"
+                >
+                  +{user.skills.length - 3}
+                </Badge>
+              )}
+            </div>
+          )}
 
           {/* Metadata Footer */}
           <div className="mt-3 pt-3 border-t border-gray-100">
@@ -345,13 +467,13 @@ export function GlobalConnectionCard({
                 variant={finalSecondaryAction.variant || 'outline'}
                 size="sm"
                 onClick={handleSecondaryAction}
-                disabled={isSecondaryLoading}
+                disabled={isSecondaryLoading || isProcessing}
                 className={cn(
                   "flex-1 text-xs",
                   compact ? "h-7" : "h-8"
                 )}
               >
-                {isSecondaryLoading ? (
+                {(isSecondaryLoading || isProcessing) ? (
                   <>
                     <div className="w-3 h-3 border-2 border-gray-400 border-t-transparent rounded-full animate-spin mr-1.5" />
                     {finalSecondaryAction.loadingText || 'Loading...'}
@@ -372,7 +494,7 @@ export function GlobalConnectionCard({
                 variant={finalPrimaryAction.variant || 'default'}
                 size="sm"
                 onClick={handlePrimaryAction}
-                disabled={isPrimaryLoading}
+                disabled={isPrimaryLoading || isProcessing}
                 className={cn(
                   "text-xs",
                   finalSecondaryAction ? "flex-1" : "w-full",
@@ -381,7 +503,7 @@ export function GlobalConnectionCard({
                   actionState === 'following' && "bg-green-600 hover:bg-green-700"
                 )}
               >
-                {isPrimaryLoading ? (
+                {(isPrimaryLoading || isProcessing) ? (
                   <>
                     <div className="w-3 h-3 border-2 border-white border-t-transparent rounded-full animate-spin mr-1.5" />
                     {finalPrimaryAction.loadingText || 'Loading...'}

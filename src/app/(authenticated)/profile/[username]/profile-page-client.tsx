@@ -4,10 +4,12 @@ import { useProfile } from '@/hooks/use-profile'
 import { ProfileHero } from '@/components/profile/profile-hero'
 import { ProfileSummary } from '@/components/profile/profile-summary'
 import { ProjectsList } from '@/components/profile/projects-list'
+import { ExperienceList } from '@/components/profile/experience-list'
 import { ContentStream } from '@/components/profile/content-stream'
 import { SkillsMatrix } from '@/components/profile/skills-matrix'
 import { ProfileSidebar } from '@/components/profile/profile-sidebar'
 import { LoadingSpinner } from '@/components/ui/LoadingSpinner'
+import { mockExperiences } from '@/lib/mock-data'
 
 interface ProfilePageClientProps {
   username: string
@@ -70,6 +72,12 @@ export function ProfilePageClient({ username }: ProfilePageClientProps) {
             {/* All Projects */}
             <ProjectsList 
               isOwnProfile={isOwnProfile}
+            />
+
+            {/* Experience Timeline */}
+            <ExperienceList 
+              isOwnProfile={isOwnProfile}
+              experiences={mockExperiences}
             />
 
             {/* Skills Matrix */}

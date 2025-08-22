@@ -21,6 +21,9 @@ export const profilesTable = pgTable('profiles', {
   coverImageUrl: text('cover_image_url'),
   tagline: text('tagline'),
   
+  // Onboarding tracking
+  onboardingCompleted: boolean('onboarding_completed').notNull().default(false),
+  
   // Additional profile fields
   isVerified: boolean('is_verified').notNull().default(false),
   location: text('location'),

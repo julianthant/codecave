@@ -1,6 +1,6 @@
 'use client'
 
-import React from 'react'
+import React, { useEffect, useState } from 'react'
 import { motion } from 'framer-motion'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
@@ -11,8 +11,10 @@ import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Textarea } from '@/components/ui/textarea'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
-import { Upload, User, Github, Twitter, MessageSquare, Linkedin } from 'lucide-react'
+import { Upload, User, Github, Twitter, MessageSquare, Linkedin, Loader2 } from 'lucide-react'
 import { toast } from 'sonner'
+import { useAuthStore } from '@/stores/auth.store'
+import { useMutation, useQueryClient } from '@tanstack/react-query'
 
 const profileSchema = z.object({
   displayName: z.string().min(2, 'Display name must be at least 2 characters').max(50, 'Display name must be less than 50 characters'),
@@ -26,39 +28,93 @@ const profileSchema = z.object({
 
 type ProfileFormData = z.infer<typeof profileSchema>
 
-// Mock data
-const mockProfile = {
-  displayName: 'John Doe',
-  username: 'johndoe',
-  bio: 'Full-stack developer passionate about React and TypeScript. Building amazing web experiences.',
-  avatarUrl: 'https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=400&h=400&fit=crop&crop=face',
-  githubUsername: 'johndoe',
-  twitterUsername: 'johndoe',
-  discordUsername: 'johndoe#1234',
-  linkedinUrl: 'https://linkedin.com/in/johndoe',
+// API functions
+async function updateProfile(data: ProfileFormData) {
+  const response = await fetch('/api/profiles/me', {
+    method: 'PATCH',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify(data),
+  })
+
+  if (!response.ok) {
+    const error = await response.json()
+    throw new Error(error.error || 'Failed to update profile')
+  }
+
+  return response.json()
 }
 
 export function ProfileSettings() {
+  const { profile, setProfile } = useAuthStore()
+  const queryClient = useQueryClient()
+  const [isLoading, setIsLoading] = useState(true)
+
   const {
     register,
     handleSubmit,
     formState: { errors, isDirty },
+    reset,
   } = useForm<ProfileFormData>({
     resolver: zodResolver(profileSchema),
-    defaultValues: mockProfile,
+    defaultValues: {
+      displayName: '',
+      username: '',
+      bio: '',
+      githubUsername: '',
+      twitterUsername: '',
+      discordUsername: '',
+      linkedinUrl: '',
+    },
+  })
+
+  // Update form when profile data loads
+  useEffect(() => {
+    if (profile) {
+      reset({
+        displayName: profile.displayName || '',
+        username: profile.username || '',
+        bio: profile.bio || '',
+        githubUsername: profile.githubUsername || '',
+        twitterUsername: profile.twitterUsername || '',
+        discordUsername: profile.discordUsername || '',
+        linkedinUrl: profile.linkedinUrl || '',
+      })
+      setIsLoading(false)
+    }
+  }, [profile, reset])
+
+  const updateProfileMutation = useMutation({
+    mutationFn: updateProfile,
+    onSuccess: (updatedProfile) => {
+      setProfile(updatedProfile)
+      toast.success('Profile updated successfully!')
+      // Invalidate profile-related queries
+      queryClient.invalidateQueries({ queryKey: ['profile'] })
+    },
+    onError: (error: Error) => {
+      toast.error(error.message || 'Failed to update profile')
+    },
   })
 
   const onSubmit = async (data: ProfileFormData) => {
-    // Simulate API call
-    await new Promise(resolve => setTimeout(resolve, 1000))
-    
-    console.log('Profile update:', data)
-    toast.success('Profile updated successfully!')
+    updateProfileMutation.mutate(data)
   }
 
   const handleAvatarUpload = () => {
-    // Simulate avatar upload
-    toast.success('Avatar uploaded successfully!')
+    // TODO: Implement avatar upload
+    toast.info('Avatar upload feature coming soon!')
+  }
+
+  // Show loading state while profile is loading
+  if (isLoading || !profile) {
+    return (
+      <div className="flex items-center justify-center py-8">
+        <Loader2 className="h-8 w-8 animate-spin" />
+        <span className="ml-2">Loading profile...</span>
+      </div>
+    )
   }
 
   return (
@@ -74,9 +130,12 @@ export function ProfileSettings() {
         <CardContent>
           <div className="flex items-center space-x-6">
             <Avatar className="h-20 w-20">
-              <AvatarImage src={mockProfile.avatarUrl} alt="Profile picture" />
+              <AvatarImage src={profile?.avatarUrl || undefined} alt="Profile picture" />
               <AvatarFallback className="bg-orange-500 text-white">
-                <User className="h-8 w-8" />
+                {profile?.displayName ? 
+                  profile.displayName.split(' ').map(n => n[0]).join('').toUpperCase() :
+                  <User className="h-8 w-8" />
+                }
               </AvatarFallback>
             </Avatar>
             <div className="space-y-2">
@@ -151,10 +210,17 @@ export function ProfileSettings() {
             >
               <Button 
                 type="submit" 
-                disabled={!isDirty}
+                disabled={!isDirty || updateProfileMutation.isPending}
                 className="bg-orange-600 hover:bg-orange-700"
               >
-                Save Changes
+                {updateProfileMutation.isPending ? (
+                  <>
+                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                    Saving...
+                  </>
+                ) : (
+                  'Save Changes'
+                )}
               </Button>
             </motion.div>
           </form>
@@ -244,10 +310,17 @@ export function ProfileSettings() {
             >
               <Button 
                 type="submit" 
-                disabled={!isDirty}
+                disabled={!isDirty || updateProfileMutation.isPending}
                 className="bg-orange-600 hover:bg-orange-700"
               >
-                Save Social Links
+                {updateProfileMutation.isPending ? (
+                  <>
+                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                    Saving...
+                  </>
+                ) : (
+                  'Save Social Links'
+                )}
               </Button>
             </motion.div>
           </form>

@@ -180,9 +180,6 @@ export function MultiStepForm({ user }: MultiStepFormProps) {
     }
   }
 
-  const handleSkip = () => {
-    router.push('/feed')
-  }
 
   const handleSuccessComplete = () => {
     router.push('/feed')
@@ -264,35 +261,23 @@ export function MultiStepForm({ user }: MultiStepFormProps) {
           Previous
         </Button>
 
-        <div className="flex items-center gap-3">
-          <Button
-            type="button"
-            variant="ghost"
-            onClick={handleSkip}
-            disabled={isLoading}
-            className="text-muted-foreground hover:text-foreground"
-          >
-            Skip for Now
-          </Button>
-
-          <Button
-            onClick={handleNext}
-            disabled={isLoading}
-            className="bg-gradient-to-r from-orange-500 to-orange-600 hover:from-orange-600 hover:to-orange-700 text-white shadow-lg shadow-orange-500/25 flex items-center gap-2 min-w-[120px]"
-          >
-            {isLoading ? (
-              <>
-                <Loader2 className="w-4 h-4 animate-spin" />
-                Creating...
-              </>
-            ) : (
-              <>
-                {isLastStep ? 'Complete Setup' : 'Next'}
-                {!isLastStep && <ArrowRight className="w-4 h-4" />}
-              </>
-            )}
-          </Button>
-        </div>
+        <Button
+          onClick={handleNext}
+          disabled={isLoading}
+          className="bg-gradient-to-r from-orange-500 to-orange-600 hover:from-orange-600 hover:to-orange-700 text-white shadow-lg shadow-orange-500/25 flex items-center gap-2 min-w-[120px]"
+        >
+          {isLoading ? (
+            <>
+              <Loader2 className="w-4 h-4 animate-spin" />
+              Creating...
+            </>
+          ) : (
+            <>
+              {isLastStep ? 'Complete Setup' : 'Next'}
+              {!isLastStep && <ArrowRight className="w-4 h-4" />}
+            </>
+          )}
+        </Button>
       </motion.div>
 
       {/* Help Text */}

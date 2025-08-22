@@ -39,17 +39,101 @@ export async function updateSession(request: NextRequest) {
     data: { user },
   } = await supabase.auth.getUser()
 
-  // Define protected routes that require authentication
+  // Define route types
   const protectedRoutes = ['/onboarding']
-  const isProtectedRoute = protectedRoutes.some(route => 
-    request.nextUrl.pathname.startsWith(route)
+  const authenticatedRoutes = [
+    '/dashboard',
+    '/connections',
+    '/collaborations',
+    '/settings',
+    '/profile',
+  ]
+
+  const pathname = request.nextUrl.pathname
+  const isProtectedRoute = protectedRoutes.some((route) =>
+    pathname.startsWith(route)
+  )
+  const isAuthenticatedRoute = authenticatedRoutes.some((route) =>
+    pathname.startsWith(route)
   )
 
-  if (!user && isProtectedRoute) {
-    // no user, redirect to login for protected routes only
+  // Special handling for /feed route - conditional access based on authentication
+  if (pathname.startsWith('/feed')) {
+    // Allow guest users (not authenticated) to access feed
+    if (!user) {
+      return supabaseResponse
+    }
+    
+    // For authenticated users, check onboarding completion
+    try {
+      // Use edge function for database access
+      const { data: profileData } =
+        await supabase.functions.invoke('database-access', {
+          body: {
+            action: 'findProfile',
+            userId: user.id,
+          },
+        })
+
+      const profile = profileData?.profile
+
+      // If authenticated user hasn't completed onboarding, redirect to onboarding
+      if (!profile || !profile.onboarding_completed) {
+        const url = request.nextUrl.clone()
+        url.pathname = '/onboarding'
+        return NextResponse.redirect(url)
+      }
+    } catch (error) {
+      console.error('Middleware: Error checking profile for feed access:', error)
+      // Allow access on database errors to prevent blocking users
+    }
+    
+    // Allow access if user is authenticated and has completed onboarding
+    return supabaseResponse
+  }
+
+  // Redirect unauthenticated users from protected/authenticated routes
+  if (!user && (isProtectedRoute || isAuthenticatedRoute)) {
     const url = request.nextUrl.clone()
     url.pathname = '/auth/login'
     return NextResponse.redirect(url)
+  }
+
+  // Check profile for authenticated users on specific routes
+  if (user && (isAuthenticatedRoute || pathname.startsWith('/onboarding'))) {
+    try {
+      // Use edge function for database access
+      const { data: profileData } =
+        await supabase.functions.invoke('database-access', {
+          body: {
+            action: 'findProfile',
+            userId: user.id,
+          },
+        })
+
+      const profile = profileData?.profile
+
+      // Handle onboarding page - redirect completed users to feed
+      if (pathname.startsWith('/onboarding')) {
+        if (profile && profile.onboarding_completed) {
+          const url = request.nextUrl.clone()
+          url.pathname = '/feed'
+          return NextResponse.redirect(url)
+        }
+      }
+
+      // Handle authenticated routes - redirect users without profiles to onboarding
+      if (isAuthenticatedRoute && !pathname.startsWith('/onboarding')) {
+        if (!profile) {
+          const url = request.nextUrl.clone()
+          url.pathname = '/onboarding'
+          return NextResponse.redirect(url)
+        }
+      }
+    } catch (error) {
+      console.error('Middleware: Error checking profile:', error)
+      // Allow access on database errors to prevent redirect loops
+    }
   }
 
   // IMPORTANT: You *must* return the supabaseResponse object as it is.

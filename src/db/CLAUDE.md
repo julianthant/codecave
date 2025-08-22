@@ -16,7 +16,20 @@ CodeCave uses a **schema-first, push-based approach** for rapid development. Typ
 
 ```
 src/db/
-├── schema/                    # MODULAR: Schema definitions split by domain
+├── rls/                      # ROW LEVEL SECURITY: Domain-organized policies
+│   ├── helpers/              # RLS helper functions
+│   │   ├── auth.sql          # Auth pattern functions (auth.uid(), ownership checks)
+│   │   └── functions.sql     # Security definer functions for complex operations
+│   ├── policies/             # Domain-specific RLS policies
+│   │   ├── profiles.sql      # Profiles and user settings policies
+│   │   ├── posts.sql         # Posts and engagement policies
+│   │   ├── connections.sql   # Social connections policies
+│   │   ├── collaborations.sql # Collaboration access policies
+│   │   ├── notifications.sql # Personal notifications policies
+│   │   └── projects.sql      # Portfolio projects policies
+│   ├── indexes.sql           # Performance indexes for RLS queries
+│   └── enable-rls.sql        # Enable RLS on all tables
+├── schema/                   # MODULAR: Schema definitions split by domain
 │   ├── validation/           # ZOD: Validation schemas for API safety
 │   │   ├── profiles.validation.ts
 │   │   ├── posts.validation.ts
@@ -339,3 +352,147 @@ If converting from migration files to push-based:
 6. ✅ Test all functionality with new validation
 
 The schema will be synchronized directly from TypeScript definitions, providing faster development cycles and better type safety.
+
+## Row Level Security (RLS) Rules (CRITICAL)
+
+### RLS Organization (EXACT STRUCTURE)
+- ✅ **Domain-Based**: Policies organized by domain (profiles, posts, etc.)
+- ✅ **Helper Functions**: Reusable auth patterns in `/rls/helpers/`
+- ✅ **Performance First**: Indexes and optimized function patterns
+- ✅ **Security Definer**: Complex operations bypass RLS for performance
+
+### RLS Policy Patterns (REQUIRED)
+
+#### Ownership Pattern (PRIMARY)
+```sql
+-- ✅ CORRECT: Optimized ownership check
+create policy "table_action_own" on table_name
+for action to authenticated
+using ((select auth.uid()) = user_id);
+
+-- ❌ WRONG: Direct function call (slower)
+create policy "table_action_own" on table_name  
+for action to authenticated
+using (auth.uid() = user_id);
+```
+
+#### Visibility Pattern (REQUIRED)
+```sql
+-- ✅ CORRECT: Security definer for complex logic
+create policy "posts_select_visible" on posts
+for select to authenticated, anon
+using (public.can_view_post(author_id, visibility, is_published));
+```
+
+#### Role Targeting (REQUIRED)
+```sql
+-- ✅ CORRECT: Always specify roles
+create policy "table_select" on table_name
+for select to authenticated, anon  -- Explicit roles
+using (condition);
+
+-- ❌ WRONG: No role specification
+create policy "table_select" on table_name
+for select using (condition);
+```
+
+### RLS File Rules (EXACT)
+
+#### Helper Functions (`rls/helpers/auth.sql`)
+- Authentication utilities (`auth.current_user_id()`, `auth.is_owner()`)
+- Role checks (`auth.is_admin()`, `auth.is_banned()`)
+- Relationship functions (`auth.follows_user()`, `auth.are_connected()`)
+
+#### Security Definer Functions (`rls/helpers/functions.sql`)
+- Complex visibility logic (`can_view_post()`, `can_view_collaboration()`)
+- Performance-critical operations that bypass RLS
+- Stats update functions with elevated privileges
+
+#### Policy Naming (EXACT)
+```sql
+-- Required pattern: {table}_{operation}_{condition}
+create policy "posts_select_visible" on posts for select ...
+create policy "posts_insert_own" on posts for insert ...
+create policy "posts_update_own" on posts for update ...
+create policy "posts_delete_own" on posts for delete ...
+create policy "posts_admin_delete" on posts for delete ...
+```
+
+### RLS Development Workflow (CRITICAL)
+
+#### Making RLS Changes
+1. **Modify** policy files in `src/db/rls/policies/`
+2. **Test** policies in local environment
+3. **Apply** via migration script or direct SQL execution
+4. **Verify** with different user contexts (`anon`, `authenticated`, `admin`)
+
+#### Performance Requirements
+- ✅ **Index All Columns**: Used in RLS policy `using` clauses
+- ✅ **Use Select Wrappers**: `(select auth.uid())` pattern for caching
+- ✅ **Security Definer Functions**: For complex multi-table operations
+- ✅ **Role Targeting**: Limit policy execution with `TO` clause
+
+### RLS Commands (EXACT)
+```bash
+# Enable RLS on tables
+psql -f src/db/rls/enable-rls.sql
+
+# Apply helper functions
+psql -f src/db/rls/helpers/auth.sql
+psql -f src/db/rls/helpers/functions.sql
+
+# Apply domain policies
+psql -f src/db/rls/policies/profiles.sql
+psql -f src/db/rls/policies/posts.sql
+# ... etc
+
+# Create performance indexes
+psql -f src/db/rls/indexes.sql
+```
+
+### RLS Critical Rules
+
+1. **ALWAYS** enable RLS before applying policies (`enable-rls.sql`)
+2. **ALWAYS** use `(select auth.uid())` pattern for performance
+3. **ALWAYS** specify roles with `TO authenticated, anon`
+4. **ALWAYS** create indexes for columns used in policies
+5. **ALWAYS** use security definer functions for complex operations
+6. **NEVER** put business logic directly in policy expressions
+7. **NEVER** create policies without considering performance impact
+8. **NEVER** use `auth.uid()` directly without select wrapper
+9. **ALWAYS** test policies with different user contexts
+10. **ALWAYS** include banned user checks in sensitive operations
+
+### RLS Security Patterns
+
+#### Public Data (REQUIRED)
+```sql
+-- Public profiles viewable by everyone
+create policy "profiles_select_public" on profiles
+for select to authenticated, anon
+using (true);
+```
+
+#### Owner-Only Data (REQUIRED)
+```sql
+-- Private settings accessible only by owner
+create policy "user_settings_select_own" on user_settings
+for select to authenticated
+using ((select auth.uid()) = id and not auth.is_banned());
+```
+
+#### Relationship-Based Access (REQUIRED)
+```sql
+-- Posts visible based on visibility and relationships
+create policy "posts_select_visible" on posts
+for select to authenticated, anon
+using (public.can_view_post(author_id, visibility, is_published));
+```
+
+#### Admin Override (REQUIRED)
+```sql
+-- Admin moderation capabilities
+create policy "table_admin_delete" on table_name
+for delete to authenticated
+using (auth.is_admin());
+```

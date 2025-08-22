@@ -1,6 +1,6 @@
 'use client'
 
-import React, { useState } from 'react'
+import React from 'react'
 import { motion } from 'framer-motion'
 import { 
   Github, 
@@ -27,6 +27,7 @@ import {
 } from '@/components/ui/dropdown-menu'
 import { ProjectEditModal } from './modals/project-edit-modal'
 import { useProjects, useDeleteProject } from '@/hooks/use-projects'
+import { useProjectsStore } from '@/stores/projects.store'
 import { toast } from 'sonner'
 import type { Project } from '@/db/schema'
 
@@ -64,8 +65,7 @@ interface ProjectsListProps {
 }
 
 export function ProjectsList({ isOwnProfile = false }: ProjectsListProps) {
-  const [isCreateModalOpen, setIsCreateModalOpen] = useState(false)
-  const [editingProject, setEditingProject] = useState<Project | undefined>()
+  const { openProjectModal } = useProjectsStore()
   
   // Use the projects hook to fetch real data
   const { data: projects = [], isLoading, error } = useProjects(!isOwnProfile) // Include private only for own profile
@@ -137,7 +137,7 @@ export function ProjectsList({ isOwnProfile = false }: ProjectsListProps) {
                     </Button>
                   </DropdownMenuTrigger>
                   <DropdownMenuContent align="end">
-                    <DropdownMenuItem onClick={() => setEditingProject(project)}>
+                    <DropdownMenuItem onClick={() => openProjectModal(project)}>
                       <Edit3 className="h-4 w-4 mr-2" />
                       Edit Project
                     </DropdownMenuItem>
@@ -319,7 +319,7 @@ export function ProjectsList({ isOwnProfile = false }: ProjectsListProps) {
               <Button 
                 variant="outline" 
                 size="sm"
-                onClick={() => setIsCreateModalOpen(true)}
+                onClick={() => openProjectModal()}
               >
                 <Plus className="h-4 w-4 mr-1" />
                 Add Project
@@ -340,7 +340,7 @@ export function ProjectsList({ isOwnProfile = false }: ProjectsListProps) {
             <Button 
               variant="outline" 
               size="sm"
-              onClick={() => setIsCreateModalOpen(true)}
+              onClick={() => openProjectModal()}
             >
               <Plus className="h-4 w-4 mr-1" />
               Create Your First Project
@@ -367,7 +367,7 @@ export function ProjectsList({ isOwnProfile = false }: ProjectsListProps) {
             <Button 
               variant="outline" 
               size="sm"
-              onClick={() => setIsCreateModalOpen(true)}
+              onClick={() => openProjectModal()}
             >
               <Plus className="h-4 w-4 mr-1" />
               Add Project
@@ -390,17 +390,8 @@ export function ProjectsList({ isOwnProfile = false }: ProjectsListProps) {
         </motion.div>
       </div>
 
-      {/* Project Modals */}
-      <ProjectEditModal
-        isOpen={isCreateModalOpen}
-        onClose={() => setIsCreateModalOpen(false)}
-      />
-      
-      <ProjectEditModal
-        isOpen={!!editingProject}
-        onClose={() => setEditingProject(undefined)}
-        project={editingProject}
-      />
+      {/* Project Modal */}
+      <ProjectEditModal />
     </div>
   )
 }

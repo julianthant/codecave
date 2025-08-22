@@ -7,6 +7,7 @@ export * from './schema/connections'
 export * from './schema/collaborations'
 export * from './schema/notifications'
 export * from './schema/projects'
+export * from './schema/experiences'
 
 // Re-export all validation schemas
 export * from './schema/validation'

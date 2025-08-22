@@ -1,30 +1,71 @@
 'use client'
 
-import React, { useState } from 'react'
-import { Search, Heart } from 'lucide-react'
+import React, { useState, useMemo } from 'react'
+import { useQuery } from '@tanstack/react-query'
+import { Search, Heart, Loader2 } from 'lucide-react'
 import { Input } from '@/components/ui/input'
 import { GlobalConnectionCard } from '../shared/global-connection-card'
-import { mockFollowers } from '@/lib/mock-data/connections-data'
+import type { Profile } from '@/types'
+
+interface FollowerWithStatus extends Profile {
+  isFollowingBack: boolean
+}
 
 export function FollowersSection() {
   const [searchQuery, setSearchQuery] = useState('')
-  const [filteredFollowers, setFilteredFollowers] = useState(mockFollowers)
 
-  const handleSearch = (query: string) => {
-    setSearchQuery(query)
-    if (!query.trim()) {
-      setFilteredFollowers(mockFollowers)
-      return
+  // Fetch followers list
+  const { data: followersData, isLoading, error } = useQuery({
+    queryKey: ['connections', 'followers'],
+    queryFn: async () => {
+      const response = await fetch('/api/connections/followers?limit=100')
+      if (!response.ok) {
+        throw new Error('Failed to fetch followers list')
+      }
+      const result = await response.json()
+      return result.data
+    },
+  })
+
+  // Filter followers list based on search query
+  const filteredFollowers = useMemo(() => {
+    const followers = followersData?.followers || []
+    
+    if (!searchQuery.trim()) {
+      return followers
     }
 
-    const filtered = mockFollowers.filter(
-      (user) =>
-        user.displayName.toLowerCase().includes(query.toLowerCase()) ||
-        user.username.toLowerCase().includes(query.toLowerCase()) ||
-        user.bio?.toLowerCase().includes(query.toLowerCase())
+    const searchLower = searchQuery.toLowerCase()
+    return followers.filter((user: FollowerWithStatus) =>
+      user.displayName?.toLowerCase().includes(searchLower) ||
+      user.username.toLowerCase().includes(searchLower) ||
+      user.bio?.toLowerCase().includes(searchLower)
     )
-    setFilteredFollowers(filtered)
+  }, [followersData?.followers, searchQuery])
+
+  if (isLoading) {
+    return (
+      <div className="space-y-6">
+        <div className="flex justify-center items-center py-12">
+          <Loader2 className="w-8 h-8 text-orange-500 animate-spin" />
+          <span className="ml-2 text-gray-600">Loading followers list...</span>
+        </div>
+      </div>
+    )
   }
+
+  if (error) {
+    return (
+      <div className="space-y-6">
+        <div className="py-12 text-center">
+          <h3 className="mb-2 font-medium text-gray-900 text-lg">Unable to load followers list</h3>
+          <p className="text-gray-600">Please try again later.</p>
+        </div>
+      </div>
+    )
+  }
+
+  const totalFollowers = followersData?.total || 0
 
   return (
     <div className="space-y-6">
@@ -33,8 +74,8 @@ export function FollowersSection() {
         <div>
           <h2 className="font-semibold text-gray-900 text-xl">Followers</h2>
           <p className="text-gray-600 text-sm">
-            {filteredFollowers.length} developer
-            {filteredFollowers.length !== 1 ? 's' : ''} following you
+            {searchQuery ? filteredFollowers.length : totalFollowers} developer
+            {(searchQuery ? filteredFollowers.length : totalFollowers) !== 1 ? 's' : ''} following you
           </p>
         </div>
       </div>
@@ -45,7 +86,7 @@ export function FollowersSection() {
         <Input
           placeholder="Search your followers..."
           value={searchQuery}
-          onChange={(e) => handleSearch(e.target.value)}
+          onChange={(e) => setSearchQuery(e.target.value)}
           className="pl-10"
         />
       </div>
@@ -71,7 +112,7 @@ export function FollowersSection() {
         </div>
       ) : (
         <div className="gap-2 sm:gap-4 grid grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
-          {filteredFollowers.map((user) => (
+          {filteredFollowers.map((user: FollowerWithStatus) => (
             <GlobalConnectionCard
               key={`follower-mobile-${user.id}`}
               user={user}
@@ -80,7 +121,7 @@ export function FollowersSection() {
               className="sm:hidden block"
             />
           ))}
-          {filteredFollowers.map((user) => (
+          {filteredFollowers.map((user: FollowerWithStatus) => (
             <GlobalConnectionCard
               key={`follower-desktop-${user.id}`}
               user={user}

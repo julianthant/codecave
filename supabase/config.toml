@@ -1,0 +1,82 @@
+[project_id]
+# Project configuration for Supabase CLI
+
+[auth]
+enabled = true
+external_email_enabled = true
+external_phone_enabled = false
+external_apple_enabled = false
+external_azure_enabled = false
+external_bitbucket_enabled = false
+external_discord_enabled = false
+external_facebook_enabled = false
+external_github_enabled = true
+external_gitlab_enabled = false
+external_google_enabled = true
+external_keycloak_enabled = false
+external_linkedin_enabled = false
+external_notion_enabled = false
+external_slack_enabled = false
+external_spotify_enabled = false
+external_twitch_enabled = false
+external_twitter_enabled = false
+external_workos_enabled = false
+external_zoom_enabled = false
+
+[auth.email]
+enable_signup = true
+double_confirm_changes = true
+enable_confirmations = false
+
+[db]
+# Database configuration
+port = 54322
+shadow_port = 54320
+major_version = 15
+
+[db.seed]
+# Seeding configuration following best practices
+enabled = true
+sql_paths = [
+  './seeds/00-setup.sql',
+  './seeds/01-profiles.sql', 
+  './seeds/02-connections.sql',
+  './seeds/03-collaborations.sql',
+  './seeds/04-posts.sql',
+  './seeds/05-projects.sql',
+  './seeds/06-notifications.sql',
+  './seeds/07-engagement.sql',
+  './seeds/99-cleanup.sql'
+]
+
+[api]
+enabled = true
+port = 54321
+schemas = ["public", "graphql_public"]
+extra_search_path = ["public", "extensions"]
+max_rows = 1000
+
+[api.cors]
+enabled = false
+origins = ["https://localhost:3000"]
+methods = ["GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS"]
+allowed_headers = ["*"]
+
+[realtime]
+enabled = true
+ip_version = "IPv4"
+
+[studio]
+enabled = true
+port = 54323
+api_url = "http://127.0.0.1"
+
+[inbucket]
+enabled = true
+port = 54324
+web_port = 54325
+smtp_port = 54326
+
+[storage]
+enabled = true
+file_size_limit = "50MiB"

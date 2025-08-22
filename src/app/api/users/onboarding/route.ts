@@ -1,6 +1,25 @@
 import { NextResponse } from 'next/server'
 import { dbService } from '@/services/database'
 import { createClient } from '@/utils/supabase/server'
+// import { profileInsertSchema, userSettingsInsertSchema } from '@/db/schema/validation/profiles.validation'
+import { z } from 'zod'
+
+// Onboarding-specific validation schema
+const onboardingSchema = z.object({
+  id: z.string().uuid(),
+  email: z.string().email(),
+  username: z.string().min(3).max(30).regex(/^[a-z0-9_-]+$/, 'Username can only contain lowercase letters, numbers, underscores, and hyphens'),
+  displayName: z.string().min(1).max(50),
+  tagline: z.string().max(60).optional().nullable(),
+  bio: z.string().max(160).optional().nullable(),
+  githubUsername: z.string().max(39).regex(/^[a-zA-Z0-9-]+$/).optional().nullable(),
+  skills: z.array(z.string()).max(50).default([]),
+  languages: z.array(z.string()).max(20).default([]),
+  availableForCollab: z.boolean().default(true),
+  emailNotifications: z.boolean().default(true),
+  theme: z.enum(['light', 'dark', 'system']).default('system'),
+  avatarUrl: z.string().url().optional().nullable(),
+})
 
 export async function POST(request: Request) {
   try {
@@ -31,23 +50,53 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: 'Invalid JSON in request body' }, { status: 400 })
     }
     
-    // Validate required fields
-    if (!body.username || !body.displayName) {
-      console.log('Missing required fields:', { username: !!body.username, displayName: !!body.displayName })
-      return NextResponse.json({ error: 'Username and display name are required' }, { status: 400 })
+    // Validate input with Zod schema
+    let validatedData
+    try {
+      validatedData = onboardingSchema.parse(body)
+      console.log('Request data validated successfully')
+    } catch (validationError) {
+      console.error('Validation error:', validationError)
+      if (validationError instanceof z.ZodError) {
+        const errorMessages = validationError.issues.map((err) => `${err.path.join('.')}: ${err.message}`).join(', ')
+        return NextResponse.json({ error: `Validation failed: ${errorMessages}` }, { status: 400 })
+      }
+      return NextResponse.json({ error: 'Invalid request data' }, { status: 400 })
     }
     
     // Validate that the user ID matches
-    if (body.id !== user.id) {
-      console.log('User ID mismatch:', { bodyId: body.id, userId: user.id })
+    if (validatedData.id !== user.id) {
+      console.log('User ID mismatch:', { bodyId: validatedData.id, userId: user.id })
       return NextResponse.json({ error: 'Invalid user ID' }, { status: 403 })
     }
 
-    console.log('Checking username availability:', body.username)
+    // Check if user already has a profile (prevent duplicate onboarding)
+    const { data: existingProfile, error: profileError } = await supabase
+      .from('profiles')
+      .select('id')
+      .eq('id', user.id)
+      .single()
+    
+    console.log('Existing profile check:', { existingProfile, profileError })
+    
+    if (existingProfile) {
+      console.log('User already has profile:', user.id)
+      return NextResponse.json({ error: 'User already completed onboarding' }, { status: 400 })
+    }
+    
+    // Only proceed if the error is "not found" (PGRST116)
+    if (profileError && profileError.code !== 'PGRST116') {
+      console.error('Database error checking for existing profile:', profileError)
+      return NextResponse.json({ error: 'Failed to check existing profile' }, { status: 500 })
+    }
+    
+    console.log('No existing profile found, proceeding with onboarding')
+
+    console.log('Checking username availability:', validatedData.username)
     // Check username availability
     let isAvailable
     try {
-      isAvailable = await dbService.profiles.checkUsernameAvailable(body.username)
+      isAvailable = await dbService.profiles.checkUsernameAvailable(validatedData.username)
       console.log('Username availability check result:', isAvailable)
     } catch (availabilityError) {
       console.error('Username availability check failed:', availabilityError)
@@ -55,7 +104,7 @@ export async function POST(request: Request) {
     }
     
     if (!isAvailable) {
-      console.log('Username taken:', body.username)
+      console.log('Username taken:', validatedData.username)
       return NextResponse.json({ error: 'Username already taken' }, { status: 400 })
     }
 
@@ -64,27 +113,28 @@ export async function POST(request: Request) {
     let userWithProfile
     try {
       userWithProfile = await dbService.users.createComplete(
-        body.id,
+        validatedData.id,
         // Profile data (public)
         {
-          username: body.username,
-          displayName: body.displayName,
-          tagline: body.tagline || null,
-          bio: body.bio || null,
-          avatarUrl: body.avatarUrl || null,
-          githubUsername: body.githubUsername || null,
+          username: validatedData.username,
+          displayName: validatedData.displayName,
+          tagline: validatedData.tagline,
+          bio: validatedData.bio,
+          avatarUrl: validatedData.avatarUrl,
+          githubUsername: validatedData.githubUsername,
           twitterUsername: null,
           discordUsername: null,
           linkedinUrl: null,
+          onboardingCompleted: true, // Mark onboarding as completed
         },
-        // Settings data (private) - use provided values or defaults
+        // Settings data (private) - use validated values
         {
-          skills: Array.isArray(body.skills) ? body.skills : [],
-          languages: Array.isArray(body.languages) ? body.languages : [],
+          skills: validatedData.skills,
+          languages: validatedData.languages,
           experienceLevel: null,
-          availableForCollab: body.availableForCollab ?? true,
-          emailNotifications: body.emailNotifications ?? true,
-          theme: body.theme || 'system',
+          availableForCollab: validatedData.availableForCollab,
+          emailNotifications: validatedData.emailNotifications,
+          theme: validatedData.theme,
           isPro: false,
         }
       )

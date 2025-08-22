@@ -15,9 +15,10 @@ interface SuccessAnimationProps {
 
 export function SuccessAnimation({ isVisible, onComplete, userName }: SuccessAnimationProps) {
   const [step, setStep] = useState(0)
+  const [hasCompleted, setHasCompleted] = useState(false)
 
   useEffect(() => {
-    if (!isVisible) return
+    if (!isVisible || hasCompleted) return
 
     // Initial confetti burst
     const timer1 = setTimeout(() => {
@@ -50,8 +51,9 @@ export function SuccessAnimation({ isVisible, onComplete, userName }: SuccessAni
       })
     }, 2500)
 
-    // Auto-complete after animation
+    // Auto-complete after animation (only once)
     const timer5 = setTimeout(() => {
+      setHasCompleted(true)
       onComplete?.()
     }, 4000)
 
@@ -62,7 +64,7 @@ export function SuccessAnimation({ isVisible, onComplete, userName }: SuccessAni
       clearTimeout(timer4)
       clearTimeout(timer5)
     }
-  }, [isVisible, onComplete])
+  }, [isVisible, onComplete, hasCompleted])
 
   const features = [
     { icon: Users, text: 'Connect with developers' },

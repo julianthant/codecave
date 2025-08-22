@@ -273,6 +273,7 @@ export const dbService = {
         avatarUrl: profilesTable.avatarUrl,
         coverImageUrl: profilesTable.coverImageUrl,
         tagline: profilesTable.tagline,
+        onboardingCompleted: profilesTable.onboardingCompleted,
         isVerified: profilesTable.isVerified,
         location: profilesTable.location,
         portfolioUrl: profilesTable.portfolioUrl,
@@ -300,6 +301,7 @@ export const dbService = {
         avatarUrl: profilesTable.avatarUrl,
         coverImageUrl: profilesTable.coverImageUrl,
         tagline: profilesTable.tagline,
+        onboardingCompleted: profilesTable.onboardingCompleted,
         isVerified: profilesTable.isVerified,
         location: profilesTable.location,
         portfolioUrl: profilesTable.portfolioUrl,
@@ -317,20 +319,6 @@ export const dbService = {
         .orderBy(desc(connectionsTable.createdAt))
     },
 
-    async getSuggestions(userId: string, limit: number = 10): Promise<Profile[]> {
-      const db = getDb()
-      // Simple suggestion: users not already followed
-      return await db.select().from(profilesTable)
-        .where(and(
-          sql`${profilesTable.id} != ${userId}`,
-          sql`${profilesTable.id} NOT IN (
-            SELECT following_id FROM ${connectionsTable} 
-            WHERE follower_id = ${userId}
-          )`
-        ))
-        .limit(limit)
-        .orderBy(desc(profilesTable.createdAt))
-    },
 
     async getFollowersCount(userId: string): Promise<number> {
       const db = getDb()
@@ -355,6 +343,37 @@ export const dbService = {
         ))
         .limit(1)
       return connection || null
+    },
+
+    async getSuggestions(userId: string, limit: number = 10): Promise<Profile[]> {
+      const db = getDb()
+      // Get users not already followed and not self
+      return await db.select().from(profilesTable)
+        .where(and(
+          sql`${profilesTable.id} != ${userId}`,
+          sql`${profilesTable.id} NOT IN (
+            SELECT following_id FROM ${connectionsTable} 
+            WHERE follower_id = ${userId}
+          )`,
+          eq(profilesTable.onboardingCompleted, true)
+        ))
+        .limit(limit)
+        .orderBy(desc(profilesTable.createdAt))
+    },
+
+    async getMutualConnectionCount(userId: string, targetUserId: string): Promise<number> {
+      const db = getDb()
+      // Count mutual connections - users that both userId and targetUserId follow
+      const [result] = await db.select({ count: count() })
+        .from(connectionsTable)
+        .where(and(
+          eq(connectionsTable.followerId, userId),
+          sql`${connectionsTable.followingId} IN (
+            SELECT following_id FROM ${connectionsTable}
+            WHERE follower_id = ${targetUserId}
+          )`
+        ))
+      return result.count
     }
   },
 
@@ -379,18 +398,80 @@ export const dbService = {
       return updated
     },
 
-    async getReceived(userId: string): Promise<ConnectionInvitation[]> {
+    async getReceived(userId: string) {
       const db = getDb()
-      return await db.select().from(connectionInvitationsTable)
+      return await db.select({
+        id: connectionInvitationsTable.id,
+        senderId: connectionInvitationsTable.senderId,
+        receiverId: connectionInvitationsTable.receiverId,
+        message: connectionInvitationsTable.message,
+        status: connectionInvitationsTable.status,
+        createdAt: connectionInvitationsTable.createdAt,
+        respondedAt: connectionInvitationsTable.respondedAt,
+        sender: {
+          id: profilesTable.id,
+          username: profilesTable.username,
+          displayName: profilesTable.displayName,
+          avatarUrl: profilesTable.avatarUrl
+        }
+      }).from(connectionInvitationsTable)
+        .innerJoin(profilesTable, eq(connectionInvitationsTable.senderId, profilesTable.id))
         .where(eq(connectionInvitationsTable.receiverId, userId))
         .orderBy(desc(connectionInvitationsTable.createdAt))
     },
 
-    async getSent(userId: string): Promise<ConnectionInvitation[]> {
+    async getSent(userId: string) {
       const db = getDb()
-      return await db.select().from(connectionInvitationsTable)
+      return await db.select({
+        id: connectionInvitationsTable.id,
+        senderId: connectionInvitationsTable.senderId,
+        receiverId: connectionInvitationsTable.receiverId,
+        message: connectionInvitationsTable.message,
+        status: connectionInvitationsTable.status,
+        createdAt: connectionInvitationsTable.createdAt,
+        respondedAt: connectionInvitationsTable.respondedAt,
+        receiver: {
+          id: profilesTable.id,
+          username: profilesTable.username,
+          displayName: profilesTable.displayName,
+          avatarUrl: profilesTable.avatarUrl
+        }
+      }).from(connectionInvitationsTable)
+        .innerJoin(profilesTable, eq(connectionInvitationsTable.receiverId, profilesTable.id))
         .where(eq(connectionInvitationsTable.senderId, userId))
         .orderBy(desc(connectionInvitationsTable.createdAt))
+    },
+
+    async findById(id: string): Promise<ConnectionInvitation | null> {
+      const db = getDb()
+      const [invitation] = await db.select().from(connectionInvitationsTable)
+        .where(eq(connectionInvitationsTable.id, id))
+        .limit(1)
+      return invitation || null
+    },
+
+    async hasPendingInvitation(senderId: string, receiverId: string): Promise<boolean> {
+      const db = getDb()
+      const [invitation] = await db.select().from(connectionInvitationsTable)
+        .where(and(
+          eq(connectionInvitationsTable.senderId, senderId),
+          eq(connectionInvitationsTable.receiverId, receiverId),
+          eq(connectionInvitationsTable.status, 'pending')
+        ))
+        .limit(1)
+      return !!invitation
+    },
+
+    async cancel(id: string, senderId: string): Promise<ConnectionInvitation> {
+      const db = getDb()
+      const [updated] = await db.update(connectionInvitationsTable)
+        .set({ status: 'withdrawn', respondedAt: new Date() })
+        .where(and(
+          eq(connectionInvitationsTable.id, id),
+          eq(connectionInvitationsTable.senderId, senderId)
+        ))
+        .returning()
+      return updated
     }
   },
 

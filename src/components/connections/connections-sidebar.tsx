@@ -1,6 +1,7 @@
 'use client'
 
 import React from 'react'
+import { useQuery } from '@tanstack/react-query'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
@@ -11,20 +12,34 @@ import {
   Download, 
   Share2, 
   Lightbulb,
-  Calendar
+  Calendar,
+  Loader2
 } from 'lucide-react'
-import { mockNetworkStats } from '@/lib/mock-data/connections-data'
+import { formatNumber } from '@/lib/utils'
+
+interface NetworkStats {
+  totalConnections: number
+  totalFollowers: number
+  totalFollowing: number
+  newThisWeek: number
+  networkReach: number
+  profileViews: number
+  growthRate: number
+}
 
 export function ConnectionsSidebar() {
-  const formatNumber = (num: number): string => {
-    if (num >= 1000000) {
-      return `${(num / 1000000).toFixed(1)}M`
-    }
-    if (num >= 1000) {
-      return `${(num / 1000).toFixed(1)}K`
-    }
-    return num.toLocaleString()
-  }
+  // Fetch network stats
+  const { data: stats, isLoading: statsLoading } = useQuery<NetworkStats>({
+    queryKey: ['connections', 'stats'],
+    queryFn: async () => {
+      const response = await fetch('/api/connections/stats')
+      if (!response.ok) {
+        throw new Error('Failed to fetch network stats')
+      }
+      const result = await response.json()
+      return result.data
+    },
+  })
 
   return (
     <div className="space-y-6">
@@ -37,42 +52,50 @@ export function ConnectionsSidebar() {
           </CardTitle>
         </CardHeader>
         <CardContent className="space-y-4">
-          <div className="grid grid-cols-2 gap-4">
-            <div className="text-center">
-              <div className="text-2xl font-bold text-gray-900">
-                {formatNumber(mockNetworkStats.totalConnections)}
+          {statsLoading ? (
+            <div className="flex justify-center items-center py-8">
+              <Loader2 className="w-6 h-6 text-orange-500 animate-spin" />
+            </div>
+          ) : (
+            <>
+              <div className="grid grid-cols-2 gap-4">
+                <div className="text-center">
+                  <div className="text-2xl font-bold text-gray-900">
+                    {formatNumber(stats?.totalConnections || 0)}
+                  </div>
+                  <div className="text-xs text-gray-600">Connections</div>
+                </div>
+                <div className="text-center">
+                  <div className="text-2xl font-bold text-gray-900">
+                    {formatNumber(stats?.networkReach || 0)}
+                  </div>
+                  <div className="text-xs text-gray-600">Network Reach</div>
+                </div>
               </div>
-              <div className="text-xs text-gray-600">Connections</div>
-            </div>
-            <div className="text-center">
-              <div className="text-2xl font-bold text-gray-900">
-                {formatNumber(mockNetworkStats.networkReach)}
+              
+              <div className="space-y-3 pt-2 border-t">
+                <div className="flex items-center justify-between">
+                  <span className="text-sm text-gray-600">New this week</span>
+                  <Badge variant="secondary" className="bg-green-100 text-green-700">
+                    +{stats?.newThisWeek || 0}
+                  </Badge>
+                </div>
+                <div className="flex items-center justify-between">
+                  <span className="text-sm text-gray-600">Profile views</span>
+                  <Badge variant="secondary" className="bg-blue-100 text-blue-700">
+                    {formatNumber(stats?.profileViews || 0)}
+                  </Badge>
+                </div>
+                <div className="flex items-center justify-between">
+                  <span className="text-sm text-gray-600">Growth rate</span>
+                  <Badge variant="secondary" className="bg-purple-100 text-purple-700">
+                    <TrendingUp className="w-3 h-3 mr-1" />
+                    {stats?.growthRate || 0}%
+                  </Badge>
+                </div>
               </div>
-              <div className="text-xs text-gray-600">Network Reach</div>
-            </div>
-          </div>
-          
-          <div className="space-y-3 pt-2 border-t">
-            <div className="flex items-center justify-between">
-              <span className="text-sm text-gray-600">New this week</span>
-              <Badge variant="secondary" className="bg-green-100 text-green-700">
-                +{mockNetworkStats.newThisWeek}
-              </Badge>
-            </div>
-            <div className="flex items-center justify-between">
-              <span className="text-sm text-gray-600">Profile views</span>
-              <Badge variant="secondary" className="bg-blue-100 text-blue-700">
-                {mockNetworkStats.profileViews}
-              </Badge>
-            </div>
-            <div className="flex items-center justify-between">
-              <span className="text-sm text-gray-600">Growth rate</span>
-              <Badge variant="secondary" className="bg-purple-100 text-purple-700">
-                <TrendingUp className="w-3 h-3 mr-1" />
-                {mockNetworkStats.growthRate}%
-              </Badge>
-            </div>
-          </div>
+            </>
+          )}
         </CardContent>
       </Card>
 

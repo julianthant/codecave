@@ -224,21 +224,13 @@ export function OnboardingForm({ user }: OnboardingFormProps) {
         </CardContent>
       </Card>
 
-      <div className="flex gap-3">
+      <div className="flex justify-center">
         <Button 
           type="submit" 
-          className="flex-1 bg-orange-600 hover:bg-orange-700" 
+          className="bg-orange-600 hover:bg-orange-700 min-w-[200px]" 
           disabled={isLoading}
         >
           {isLoading ? 'Creating Profile...' : 'Complete Setup'}
-        </Button>
-        <Button 
-          type="button" 
-          variant="outline" 
-          onClick={() => router.push('/feed')}
-          disabled={isLoading}
-        >
-          Skip for Now
         </Button>
       </div>
     </form>
