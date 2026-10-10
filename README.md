@@ -2,6 +2,10 @@
 
 A community app where developers post their projects, follow each other and find collaborators. Built with Next.js 15, Supabase and Drizzle ORM.
 
+**Live site:** https://codecave.julianzaw.me
+
+![CodeCave landing page](.github/assets/home.png)
+
 ## Status
 
 In progress. Development paused in August 2025. The backend is ahead of the frontend: most API routes read and write the database, while several screens still render mock data.
